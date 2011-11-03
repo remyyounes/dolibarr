@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2011   Stephen Larroque <lrq3000@gmail.com>
+/* Copyright (C) 2011   Remy Younes <ryounes@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
  *      \file       htdocs/customfields/class/customfields.class.php
  *      \ingroup    customfields
  *      \brief      Core class file for the CustomFields module, all critical functions reside here
- *		\version    $Id: customfields.class.php, v1.2.4
+ *		\version    $Id: customfields.class.php, v1.2.5
  *		\author		Stephen Larroque
  */
 
@@ -255,6 +256,10 @@ class CustomFields // extends CommonObject
 			$key = $this->varprefix.$field->column_name;
 			if (!isset($object->$key)) {
 				$key = $field->column_name;
+			}else{
+			    if($field->data_type == 'date'){
+                    $object->$key = $this->db->idate(dol_mktime(0, 0, 0, $object->{$key.'month"', $object->{$key.'day'}, $object->{$key.'year'}));
+			    }
 			}
 
 			if ($object->$key) { // Only insert/update this field if it was submitted
@@ -397,7 +402,7 @@ class CustomFields // extends CommonObject
 				$this->error.=($this->error?', '.$errmsg:$errmsg);
 			}
 			$this->db->rollback();
-			return -1*$error; // error code : we return -1 multiplied by the number of errors (so if we have 5 errors we will get -5 as a return code)
+			return -1*$error; // error code :ï¿½we return -1 multiplied by the number of errors (so if we have 5 errors we will get -5 as a return code)
 		} else {
 			$this->db->commit();
 			return $resql;
@@ -435,7 +440,7 @@ class CustomFields // extends CommonObject
 		if (!empty($size)) {
 			$sql .= '('.$size.')'; // NOTE: $size can contain enum values too ! And some types (eg: text, boolean) do not need any size!
 		} else {
-			if ($type == 'varchar') $sql.= '(256)'; // One special case for the varchar : we define a specific default value of 256 chars (this is the only exception, non generic instruction in the  whole class! But it enhance a lot the ease of users who may forget to set a value)
+			if ($type == 'varchar') $sql.= '(256)'; // One special case for the varchar :ï¿½we define a specific default value of 256 chars (this is the only exception, non generic instruction in the  whole class! But it enhance a lot the ease of users who may forget to set a value)
 		}
 		if ($nulloption) {
 			$sql .= ' null';
@@ -1101,7 +1106,7 @@ class CustomFields // extends CommonObject
 			} elseif ($type == 'date') {
 				//$out.=' (YYYY-MM-DD)';
 				$html=new Form($db);
-				$out.=$html->select_date($currentvalue,$this->varprefix.$key,0,0,1,$this->varprefix.$key);
+				$out.=$html->select_date($currentvalue,$this->varprefix.$key,0,0,1,$this->varprefix.$key,1,1,1);
 			} elseif ($type == 'datetime') {
 				//$out.=' (YYYY-MM-DD HH:MM:SS)';
 				if (empty($currentvalue)) { $currentvalue = 'YYYY-MM-DD HH:MM:SS'; }
