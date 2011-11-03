@@ -318,13 +318,13 @@ class InterfaceSaveFields
 		$patternsarray[] = $context;
 	    }
 	    $patterns_flattened = implode('|',$patternsarray); // we flatten the patterns array in a single regexp OR pattern
-	    if (preg_match('/^('.$patterns_flattened.')_((CREATE|PREBUILDDOC|CLONE).*)$/i', $action, $matches) ) { // if the current action is on a supported module or context, and the action is supported (for the moment only CREATE, PREBUILDDOC and CLONE)
+	    if (preg_match('/^('.$patterns_flattened.')_((CREATE|PREBUILDDOC|CLONE|MODIFY).*)$/i', $action, $matches) ) { // if the current action is on a supported module or context, and the action is supported (for the moment only CREATE, PREBUILDDOC and CLONE)
 		$triggername = $matches[1]; // module's name
 		$triggeraction = $matches[2]; // action name (create, modify, delete, clone, builddoc, prebuilddoc, etc.)
 		dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 
 		$action = 'CUSTOMFIELDS_'.$triggeraction;
-		if ($this->in_arrayi($triggername, $modulesarray)) { // Either we have a value (module) that matched, or a key (context)
+		if (in_array(strtolower($triggername), $modulesarray)) { // Either we have a value (module) that matched, or a key (context)
 		    $object->currentmodule = strtolower($triggername); // value (module) matched
 		} else {
 		    $object->currentmodule = $modulesarray[strtolower($triggername)]; // key (context) matched
