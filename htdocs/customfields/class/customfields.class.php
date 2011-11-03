@@ -256,7 +256,8 @@ class CustomFields // extends CommonObject
 			$key = $this->varprefix.$field->column_name;
 			if (!isset($object->$key)) {
 				$key = $field->column_name;
-			}else{
+			}else{ 
+			    //We need to fetch the correct value when we update a date field 
 			    if($field->data_type == 'date'){
                     $object->$key = $this->db->idate(dol_mktime(0, 0, 0, $object->{$key.'month"', $object->{$key.'day'}, $object->{$key.'year'}));
 			    }
@@ -402,7 +403,7 @@ class CustomFields // extends CommonObject
 				$this->error.=($this->error?', '.$errmsg:$errmsg);
 			}
 			$this->db->rollback();
-			return -1*$error; // error code :�we return -1 multiplied by the number of errors (so if we have 5 errors we will get -5 as a return code)
+			return -1*$error; // error code : we return -1 multiplied by the number of errors (so if we have 5 errors we will get -5 as a return code)
 		} else {
 			$this->db->commit();
 			return $resql;
@@ -440,7 +441,7 @@ class CustomFields // extends CommonObject
 		if (!empty($size)) {
 			$sql .= '('.$size.')'; // NOTE: $size can contain enum values too ! And some types (eg: text, boolean) do not need any size!
 		} else {
-			if ($type == 'varchar') $sql.= '(256)'; // One special case for the varchar :�we define a specific default value of 256 chars (this is the only exception, non generic instruction in the  whole class! But it enhance a lot the ease of users who may forget to set a value)
+			if ($type == 'varchar') $sql.= '(256)'; // One special case for the varchar : we define a specific default value of 256 chars (this is the only exception, non generic instruction in the  whole class! But it enhance a lot the ease of users who may forget to set a value)
 		}
 		if ($nulloption) {
 			$sql .= ' null';
