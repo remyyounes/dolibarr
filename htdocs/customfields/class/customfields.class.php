@@ -259,7 +259,7 @@ class CustomFields // extends CommonObject
 			}else{ 
 			    //We need to fetch the correct value when we update a date field 
 			    if($field->data_type == 'date'){
-                    $object->$key = $this->db->idate(dol_mktime(0, 0, 0, $object->{$key.'month"', $object->{$key.'day'}, $object->{$key.'year'}));
+                    $object->$key = $this->db->idate(dol_mktime(0, 0, 0, $object->{$key.'month'}, $object->{$key.'day'}, $object->{$key.'year'}));
 			    }
 			}
 

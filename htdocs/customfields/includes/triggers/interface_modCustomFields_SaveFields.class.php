@@ -19,7 +19,7 @@
  *      \file       htdocs/includes/triggers/interface_modCustomFields_SaveFields.class.php
  *      \ingroup    core
  *      \brief      Core triggers file for CustomFields module. Triggers actions for the customfields module. Necessary for actions to be comitted.
- *		\version	$Id: interface_modCustomFields_SaveFields.class.php, v1.2.2
+ *		\version	$Id: interface_modCustomFields_SaveFields.class.php, v1.2.3
  */
 
 
