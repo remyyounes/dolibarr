@@ -306,7 +306,7 @@ class InterfaceSaveFields
 
 		$object->currentmodule = $triggersarray[strtolower($matches[1])]; // find the right module from the triggersarray (key_trigger=>value_module)
 
-		preg_match('/^(.*)_((CREATE|PREBUILDDOC|CLONE).*)$/i', $action, $matches);
+		preg_match('/^(.*)_((CREATE|PREBUILDDOC|CLONE|MODIFY).*)$/i', $action, $matches);
 		$action = 'CUSTOMFIELDS_'.$matches[2]; // forge the right customfields trigger
 		return $this->run_trigger($action,$object,$user,$langs,$conf);
 	    }
