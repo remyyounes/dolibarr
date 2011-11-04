@@ -68,15 +68,6 @@ if ($_POST["action"] == 'update' && ! $_POST["cancel"] )
 {
     $object->fetch($socid);
     //update
-    //$object->fetch($socid);
-    //$object->makina = "customerblocking";
-    //$upd = $object->update($socid, $user, 1, 0, 0);
-    $date_m = GETPOST('cf_logdatemonth');
-    $date_d = GETPOST('cf_logdateday');
-    $date_y = GETPOST('cf_logdateyear');
-    $date = dol_mktime(12, 0, 0, $date_m , $date_d, $date_y);
-    $date =  dolibarr_print_date($date, "%Y-%m-%d");
-    $object->cf_logdate = $date;// dol_mktime(12, 0, 0, $date_m , $date_d, $date_y);
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     $makina = "customerblocking";
     $currentmodule = "societe";
