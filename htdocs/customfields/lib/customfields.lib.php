@@ -70,14 +70,15 @@ function customfields_admin_prepare_head($modulesarray, $currentmodule = null)
 /**
  *      Print the customfields at the creation form of any table based module
  *      @param      $currentmodule      the current module we are in (facture, propal, etc.)
+ *      @param      customfields_table        	Replace the '_customfields' postfix
  *      @return     void        returns nothing because this is a procedure : it just does what we want
  */
-function customfields_print_creation_form($currentmodule, $id = null) {
+function customfields_print_creation_form($currentmodule, $id = null, $customfields_table = '') {
     global $db, $langs;
 
     // Init and main vars
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    $customfields = new CustomFields($db, $currentmodule);
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
 
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
         $fields = $customfields->fetchAllCustomFields();
@@ -103,17 +104,18 @@ function customfields_print_creation_form($currentmodule, $id = null) {
 /**
  *      Print the customfields at the main form of any table based module (with editable fields)
  *      @param      currentmodule      the current module we are in (facture, propal, etc.)
- *      @param      idvar                       the name of the POST or GET variable containing the id of the object
+ *      @param      idvar                       the name of the POST or GETï¿½variable containing the id of the object
  *      @param      object                     the object containing the required informations (if we are in facture's module, it will be the facture object, if we are in propal it will be the propal object etc..)
+ *      @param      customfields_table        	Replace the '_customfields' postfix
  *      @return     void        returns nothing because this is a procedure : it just does what we want
  */
-function customfields_print_main_form($currentmodule, $object, $action, $user, $idvar = 'id', $rights = null) {
+function customfields_print_main_form($currentmodule, $object, $action, $user, $idvar = 'id', $rights = null, $customfields_table = '') {
     global $db, $langs, $conf;
 
     // Init and main vars
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php'); // for images img_edit()
-    $customfields = new CustomFields($db, $currentmodule);
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
 
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
         //print '<table class="border" width="100%">';
@@ -142,6 +144,7 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface=new Interfaces($db);
                 $newrecord->currentmodule = $currentmodule; // very important to pass the module as a property of the object
+                $newrecord->customfields_table = $customfields_table;// very important to pass the subtable (table postfix) as a property of the object
                 $result=$interface->run_triggers('CUSTOMFIELDS_MODIFY',$newrecord,$user,$langs,$conf);
 
                 // Updating the loaded record object
@@ -184,6 +187,59 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
         }
 
         //print '</table><br>';
+    }
+}
+
+/**
+ *      Print the customfields at the main form of any table based module (with editable fields)
+ *      @param      currentmodule      the current module we are in (facture, propal, etc.)
+ *      @param      idvar                       the name of the POST or GET variable containing the id of the object
+ *      @param      object                     the object containing the required informations (if we are in facture's module, it will be the facture object, if we are in propal it will be the propal object etc..)
+ *      @param      customfields_table        	Replace the '_customfields' postfix
+ *      @return     void        returns nothing because this is a procedure : it just does what we want
+ */
+function customfields_print_log($currentmodule, $object, $action, $user, $idvar = 'id', $rights = null, $customfields_table = '') {
+    global $db, $langs, $conf;
+
+    // Init and main vars
+    include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
+    include_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php'); // for images img_edit()
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
+
+    if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
+        print '<table class="border" width="100%">';
+
+        // == Fetching customfields
+        $fields = $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
+        $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
+        $datas = $customfields->records;
+        
+        print "<tr class='liste_titre'>";
+        foreach ($fields as $field) {
+            $name = $field->column_name;
+            print "<td>";
+            print $customfields->findLabel($name);
+            print "</td>";
+        }
+        print "</tr>";
+        
+        foreach ($datas as $data){
+            print "<tr>";
+            foreach ($fields as $field) { // for each customfields, we will print/save the edits
+
+                // == Default values from database record
+                $name = $field->column_name; // the name of the customfield (which is the property of the record)
+                $value = ''; // by default the value of this property is empty
+                if (isset($data->$name)) { $value = $data->$name; } // if the property exists (the record is not empty), then we fill in this value
+                // == Print the record
+                print '<td>';
+                print $customfields->printField($field, $value);
+                print '</td>';
+            }
+            print "</tr>";
+        }
+
+        print '</table><br>';
     }
 }
 
