@@ -35,6 +35,8 @@ $langs->load("companies");
 $action		= (GETPOST('action') ? GETPOST('action') : 'view');
 $confirm	= GETPOST('confirm');
 $socid		= GETPOST("socid");
+$customfields_table = "customerblocking";
+
 if ($user->societe_id) $socid=$user->societe_id;
 
 $object = new Societe($db);
@@ -69,9 +71,8 @@ if ($_POST["action"] == 'update' && ! $_POST["cancel"] )
     $object->fetch($socid);
     //update
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    $makina = "customerblocking";
     $currentmodule = "societe";
-    $customfields = new CustomFields($db, $currentmodule, $makina);
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $upd = $customfields->create($object, 0, 1);
      
     //display status message from update/create
@@ -147,15 +148,14 @@ if ($socid > 0)
     //    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $makina = "customerblocking";
     $currentmodule = "societe";
-    $customfields = new CustomFields($db, $currentmodule, $makina);
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $rights = 1;
     $idvar = "socid";
     if($action == "edit"){
-        customfields_print_creation_form($currentmodule, $socid,$makina);
+        customfields_print_creation_form($currentmodule, $socid,$customfields_table);
     }else{
-        customfields_print_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $makina);
+        customfields_print_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
     }
     if ($action == 'edit')
     {
@@ -207,12 +207,11 @@ if ($socid > 0)
     print "</br>";
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $makina = "customerblocking";
     $currentmodule = "societe";
-    $customfields = new CustomFields($db, $currentmodule, $makina);
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $rights = 1;
     $idvar = "socid";
-    customfields_print_log($currentmodule, $object, $action, $user, $idvar, $rights, $makina);
+    customfields_print_log($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
     
 }
 
