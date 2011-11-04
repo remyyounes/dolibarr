@@ -252,7 +252,7 @@ class CustomFields // extends CommonObject
 	function create($object, $notrigger=0)
 	{
 		// Get all the columns (custom fields)
-		$fields = $this->fetchAllCustomFields();
+		$fields = $this->fetchAllCustomFields(false,0,1);
 
 		if (empty($fields)) return null;
 
@@ -267,6 +267,23 @@ class CustomFields // extends CommonObject
 			    if($field->data_type == 'date'){
                     $object->$key = $this->db->idate(dol_mktime(0, 0, 0, $object->{$key.'month'}, $object->{$key.'day'}, $object->{$key.'year'}));
 			    }
+			}
+			
+			if(preg_match('/^(.*)_((auto).*)$/i', $key, $matches)){
+			    //constraints
+			    if(!empty($field->referenced_table_name)){
+			        //users
+			        if($field->referenced_table_name == MAIN_DB_PREFIX.'user'){
+                        $object->$key = $GLOBALS['user']->id;
+			        }
+			    }else{
+			        //date / datetime / timestamp
+			        if($field->data_type == 'date' || $field->data_type == 'datetime' || $field->data_type == 'timestamp'){
+			            $object->$key = $this->db->idate(dol_now());
+			        }
+			    }
+			    
+			    
 			}
 
 			if ($object->$key) { // Only insert/update this field if it was submitted
@@ -552,7 +569,7 @@ class CustomFields // extends CommonObject
 	*    @param    nohide				defines if the system fields (primary field and foreign key) must be hidden in the fetched results
 	*    @return     int/null/obj/obj[]         <0 if KO, null if no field found, one field object if only one field could be found, an array of fields objects if OK
 	*/
-       function fetchCustomField($id=null, $nohide=false, $notrigger=0) {
+       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $autofields=0) {
 
 		// Forging the SQL statement
 		$whereaddendum = '';
@@ -566,6 +583,10 @@ class CustomFields // extends CommonObject
 
 		if (!$nohide) {
 			$whereaddendum .= " AND c.column_name != 'rowid' AND c.column_name != 'fk_".$this->module."'";
+		}
+		
+		if(!$autofields){
+		    $whereaddendum .= " AND c.column_name NOT LIKE '%auto'";
 		}
 
 		$sql = "SELECT c.ordinal_position,c.column_name,c.column_default,c.is_nullable,c.data_type,c.column_type,c.character_maximum_length,
@@ -634,8 +655,8 @@ class CustomFields // extends CommonObject
 	*    @param     nohide	defines if the system fields (primary field and foreign key) must be hidden in the fetched results
 	*    @return     int/null/obj[]         <0 if KO, null if no field found, an array of fields objects if OK (even if only one field is found)
 	*/
-       function fetchAllCustomFields($nohide=false, $notrigger=0) {
-		$fields = $this->fetchCustomField(null, $nohide, $notrigger);
+       function fetchAllCustomFields($nohide=false, $notrigger=0, $autofields=0) {
+		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $autofields);
 		if ( !(is_array($fields) or is_null($fields) or is_integer($fields)) ) { $fields = array($fields); } // we convert to an array if we've got only one field, functions relying on this one expect to get an array if OK
 		return $fields;
        }

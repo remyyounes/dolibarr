@@ -101,6 +101,8 @@ class InterfaceSaveFields
 		$object->$key = $value;
 	    }
 	}
+	//retrieve table info from object
+	$customfields_table = $object->customfields_table;
 
         // Products and services
         if($action == 'PRODUCT_CREATE') {
