@@ -52,13 +52,19 @@ class CustomFields // extends CommonObject
      *      Constructor
      *      @param      DB      Database handler
      *      @param      currentmodule        	Current module (facture/propal/etc.)
+     *      @param      table_postfix        	Replace the '_customfields' postfix
      */
-    function CustomFields($DB, $currentmodule)
+    function CustomFields($DB, $currentmodule, $table_postfix)
     {
 	$this->db = $DB;
 	$this->module = $currentmodule;
-	$this->moduletable = MAIN_DB_PREFIX.$this->module."_customfields";
-
+	$this->table_postfix = $table_postfix;
+	$this->moduletable = MAIN_DB_PREFIX.$this->module;
+    if(!empty($this->table_postfix)) {
+	    $this->moduletable.="_".$this->table_postfix;
+	}else{
+	    $this->moduletable.="_customfields";
+	}
 	global $fields_prefix;
 	if (!empty($fields_prefix)) $this->varprefix = $fields_prefix;
 
@@ -474,14 +480,15 @@ class CustomFields // extends CommonObject
 
 		$reftable = MAIN_DB_PREFIX.$this->module; // the main module's table, we just add the dolibarr's prefix for db tables
 		$prifield = $this->fetchPrimaryField($reftable); // we fetch the name of primary column of this module's table
-
+        $constraintname = "fk_".$this->module;
+        if(!empty($this->table_postfix))$constraintname.="_".$this->table_postfix;
 		// Forging the SQL statement
 		$sql = "CREATE TABLE ".$this->moduletable."(
 		rowid                int(11) NOT NULL AUTO_INCREMENT,
 		fk_".$this->module."       int(11) NOT NULL, -- id of the associated invoice/document
 		PRIMARY KEY (rowid),
 		KEY fk_".$this->module." (fk_".$this->module."),
-		CONSTRAINT fk_".$this->module." FOREIGN KEY (fk_".$this->module.") REFERENCES ".$reftable." (".$prifield.") ON DELETE CASCADE ON UPDATE CASCADE
+		CONSTRAINT ".$constraintname." FOREIGN KEY (fk_".$this->module.") REFERENCES ".$reftable." (".$prifield.") ON DELETE CASCADE ON UPDATE CASCADE
 		) AUTO_INCREMENT=1 ;";
 
 		// Trigger or not?

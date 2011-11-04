@@ -192,7 +192,7 @@ class InterfaceSaveFields
 
             // Init and main vars
             include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-            $customfields = new CustomFields($this->db, $currentmodule);
+            $customfields = new CustomFields($this->db, $currentmodule, $customfields_table);
 
             // Saving the data (creating a record)
             $rtncode = $customfields->create($object);
@@ -215,7 +215,7 @@ class InterfaceSaveFields
 
             // Init and main vars
             include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-            $customfields = new CustomFields($this->db, $currentmodule);
+            $customfields = new CustomFields($this->db, $currentmodule, $customfields_table);
 
             // Saving the data (creating a record)
             $rtncode = $customfields->update($object);
@@ -235,7 +235,7 @@ class InterfaceSaveFields
 
             // Init and main vars
             include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-            $customfields = new CustomFields($this->db, $currentmodule);
+            $customfields = new CustomFields($this->db, $currentmodule, $customfields_table);
 
             // Saving the data (creating a record)
             $rtncode = $customfields->createFromClone($object->origin_id, $object->id);
@@ -255,7 +255,7 @@ class InterfaceSaveFields
 
             // Init and main vars
             include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-            $customfields = new CustomFields($this->db, $currentmodule);
+            $customfields = new CustomFields($this->db, $currentmodule, $customfields_table);
 
             // Fetching the list of fields columns
             $fields = $customfields->fetchAllCustomFields();
