@@ -282,8 +282,6 @@ class CustomFields // extends CommonObject
 			            $object->$key = $this->db->idate(dol_now());
 			        }
 			    }
-			    
-			    
 			}
 
 			if ($object->$key) { // Only insert/update this field if it was submitted
@@ -567,9 +565,10 @@ class CustomFields // extends CommonObject
 	*    Fetch the field sql definition for a particular field or for all fields from the database (not the records! See fetch and fetchAll to fetch records) and return it as an array or as a single object, and populate the CustomFields class $fields property
 	*    @param    id          			id of the field (ordinal_position of the sql column) OR string column_name of the field
 	*    @param    nohide				defines if the system fields (primary field and foreign key) must be hidden in the fetched results
+	*    @param    noautofields			defines if the auto fields (field ending in 'auto') must be hidden in the fetched results
 	*    @return     int/null/obj/obj[]         <0 if KO, null if no field found, one field object if only one field could be found, an array of fields objects if OK
 	*/
-       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $autofields=0) {
+       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $noautofields=false) {
 
 		// Forging the SQL statement
 		$whereaddendum = '';
@@ -585,7 +584,7 @@ class CustomFields // extends CommonObject
 			$whereaddendum .= " AND c.column_name != 'rowid' AND c.column_name != 'fk_".$this->module."'";
 		}
 		
-		if(!$autofields){
+		if(!$noautofields){
 		    $whereaddendum .= " AND c.column_name NOT LIKE '%auto'";
 		}
 
@@ -653,10 +652,11 @@ class CustomFields // extends CommonObject
        /**
 	*    Fetch ALL the fields sql definitions from the database (not the records! See fetch and fetchAll to fetch records)
 	*    @param     nohide	defines if the system fields (primary field and foreign key) must be hidden in the fetched results
+	*    @param     noautofields			defines if the auto fields (field ending in 'auto') must be hidden in the fetched results
 	*    @return     int/null/obj[]         <0 if KO, null if no field found, an array of fields objects if OK (even if only one field is found)
 	*/
-       function fetchAllCustomFields($nohide=false, $notrigger=0, $autofields=0) {
-		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $autofields);
+       function fetchAllCustomFields($nohide=false, $notrigger=0, $noautofields=false) {
+		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $noautofields);
 		if ( !(is_array($fields) or is_null($fields) or is_integer($fields)) ) { $fields = array($fields); } // we convert to an array if we've got only one field, functions relying on this one expect to get an array if OK
 		return $fields;
        }
