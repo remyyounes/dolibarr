@@ -103,12 +103,14 @@ class CustomFields // extends CommonObject
 	 *      Fetch a record (or all records) from the database (meaning an instance of the custom fields, the values if you prefer)
 	 *      @param	   id				id of the record to find (NOT rowid but fk_moduleid) - can be left empty if you want to fetch all the records
 	 *      @param      notrigger	    0=launch triggers after, 1=disable triggers
+	 *      @param		log				allow fetch of multiple record for logs
 	 *      @return     int/null/obj/obj[]        	<0 if KO, null if no record is found, a record if only one is found, an array of records if OK
 	 */
-	function fetch($id=null, $notrigger=0)
+	function fetch($id=null, $notrigger=0, $log=0)
 	{
 		// Get all the columns (custom fields), primary field included (that's why there's the true)
-		$fields = $this->fetchAllCustomFields(true);
+		//if log is enabled then we want to fetch autofields as well
+		$fields = $this->fetchAllCustomFields(true,0, $log);
 
 		// Forging the SQL statement - we set all the column_name to fetch (because Dolibarr wants to avoid SELECT *, so we must name the columns we fetch)
 		foreach ($fields as $field) {
@@ -119,7 +121,10 @@ class CustomFields // extends CommonObject
 		$sql = "SELECT ".$sqlfields." FROM ".$this->moduletable;
 
 		if ($id > 0) { // if we supplied an id, we fetch only this one record
-			$sql .= " WHERE fk_".$this->module."=".$id." LIMIT 1";
+			$sql .= " WHERE fk_".$this->module."=".$id." ORDER BY rowid DESC";
+			if(!$log){
+			    $sql .= " LIMIT 1";
+			}
 		}
 
 		// Trigger or not?
@@ -249,7 +254,7 @@ class CustomFields // extends CommonObject
 	 *      @param      notrigger	    0=launch triggers after, 1=disable triggers
 	 *      @return     int         	<0 if KO, >0 if OK
 	 */
-	function create($object, $notrigger=0)
+	function create($object, $notrigger=0, $forceinsert = 0)
 	{
 		// Get all the columns (custom fields)
 		$fields = $this->fetchAllCustomFields(false,0,1);
@@ -294,7 +299,7 @@ class CustomFields // extends CommonObject
 
 		$result = $this->fetch($object->id);
 
-		if (!empty($result) and count($result) > 0) { // if the record already exists for this facture id, we update it
+		if (!empty($result) and count($result) > 0 and !$forceinsert) { // if the record already exists for this facture id, we update it
 			$sql = "UPDATE ".$this->moduletable." SET ".$sqlfields." WHERE fk_".$this->module."=".$object->id;
 		} else { // else we insert a new record
 			$sql = "INSERT INTO ".$this->moduletable." SET ".$sqlfields;
@@ -1229,7 +1234,14 @@ class CustomFields // extends CommonObject
 					$record = $this->fetchAny($column, $table, $where);
 
 					// Outputting the value
-					$out.= $record->$column;
+					if($field->referenced_table_name == MAIN_DB_PREFIX.'user'){
+					    $userstatic = new User($this->db);
+					    $userstatic->fetch($value);
+					    $out .= '<a href="fiche.php?id='.$userstatic->rowid.'">'.img_object($langs->trans("ShowUser"),"user").' '.$userstatic->login.'</a>';
+					    //$out.= $record->$column;
+					}else{
+					    $out.= $record->$column;
+					}
 				// Else we just print out the value of the field
 				} else {
 					$out.=$value;
