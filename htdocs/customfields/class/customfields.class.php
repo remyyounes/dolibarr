@@ -489,7 +489,7 @@ class CustomFields // extends CommonObject
 		PRIMARY KEY (rowid),
 		KEY fk_".$this->module." (fk_".$this->module."),
 		CONSTRAINT ".$constraintname." FOREIGN KEY (fk_".$this->module.") REFERENCES ".$reftable." (".$prifield.") ON DELETE CASCADE ON UPDATE CASCADE
-		) AUTO_INCREMENT=1 ;";
+		) ENGINE=InnoDB AUTO_INCREMENT=1 ;";
 
 		// Trigger or not?
 		if ($notrigger) {
