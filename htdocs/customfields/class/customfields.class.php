@@ -1237,7 +1237,7 @@ class CustomFields // extends CommonObject
 					if($field->referenced_table_name == MAIN_DB_PREFIX.'user'){
 					    $userstatic = new User($this->db);
 					    $userstatic->fetch($value);
-					    $out .= '<a href="fiche.php?id='.$userstatic->rowid.'">'.img_object($langs->trans("ShowUser"),"user").' '.$userstatic->login.'</a>';
+					    $out .= '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$value.'">'.img_object($langs->trans("ShowUser"),"user").' '.$userstatic->login.'</a>';
 					    //$out.= $record->$column;
 					}else{
 					    $out.= $record->$column;

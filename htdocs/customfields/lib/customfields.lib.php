@@ -104,7 +104,7 @@ function customfields_print_creation_form($currentmodule, $id = null, $customfie
 /**
  *      Print the customfields at the main form of any table based module (with editable fields)
  *      @param      currentmodule      the current module we are in (facture, propal, etc.)
- *      @param      idvar                       the name of the POST or GET�variable containing the id of the object
+ *      @param      idvar                       the name of the POST or GET variable containing the id of the object
  *      @param      object                     the object containing the required informations (if we are in facture's module, it will be the facture object, if we are in propal it will be the propal object etc..)
  *      @param      customfields_table        	Replace the '_customfields' postfix
  *      @return     void        returns nothing because this is a procedure : it just does what we want
