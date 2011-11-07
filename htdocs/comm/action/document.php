@@ -22,15 +22,15 @@
 /**
  *       \file       htdocs/comm/action/document.php
  *       \ingroup    agenda
- *       \brief      Page des documents joints sur les actions
+ *       \brief      Page of documents linked to actions
  */
 
 require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/agenda.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/agenda.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT."/comm/action/class/cactioncomm.class.php");
 require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 if ($conf->projet->enabled) require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
@@ -40,7 +40,7 @@ $langs->load("other");
 $langs->load("bills");
 
 if (isset($_GET["error"])) $error=$_GET["error"];
-$objectid = isset($_GET["id"])?$_GET["id"]:'';
+$objectid = GETPOST("id");
 
 // Security check
 if ($user->societe_id > 0)
@@ -67,7 +67,7 @@ if (! $sortfield) $sortfield="name";
  */
 if ( $_POST["sendit"] && ! empty($conf->global->MAIN_UPLOAD_DOC))
 {
-	require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+	require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
 	// Creation repertoire si n'existe pas
 	$upload_dir = $conf->agenda->dir_output.'/'.dol_sanitizeFileName($objectid);
@@ -132,9 +132,7 @@ if ($objectid > 0)
 		$author->fetch($act->author->id);
 		$act->author=$author;
 
-		$contact=new Contact($db);
-		$contact->fetch($act->contact->id);
-		$act->contact=$contact;
+        if ($act->contact->id) $act->fetch_contact($act->contact->id);
 
 		$head=actions_prepare_head($act);
 		dol_fiche_head($head, 'documents', $langs->trans("Action"),0,'action');

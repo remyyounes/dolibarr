@@ -23,9 +23,9 @@
  */
 
 require('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/lib/report.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/tax.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/date.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/report.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/tax.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 
 // Security check
 $socid = isset($_REQUEST["socid"])?$_REQUEST["socid"]:'';
@@ -34,7 +34,7 @@ if (!$user->rights->compta->resultat->lire && !$user->rights->accounting->compta
 accessforbidden();
 
 // Define modecompta ('CREANCES-DETTES' or 'RECETTES-DEPENSES')
-$modecompta = $conf->compta->mode;
+$modecompta = $conf->global->COMPTA_MODE;
 if ($_GET["modecompta"]) $modecompta=$_GET["modecompta"];
 
 $sortorder=isset($_GET["sortorder"])?$_GET["sortorder"]:$_POST["sortorder"];

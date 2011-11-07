@@ -26,14 +26,14 @@
  */
 
 require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/agenda.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/agenda.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT."/user/class/user.class.php");
 require_once(DOL_DOCUMENT_ROOT."/comm/action/class/cactioncomm.class.php");
 require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formactions.class.php");
 require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/project.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
 
 $langs->load("companies");
 $langs->load("commercial");
@@ -48,7 +48,6 @@ $action=GETPOST("action");
 $socid = GETPOST('socid');
 $id = GETPOST('id');
 if ($user->societe_id) $socid=$user->societe_id;
-// TODO: revoir les droits car pas clair
 //$result = restrictedArea($user, 'agenda', $id, 'actioncomm', 'actions', '', 'id');
 
 if (isset($_GET["error"])) $error=$_GET["error"];
@@ -64,6 +63,8 @@ $contact = new Contact($db);
  */
 if ($action == 'add_action')
 {
+	$error=0;
+	
     $backtopage='';
     if (! empty($_POST["backtopage"])) $backtopage=$_POST["backtopage"];
     if (! $backtopage)
@@ -105,7 +106,7 @@ if ($action == 'add_action')
 	// Check parameters
 	if (! $datef && $_POST["percentage"] == 100)
 	{
-		$error=1;
+		$error++;
 		$action = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->trans("DateEnd")).'</div>';
 	}
@@ -113,7 +114,7 @@ if ($action == 'add_action')
 	// Initialisation objet cactioncomm
 	if (! $_POST["actioncode"])
 	{
-		$error=1;
+		$error++;
 		$action = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->trans("Type")).'</div>';
 	}
@@ -179,20 +180,20 @@ if ($action == 'add_action')
 	// Check parameters
 	if ($actioncomm->type_code == 'AC_RDV' && ($datep == '' || $datef == ''))
 	{
-		$error=1;
+		$error++;
 		$action = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("DateEnd")).'</div>';
 	}
 	if ($datea && $_POST["percentage"] == 0)
 	{
-		$error=1;
+		$error++;
 		$action = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorStatusCantBeZeroIfStarted").'</div>';
 	}
 
 	if (! $_POST["apyear"] && ! $_POST["adyear"])
 	{
-		$error=1;
+		$error++;
 		$action = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Date")).'</div>';
 	}
@@ -580,14 +581,14 @@ if ($action == 'create')
 
 	// Priority
 	print '<tr><td nowrap>'.$langs->trans("Priority").'</td><td colspan="3">';
-	print '<input type="text" name="priority" value="'.($_POST["priority"]?$_POST["priority"]:$actioncomm->priority).'" size="5">';
+	print '<input type="text" name="priority" value="'.($_POST["priority"]?$_POST["priority"]:($actioncomm->priority?$actioncomm->priority:'')).'" size="5">';
 	print '</td></tr>';
 
 	add_row_for_calendar_link();
 
     // Description
     print '<tr><td valign="top">'.$langs->trans("Description").'</td><td>';
-    require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
+    require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
     $doleditor=new DolEditor('note',($_POST["note"]?$_POST["note"]:$actioncomm->note),'',280,'dolibarr_notes','In',true,true,$conf->fckeditor->enabled,ROWS_7,90);
     $doleditor->Create();
     print '</td></tr>';
@@ -701,6 +702,7 @@ if ($id)
 		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 		print '<input type="hidden" name="action" value="update">';
 		print '<input type="hidden" name="id" value="'.$id.'">';
+		print '<input type="hidden" name="ref_ext" value="'.$act->ref_ext.'">';
 		if (GETPOST("backtopage")) print '<input type="hidden" name="backtopage" value="'.(GETPOST("backtopage") ? GETPOST("backtopage") : $_SERVER["HTTP_REFERER"]).'">';
 
 		print '<table class="border" width="100%">';
@@ -788,7 +790,7 @@ if ($id)
 
 		// Priority
 		print '<tr><td nowrap>'.$langs->trans("Priority").'</td><td colspan="3">';
-		print '<input type="text" name="priority" value="'.$act->priority.'" size="5">';
+		print '<input type="text" name="priority" value="'.($act->priority?$act->priority:'').'" size="5">';
 		print '</td></tr>';
 
 		// Object linked
@@ -801,7 +803,7 @@ if ($id)
         // Description
         print '<tr><td valign="top">'.$langs->trans("Description").'</td><td colspan="3">';
         // Editeur wysiwyg
-        require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
         $doleditor=new DolEditor('note',$act->note,'',240,'dolibarr_notes','In',true,true,$conf->fckeditor->enabled,ROWS_5,90);
         $doleditor->Create();
         print '</td></tr>';
@@ -950,7 +952,7 @@ if ($id)
 
 		// Priority
 		print '<tr><td nowrap>'.$langs->trans("Priority").'</td><td colspan="3">';
-		print $act->priority;
+		print ($act->priority?$act->priority:'');
 		print '</td></tr>';
 
 		// Object linked

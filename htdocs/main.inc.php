@@ -7,6 +7,7 @@
  * Copyright (C) 2005-2011 Regis Houssin        <regis@dolibarr.fr>
  * Copyright (C) 2011      Philippe Grand       <philippe.grand@atoo-net.com>
  * Copyright (C) 2008      Matteli
+ * Copyright (C) 2011      Juanjo Menent		<jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +82,10 @@ function test_sql_and_script_inject($val, $get)
 	$sql_inj += preg_match('/union.+select/i', $val);
 	$sql_inj += preg_match('/(\.\.%2f)+/i', $val);
 	// For XSS Injection done by adding javascript with script
-	$sql_inj += preg_match('/<script/i', $val);
+    $sql_inj += preg_match('/<script/i', $val);
+    $sql_inj += preg_match('/img[\s]src/i', $val);
+    $sql_inj += preg_match('/base[\s]href/i', $val);
+	if ($get) $sql_inj += preg_match('/javascript:/i', $val);
 	// For XSS Injection done by adding javascript with onmousemove, etc... (closing a src or href tag with not cleaned param)
 	if ($get) $sql_inj += preg_match('/"/i', $val);	// We refused " in GET parameters value
 	return $sql_inj;
@@ -227,8 +231,7 @@ if (! empty($conf->file->main_force_https))
 // Chargement des includes complementaires de presentation
 if (! defined('NOREQUIREMENU')) require_once(DOL_DOCUMENT_ROOT ."/core/class/menu.class.php");			// Need 10ko memory (11ko in 2.2)
 if (! defined('NOREQUIREHTML')) require_once(DOL_DOCUMENT_ROOT ."/core/class/html.form.class.php");	    // Need 660ko memory (800ko in 2.2)
-if (! defined('NOREQUIREAJAX') && $conf->use_javascript_ajax) require_once(DOL_DOCUMENT_ROOT.'/lib/ajax.lib.php');	// Need 22ko memory
-//dol_stopwithmem();
+if (! defined('NOREQUIREAJAX') && $conf->use_javascript_ajax) require_once(DOL_DOCUMENT_ROOT.'/core/lib/ajax.lib.php');	// Need 22ko memory
 
 // If install or upgrade process not done or not completely finished, we call the install page.
 if (! empty($conf->global->MAIN_NOT_INSTALLED) || ! empty($conf->global->MAIN_NOT_UPGRADED))
@@ -242,7 +245,7 @@ if ((! empty($conf->global->MAIN_VERSION_LAST_UPGRADE) && ($conf->global->MAIN_V
 || (empty($conf->global->MAIN_VERSION_LAST_UPGRADE) && ! empty($conf->global->MAIN_VERSION_LAST_INSTALL) && ($conf->global->MAIN_VERSION_LAST_INSTALL != DOL_VERSION)))
 {
     $versiontocompare=empty($conf->global->MAIN_VERSION_LAST_UPGRADE)?$conf->global->MAIN_VERSION_LAST_INSTALL:$conf->global->MAIN_VERSION_LAST_UPGRADE;
-    require_once(DOL_DOCUMENT_ROOT ."/lib/admin.lib.php");
+    require_once(DOL_DOCUMENT_ROOT ."/core/lib/admin.lib.php");
 	$dolibarrversionlastupgrade=preg_split('/[.-]/',$versiontocompare);
 	$dolibarrversionprogram=preg_split('/[.-]/',DOL_VERSION);
     $rescomp=versioncompare($dolibarrversionprogram,$dolibarrversionlastupgrade);
@@ -347,7 +350,7 @@ if (! defined('NOLOGIN'))
 			{
 				dol_syslog('Bad value for code, connexion refused');
 				$langs->load('main');
-				$langs->load('other');
+				$langs->load('errors');
 
 				$user->trigger_mesg='ErrorBadValueForCode - login='.$_POST["username"];
 				$_SESSION["dol_loginmesg"]=$langs->trans("ErrorBadValueForCode");
@@ -380,7 +383,18 @@ if (! defined('NOLOGIN'))
 			{
 				$dol_authmode=$conf->authmode;	// This properties is defined only when logged to say what mode was successfully used
 				$dol_tz=$_POST["tz"];
-				$dol_dst=$_POST["dst"];
+				$dol_dst=0;
+				if (isset($_POST["dst_first"]) && isset($_POST["dst_second"]))
+				{
+                    $datenow=dol_now();
+                    $datefirst=dol_stringtotime($_POST["dst_first"]);
+                    $datesecond=dol_stringtotime($_POST["dst_second"]);
+                    if ($datenow >= $datefirst && $datenow < $datesecond) $dol_dst=1;
+				}
+				//print $datefirst.'-'.$datesecond.'-'.$datenow; exit;
+				$dol_dst_observed=$_POST["dst_observed"];
+				$dol_dst_first=$_POST["dst_first"];
+				$dol_dst_second=$_POST["dst_second"];
 				$dol_screenwidth=$_POST["screenwidth"];
 				$dol_screenheight=$_POST["screenheight"];
 			}
@@ -389,7 +403,7 @@ if (! defined('NOLOGIN'))
 			{
 				dol_syslog('Bad password, connexion refused',LOG_DEBUG);
 				$langs->load('main');
-				$langs->load('other');
+				$langs->load('errors');
 
 				// Bad password. No authmode has found a good password.
 				$user->trigger_mesg=$langs->trans("ErrorBadLoginPassword").' - login='.$_POST["username"];
@@ -428,7 +442,7 @@ if (! defined('NOLOGIN'))
 			if ($resultFetchUser == 0)
 			{
 				$langs->load('main');
-				$langs->load('other');
+				$langs->load('errors');
 
 				$user->trigger_mesg='ErrorCantLoadUserFromDolibarrDatabase - login='.$login;
 				$_SESSION["dol_loginmesg"]=$langs->trans("ErrorCantLoadUserFromDolibarrDatabase",$login);
@@ -468,7 +482,7 @@ if (! defined('NOLOGIN'))
 			if ($resultFetchUser == 0)
 			{
 				$langs->load('main');
-				$langs->load('other');
+				$langs->load('errors');
 
 				$user->trigger_mesg='ErrorCantLoadUserFromDolibarrDatabase - login='.$login;
 				$_SESSION["dol_loginmesg"]=$langs->trans("ErrorCantLoadUserFromDolibarrDatabase",$login);
@@ -504,7 +518,7 @@ if (! defined('NOLOGIN'))
 	}
 
 	// Is it a new session that has started ?
-	// If we are here this means authentication was successfull.
+	// If we are here, this means authentication was successfull.
 	if (! isset($_SESSION["dol_login"]))
 	{
 		$error=0;
@@ -514,6 +528,9 @@ if (! defined('NOLOGIN'))
 		$_SESSION["dol_authmode"]=isset($dol_authmode)?$dol_authmode:'';
 		$_SESSION["dol_tz"]=isset($dol_tz)?$dol_tz:'';
 		$_SESSION["dol_dst"]=isset($dol_dst)?$dol_dst:'';
+		$_SESSION["dol_dst_observed"]=isset($dol_dst_observed)?$dol_dst_observed:'';
+		$_SESSION["dol_dst_first"]=isset($dol_dst_first)?$dol_dst_first:'';
+		$_SESSION["dol_dst_second"]=isset($dol_dst_second)?$dol_dst_second:'';
 		$_SESSION["dol_screenwidth"]=isset($dol_screenwidth)?$dol_screenwidth:'';
 		$_SESSION["dol_screenheight"]=isset($dol_screenheight)?$dol_screenheight:'';
 		$_SESSION["dol_company"]=$conf->global->MAIN_INFO_SOCIETE_NOM;
@@ -561,34 +578,14 @@ if (! defined('NOLOGIN'))
 			$entityCookie->_setCookie($entityCookieName, $entity, $ttl);
 		}
 
-		// Module webcalendar
-		if (! empty($conf->webcalendar->enabled) && $user->webcal_login != "")
-		{
-			$domain='';
-
-			// Creation of a cookie to save login
-			$cookiename='webcalendar_login';
-			if (! isset($_COOKIE[$cookiename]))
-			{
-				setcookie($cookiename, $user->webcal_login, 0, "/", $domain, 0);
-			}
-			// Creation of a cookie to save session
-			$cookiename='webcalendar_session';
-			if (! isset($_COOKIE[$cookiename]))
-			{
-				setcookie($cookiename, 'TODO', 0, "/", $domain, 0);
-			}
-		}
-
-		// Module Phenix
-		if (! empty($conf->phenix->enabled) && $user->phenix_login != "" && $conf->phenix->cookie)
-		{
-			// Creation du cookie permettant la connexion automatique, valide jusqu'a la fermeture du browser
-			if (!isset($_COOKIE[$conf->phenix->cookie]))
-			{
-				setcookie($conf->phenix->cookie, $user->phenix_login.":".$user->phenix_pass_crypted.":1", 0, "/", "", 0);
-			}
-		}
+        // Hooks on successfull login
+        $action='';
+        include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
+        $hookmanager=new HookManager($db);
+        $hookmanager->callHooks(array('login'));
+        $parameters=array('dol_authmode'=>$dol_authmode);
+        $reshook=$hookmanager->executeHooks('afterLogin',$parameters,$user,$action);    // Note that $action and $object may have been modified by some hooks
+		if ($reshook < 0) $error++;
 	}
 
 
@@ -844,7 +841,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
 		else print "<title>".$appli."</title>";
 		print "\n";
 
-        if (! defined('DISABLE_JQUERY'))
+        if (! defined('DISABLE_JQUERY') && ! $disablejs && $conf->use_javascript_ajax)
         {
             print '<!-- Includes for JQuery (Ajax library) -->'."\n";
             $jquerytheme = 'smoothness';
@@ -872,7 +869,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
         // Output style sheets (optioncss='print' or '')
         $themepath=dol_buildpath((empty($conf->global->MAIN_FORCETHEMEDIR)?'':$conf->global->MAIN_FORCETHEMEDIR).$conf->css,1);
         //print 'themepath='.$themepath;exit;
-		print '<link rel="stylesheet" type="text/css" title="default" href="'.$themepath.'?lang='.$langs->defaultlang.'&theme='.$conf->theme.(GETPOST('optioncss')?'&optioncss='.GETPOST('optioncss'):'').'">'."\n";
+		print '<link rel="stylesheet" type="text/css" title="default" href="'.$themepath.'?lang='.$langs->defaultlang.'&theme='.$conf->theme.(GETPOST('optioncss')?'&optioncss='.GETPOST('optioncss','alpha',1):'').'">'."\n";
 		// CSS forced by modules (relative url starting with /)
 		if (is_array($conf->css_modules))
 		{
@@ -880,7 +877,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
 			{	// cssfile is an absolute path
 				print '<link rel="stylesheet" type="text/css" title="default" href="'.dol_buildpath($cssfile,1);
                 // We add params only if page is not static, because some web server setup does not return content type text/css if url has parameters and browser cache is not used.
-				if (!preg_match('/\.css$/i',$cssfile)) print '?lang='.$langs->defaultlang.'&theme='.$conf->theme.(GETPOST('optioncss')?'&optioncss='.GETPOST('optioncss'):'');
+				if (!preg_match('/\.css$/i',$cssfile)) print '?lang='.$langs->defaultlang.'&theme='.$conf->theme.(GETPOST('optioncss')?'&optioncss='.GETPOST('optioncss','alpha',1):'');
 				print '">'."\n";
 			}
 		}
@@ -891,7 +888,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
 			{
 				print '<link rel="stylesheet" type="text/css" title="default" href="'.dol_buildpath($cssfile,1);
                 // We add params only if page is not static, because some web server setup does not return content type text/css if url has parameters and browser cache is not used.
-				if (!preg_match('/\.css$/i',$cssfile)) print '?lang='.$langs->defaultlang.'&theme='.$conf->theme.(GETPOST('optioncss')?'&optioncss='.GETPOST('optioncss'):'');
+				if (!preg_match('/\.css$/i',$cssfile)) print '?lang='.$langs->defaultlang.'&theme='.$conf->theme.(GETPOST('optioncss')?'&optioncss='.GETPOST('optioncss','alpha',1):'');
 				print '">'."\n";
 			}
 		}
@@ -904,7 +901,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
 		if (! $disablejs && $conf->use_javascript_ajax)
 		{
 			// Other external js
-			require_once DOL_DOCUMENT_ROOT.'/lib/ajax.lib.php';
+			require_once DOL_DOCUMENT_ROOT.'/core/lib/ajax.lib.php';
 
 			$ext='.js';
 			if (isset($conf->global->MAIN_OPTIMIZE_SPEED) && ($conf->global->MAIN_OPTIMIZE_SPEED & 0x01)) { $ext='.jgz'; }	// mini='_mini', ext='.gz'
@@ -917,23 +914,49 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/tiptip/jquery.tipTip.min'.$ext.'"></script>'."\n";
             //print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/lightbox/js/jquery.lightbox-0.5.min'.$ext.'"></script>'."\n";
             // jQuery Layout
-			if (!empty($conf->global->MAIN_MENU_USE_JQUERY_LAYOUT) || defined('REQUIRE_JQUERY_LAYOUT'))
+			if (! empty($conf->global->MAIN_MENU_USE_JQUERY_LAYOUT) || defined('REQUIRE_JQUERY_LAYOUT'))
 			{
                 print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/layout/jquery.layout-latest'.$ext.'"></script>'."\n";
 			}
 			// jQuery jnotify
-			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY))	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js"></script>'."\n";
-            // Flot
-            print '<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/excanvas.min.js"></script><![endif]-->'."\n";
-			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.min.js"></script>'."\n";
-            print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.pie.min.js"></script>'."\n";
-            print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.stack.min.js"></script>'."\n";
+			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY))
+			{
+				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js"></script>'."\n";
+				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/jnotify.js"></script>'."\n";
+			}
+			// Flot
+			if (empty($conf->global->MAIN_DISABLE_JQUERY_FLOT))
+			{
+				print '<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/excanvas.min.js"></script><![endif]-->'."\n";
+				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.min.js"></script>'."\n";
+				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.pie.min.js"></script>'."\n";
+				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.stack.min.js"></script>'."\n";
+			}
             // CKEditor
-            if (!empty($conf->fckeditor->enabled) && !empty($conf->global->FCKEDITOR_EDITORNAME) && $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor')
+            if (! empty($conf->fckeditor->enabled) && ! empty($conf->global->FCKEDITOR_EDITORNAME) && $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor')
             {
                 print '<!-- Includes JS for CKEditor -->'."\n";
                 print '<script type="text/javascript">var CKEDITOR_BASEPATH = \''.DOL_URL_ROOT.'/includes/ckeditor/\';</script>'."\n";
                 print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/ckeditor/ckeditor_basic.js"></script>'."\n";
+            }
+            // jQuery jeditable
+            if (! empty($conf->global->MAIN_USE_JQUERY_JEDITABLE))
+            {
+            	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jeditable/jquery.jeditable.min'.$ext.'"></script>'."\n";
+            	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jeditable/jquery.jeditable.ui-datepicker.js"></script>'."\n";
+            	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jeditable/jquery.jeditable.ui-autocomplete.js"></script>'."\n";
+            	print '<script type="text/javascript">'."\n";
+            	print 'var urlSaveInPlace = \''.DOL_URL_ROOT.'/core/ajax/saveinplace.php\';'."\n";
+            	print 'var urlLoadInPlace = \''.DOL_URL_ROOT.'/core/ajax/loadinplace.php\';'."\n";
+            	print 'var tooltipInPlace = \''.$langs->transnoentities('ClickToEdit').'\';'."\n";
+            	print 'var placeholderInPlace = \''.$langs->trans('ClickToEdit').'\';'."\n";
+            	print 'var cancelInPlace = \''.$langs->trans('Cancel').'\';'."\n";
+            	print 'var submitInPlace = \''.$langs->trans('Ok').'\';'."\n";
+            	print 'var indicatorInPlace = \'<img src="'.DOL_URL_ROOT."/theme/".$conf->theme."/img/working.gif".'">\';'."\n";
+            	print 'var ckeditorConfig = \''.dol_buildpath('/theme/'.$conf->theme.'/ckeditor/config.js',1).'\';'."\n";
+            	print '</script>'."\n";
+            	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/editinplace.js"></script>'."\n";
+            	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jeditable/jquery.jeditable.ckeditor.js"></script>'."\n";
             }
             // File Upload
             if (! empty($conf->global->MAIN_USE_JQUERY_FILEUPLOAD))
@@ -951,84 +974,32 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/datatables/extras/ColVis/js/ColVis.min'.$ext.'"></script>'."\n";
             	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/datatables/extras/TableTools/js/TableTools.min'.$ext.'"></script>'."\n";
             }
+
             // Global js function
             print '<!-- Includes JS of Dolibarr -->'."\n";
-            print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/lib/lib_head.js"></script>'."\n";
+            print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_head.js"></script>'."\n";
+
+            // Add datepicker default options
+            print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/datepicker.js.php?lang='.$langs->defaultlang.'"></script>'."\n";
+
+            // Output module javascript
+            if (is_array($arrayofjs))
+            {
+            	print '<!-- Includes JS specific to page -->'."\n";
+            	foreach($arrayofjs as $jsfile)
+            	{
+            		if (preg_match('/^http/i',$jsfile))
+            		{
+            			print '<script type="text/javascript" src="'.$jsfile.'"></script>'."\n";
+            		}
+            		else
+            		{
+            			if (! preg_match('/^\//',$jsfile)) $jsfile='/'.$jsfile;	// For backward compatibility
+            			print '<script type="text/javascript" src="'.dol_buildpath($jsfile,1).'"></script>'."\n";
+            		}
+            	}
+            }
 		}
-
-		// Output module javascript
-		if (is_array($arrayofjs))
-		{
-			print '<!-- Includes JS specific to page -->'."\n";
-			foreach($arrayofjs as $jsfile)
-			{
-				if (preg_match('/^http/i',$jsfile))
-				{
-					print '<script type="text/javascript" src="'.$jsfile.'"></script>'."\n";
-				}
-				else
-				{
-					if (! preg_match('/^\//',$jsfile)) $jsfile='/'.$jsfile;	// For backward compatibility
-					print '<script type="text/javascript" src="'.dol_buildpath($jsfile,1).'"></script>'."\n";
-				}
-			}
-		}
-
-		// Define tradMonths javascript array (we define this in datapicker AND in parent page to avoid errors with IE8)
-        print '<script type="text/javascript">'."\n";
-		$tradMonths=array($langs->trans("January"),
-		$langs->trans("February"),
-		$langs->trans("March"),
-		$langs->trans("April"),
-		$langs->trans("May"),
-		$langs->trans("June"),
-		$langs->trans("July"),
-		$langs->trans("August"),
-		$langs->trans("September"),
-		$langs->trans("October"),
-		$langs->trans("November"),
-		$langs->trans("December")
-		);
-		print 'var tradMonths = '.json_encode($tradMonths).';'."\n";
-
-		// Define tradMonthsMin javascript array (we define this in datapicker AND in parent page to avoid errors with IE8)
-		$tradMonthsMin=array($langs->trans("JanuaryMin"),
-		$langs->trans("FebruaryMin"),
-		$langs->trans("MarchMin"),
-		$langs->trans("AprilMin"),
-		$langs->trans("MayMin"),
-		$langs->trans("JuneMin"),
-		$langs->trans("JulyMin"),
-		$langs->trans("AugustMin"),
-		$langs->trans("SeptemberMin"),
-		$langs->trans("OctoberMin"),
-		$langs->trans("NovemberMin"),
-		$langs->trans("DecemberMin")
-		);
-		print 'var tradMonthsMin = '.json_encode($tradMonthsMin).';'."\n";
-
-		// Define tradDays javascript array (we define this in datapicker AND in parent page to avoid errors with IE8)
-		$tradDays=array($langs->trans("Monday"),
-		$langs->trans("Tuesday"),
-		$langs->trans("Wednesday"),
-		$langs->trans("Thursday"),
-		$langs->trans("Friday"),
-		$langs->trans("Saturday"),
-		$langs->trans("Sunday")
-		);
-		print 'var tradDays = '.json_encode($tradDays).';'."\n";
-
-		// Define tradDaysMin javascript array (we define this in datapicker AND in parent page to avoid errors with IE8)
-		$tradDaysMin=array($langs->trans("MondayMin"),
-		$langs->trans("TuesdayMin"),
-		$langs->trans("WednesdayMin"),
-		$langs->trans("ThursdayMin"),
-		$langs->trans("FridayMin"),
-		$langs->trans("SaturdayMin"),
-		$langs->trans("SundayMin")
-		);
-		print 'var tradDaysMin = '.json_encode($tradDaysMin).';'."\n";
-		print '</script>'."\n";
 
 		if (! empty($head)) print $head."\n";
 		if (! empty($conf->global->MAIN_HTML_HEADER)) print $conf->global->MAIN_HTML_HEADER."\n";
@@ -1154,11 +1125,11 @@ function top_menu($head, $title='', $target='', $disablejs=0, $disablehead=0, $a
     if (GETPOST('menu')) $top_menu=GETPOST('menu'); // menu=eldy_backoffice.php
 
 	// Load the top menu manager
-	$result=dol_include_once("/includes/menus/standard/".$top_menu);
+	$result=dol_include_once("/core/menus/standard/".$top_menu);
 	if (! $result)	// If failed to include, we try with standard
 	{
 		$top_menu='eldy_backoffice.php';
-		include_once(DOL_DOCUMENT_ROOT."/includes/menus/standard/".$top_menu);
+		include_once(DOL_DOCUMENT_ROOT."/core/menus/standard/".$top_menu);
 	}
 
 
@@ -1351,11 +1322,11 @@ function left_menu($menu_array_before, $helppagename='', $moresearchform='', $me
     if (GETPOST('menu')) $left_menu=GETPOST('menu');     // menu=eldy_backoffice.php
 
     // Load the left menu manager
-	$result=dol_include_once("/includes/menus/standard/".$left_menu);
+	$result=dol_include_once("/core/menus/standard/".$left_menu);
 	if (! $result)	// If menu manager removed or not found
 	{
 		$left_menu='eldy_backoffice.php';
-		include_once(DOL_DOCUMENT_ROOT ."/includes/menus/standard/".$left_menu);
+		include_once(DOL_DOCUMENT_ROOT ."/core/menus/standard/".$left_menu);
 	}
 
     // Left column
@@ -1448,7 +1419,7 @@ function left_menu($menu_array_before, $helppagename='', $moresearchform='', $me
 
 	// Execute hook printLeftBlock
 	$parameters=array();
-    $leftblock.=$hookmanager->executeHooks('printLeftBlock',$parameters);    // Note that $action and $object may have been modified by some hooks
+    $leftblock=$hookmanager->executeHooks('printLeftBlock',$parameters);    // Note that $action and $object may have been modified by some hooks
     print $leftblock;
 
 	if ($conf->use_javascript_ajax && $conf->global->MAIN_MENU_USE_JQUERY_LAYOUT) print '</div> <!-- End left layout -->'."\n";
@@ -1624,50 +1595,7 @@ if (! function_exists("llxFooter"))
         print "\n";
         if ($foot) print '<!-- '.$foot.' -->'."\n";
 
-        if (! empty($conf->global->MAIN_HTML_FOOTER)) print $conf->global->MAIN_HTML_FOOTER."\n";
-
-
-		// If there is some logs in buffer to show
-		if (count($conf->logbuffer))
-		{
-			print "\n";
-			print "<!-- Start of log output\n";
-			//print '<div class="hidden">'."\n";
-			foreach($conf->logbuffer as $logline)
-			{
-				print $logline."<br>\n";
-			}
-			//print '</div>'."\n";
-			print "End of log output -->\n";
-		}
-
-		// End of tuning
-        if (! empty($_SERVER['DOL_TUNING']))
-        {
-            $micro_end_time=dol_microtime_float(true);
-            print "\n".'<script type="text/javascript">console.log("';
-            if (! empty($conf->global->MEMCACHED_SERVER)) print 'MEMCACHED_SERVER='.$conf->global->MEMCACHED_SERVER.' - ';
-            print 'MAIN_OPTIMIZE_SPEED='.(isset($conf->global->MAIN_OPTIMIZE_SPEED)?$conf->global->MAIN_OPTIMIZE_SPEED:'off');
-            print ' - Build time: '.ceil(1000*($micro_end_time-$micro_start_time)).' ms';
-            if (function_exists("memory_get_usage"))
-            {
-                print ' - Mem: '.memory_get_usage();
-            }
-            if (function_exists("xdebug_memory_usage"))
-            {
-                print ' - XDebug time: '.ceil(1000*xdebug_time_index()).' ms';
-                print ' - XDebug mem: '.xdebug_memory_usage();
-                print ' - XDebug mem peak: '.xdebug_peak_memory_usage();
-            }
-            if (function_exists("zend_loader_file_encoded"))
-            {
-                print ' - Zend encoded file: '.(zend_loader_file_encoded()?'yes':'no');
-            }
-            print '")</script>'."\n";
-
-            // Add Xdebug coverage of code
-            if (defined('XDEBUGCOVERAGE')) { var_dump(xdebug_get_code_coverage()); }
-        }
+        printCommonFooter();
 
 		print "</body>\n";
 		print "</html>\n";

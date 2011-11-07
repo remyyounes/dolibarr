@@ -22,8 +22,8 @@
  */
 
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/functions2.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/usergroups.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/usergroups.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formadmin.class.php");
 
 $langs->load("companies");
@@ -35,29 +35,30 @@ $langs->load("languages");
 // Defini si peux lire/modifier permisssions
 $canreaduser=($user->admin || $user->rights->user->user->lire);
 
-if ($_REQUEST["id"])
+$id = GETPOST('id','int');
+$action = GETPOST('action');
+
+if ($id)
 {
-    // $user est le user qui edite, $_REQUEST["id"] est l'id de l'utilisateur edite
-    $caneditfield=( (($user->id == $_REQUEST["id"]) && $user->rights->user->self->creer)
-    || (($user->id != $_REQUEST["id"]) && $user->rights->user->user->creer));
+    // $user est le user qui edite, $id est l'id de l'utilisateur edite
+    $caneditfield=( (($user->id == $id) && $user->rights->user->self->creer)
+    || (($user->id != $id) && $user->rights->user->user->creer));
 }
 
 // Security check
 $socid=0;
 if ($user->societe_id > 0) $socid = $user->societe_id;
 $feature2 = (($socid && $user->rights->user->self->creer)?'':'user');
-if ($user->id == $_REQUEST["id"])	// A user can always read its own card
+if ($user->id == $id)	// A user can always read its own card
 {
     $feature2='';
     $canreaduser=1;
 }
-$result = restrictedArea($user, 'user', $_REQUEST["id"], '', $feature2);
-if ($user->id <> $_REQUEST["id"] && ! $canreaduser) accessforbidden();
+$result = restrictedArea($user, 'user', $id, '', $feature2);
+if ($user->id <> $id && ! $canreaduser) accessforbidden();
 
-
-$id=! empty($_GET["id"])?$_GET["id"]:$_POST["id"];
-$dirtop = "../includes/menus/standard";
-$dirleft = "../includes/menus/standard";
+$dirtop = "../core/menus/standard";
+$dirleft = "../core/menus/standard";
 
 // Charge utilisateur edite
 $fuser = new User($db);
@@ -76,13 +77,9 @@ $formadmin=new FormAdmin($db);
 /*
  * Actions
  */
-if ($_POST["action"] == 'update' && ($caneditfield  || $user->admin))
+if ($action == 'update' && ($caneditfield  || $user->admin))
 {
-    if ($_POST["cancel"])
-    {
-        $_GET["id"]=$_POST["id"];
-    }
-    else
+    if (! $_POST["cancel"])
     {
         $tabparam=array();
 
@@ -105,7 +102,7 @@ if ($_POST["action"] == 'update' && ($caneditfield  || $user->admin))
 
         $_SESSION["mainmenu"]="";   // Le gestionnaire de menu a pu changer
 
-        Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$_POST["id"]);
+        Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$id);
         exit;
     }
 }
@@ -151,7 +148,7 @@ if ($_GET["action"] == 'edit')
     print '<form method="post" action="'.$_SERVER["PHP_SELF"].'">';
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
     print '<input type="hidden" name="action" value="update">';
-    print '<input type="hidden" name="id" value="'.$_GET["id"].'">';
+    print '<input type="hidden" name="id" value="'.$id.'">';
 
     clearstatcache();
     $var=true;

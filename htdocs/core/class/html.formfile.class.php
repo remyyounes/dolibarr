@@ -41,18 +41,17 @@ class FormFile
 	 *
 	 *  @param		DoliDB		$DB      Database handler
      */
-    function FormFile($DB)
+    function FormFile($db)
     {
-        $this->db = $DB;
-
+        $this->db = $db;
         $this->numoffiles=0;
-
         return 1;
     }
 
 
     /**
      *    	Show form to upload a new file
+	 *
      *    	@param      url				Url
      *    	@param      title			Title zone (Title or '' or 'none')
      *    	@param      addcancel		1=Add 'Cancel' button
@@ -131,24 +130,24 @@ class FormFile
     /**
      *      Show the box with list of available documents for object
      *
-     *      @param      modulepart          propal, facture, facture_fourn, ...
-     *      @param      filename            Sub dir to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if filedir already complete)
-     *      @param      filedir             Dir to scan
-     *      @param      urlsource           Url of origin page (for return)
-     *      @param      genallowed          Generation is allowed (1/0 or array of formats)
-     *      @param      delallowed          Remove is allowed (1/0)
-     *      @param      modelselected       Model to preselect by default
-     *      @param      allowgenifempty		Show warning if no model activated
-     *      @param      forcenomultilang	Do not show language option (even if MAIN_MULTILANGS defined)
-     *      @param      iconPDF             Show only PDF icon with link (1/0)
-     * 		@param		maxfilenamelength	Max length for filename shown
-     * 		@param		noform				Do not output html form tags
-     * 		@param		param				More param on http links
-     * 		@param		title				Title to show on top of form
-     * 		@param		buttonlabel			Label on submit button
-     * 		@param		codelang			Default language code to use on lang combo box if multilang is enabled
-     * 		@param		hookmanager			Object hook of external modules
-     * 		@return		int					<0 if KO, number of shown files if OK
+     *      @param      string				$modulepart         propal, facture, facture_fourn, ...
+     *      @param      string				$filename           Sub-directory to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if $filedir is already complete)
+     *      @param      string				$filedir            Directory to scan
+     *      @param      string				$urlsource          Url of origin page (for return)
+     *      @param      int					$genallowed         Generation is allowed (1/0 or array of formats)
+     *      @param      int					$delallowed         Remove is allowed (1/0)
+     *      @param      string				$modelselected      Model to preselect by default
+     *      @param      string				$allowgenifempty	Show warning if no model activated
+     *      @param      string				$forcenomultilang	Do not show language option (even if MAIN_MULTILANGS defined)
+     *      @param      int					$iconPDF            Show only PDF icon with link (1/0)
+     * 		@param		int					$maxfilenamelength	Max length for filename shown
+     * 		@param		string				$noform				Do not output html form tags
+     * 		@param		string				$param				More param on http links
+     * 		@param		string				$title				Title to show on top of form
+     * 		@param		string				$buttonlabel		Label on submit button
+     * 		@param		string				$codelang			Default language code to use on lang combo box if multilang is enabled
+     * 		@param		HookManager			$hookmanager		Object hookmanager with instance of external modules hook classes
+     * 		@return		int										<0 if KO, number of shown files if OK
      */
     function show_documents($modulepart,$filename,$filedir,$urlsource,$genallowed,$delallowed=0,$modelselected='',$allowgenifempty=1,$forcenomultilang=0,$iconPDF=0,$maxfilenamelength=28,$noform=0,$param='',$title='',$buttonlabel='',$codelang='',$hookmanager=false)
     {
@@ -161,29 +160,29 @@ class FormFile
      *      Return a string to show the box with list of available documents for object.
      *      This also set the property $this->numoffiles
      *
-     *      @param      modulepart          propal, facture, facture_fourn, ...
-     *      @param      filename            Sub dir to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if filedir already complete)
-     *      @param      filedir             Dir to scan
-     *      @param      urlsource           Url of origin page (for return)
-     *      @param      genallowed          Generation is allowed (1/0 or array of formats)
-     *      @param      delallowed          Remove is allowed (1/0)
-     *      @param      modelselected       Model to preselect by default
-     *      @param      allowgenifempty		Show warning if no model activated
-     *      @param      forcenomultilang	Do not show language option (even if MAIN_MULTILANGS defined)
-     *      @param      iconPDF             Show only PDF icon with link (1/0)
-     * 		@param		maxfilenamelength	Max length for filename shown
-     * 		@param		noform				Do not output html form tags
-     * 		@param		param				More param on http links
-     * 		@param		title				Title to show on top of form
-     * 		@param		buttonlabel			Label on submit button
-     * 		@param		codelang			Default language code to use on lang combo box if multilang is enabled
-     * 		@param		hookmanager			Object hookmanager with instance of external modules hook classes
-     * 		@return		string              Output string.
+     *      @param      string				$modulepart         propal, facture, facture_fourn, ...
+     *      @param      string				$filename           Sub-directory to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if $filedir is already complete)
+     *      @param      string				$filedir            Directory to scan
+     *      @param      string				$urlsource          Url of origin page (for return)
+     *      @param      int					$genallowed         Generation is allowed (1/0 or array of formats)
+     *      @param      int					$delallowed         Remove is allowed (1/0)
+     *      @param      string				$modelselected      Model to preselect by default
+     *      @param      string				$allowgenifempty	Show warning if no model activated
+     *      @param      string				$forcenomultilang	Do not show language option (even if MAIN_MULTILANGS defined)
+     *      @param      int					$iconPDF            Show only PDF icon with link (1/0)
+     * 		@param		int					$maxfilenamelength	Max length for filename shown
+     * 		@param		string				$noform				Do not output html form tags
+     * 		@param		string				$param				More param on http links
+     * 		@param		string				$title				Title to show on top of form
+     * 		@param		string				$buttonlabel		Label on submit button
+     * 		@param		string				$codelang			Default language code to use on lang combo box if multilang is enabled
+     * 		@param		HookManager			$hookmanager		Object hookmanager with instance of external modules hook classes
+     * 		@return		string              					Output string with HTML array of documents (might be empty string)
      */
     function showdocuments($modulepart,$filename,$filedir,$urlsource,$genallowed,$delallowed=0,$modelselected='',$allowgenifempty=1,$forcenomultilang=0,$iconPDF=0,$maxfilenamelength=28,$noform=0,$param='',$title='',$buttonlabel='',$codelang='',$hookmanager=false)
     {
         // filedir = conf->...dir_ouput."/".get_exdir(id)
-        include_once(DOL_DOCUMENT_ROOT.'/lib/files.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
 
         global $langs,$bc,$conf;
 
@@ -214,7 +213,6 @@ class FormFile
         if ($genallowed)
         {
             $modellist=array();
-            $cgvlist=array();
 
             if ($modulepart == 'company')
             {
@@ -222,7 +220,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/societe/modules_societe.class.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/societe/modules_societe.class.php');
                     $modellist=ModeleThirdPartyDoc::liste_modeles($this->db);
                 }
             }
@@ -231,7 +229,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/propale/modules_propale.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/propale/modules_propale.php');
                     $modellist=ModelePDFPropales::liste_modeles($this->db);
                 }
             }
@@ -240,7 +238,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/commande/modules_commande.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/commande/modules_commande.php');
                     $modellist=ModelePDFCommandes::liste_modeles($this->db);
                 }
             }
@@ -249,7 +247,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/expedition/pdf/ModelePdfExpedition.class.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/expedition/pdf/ModelePdfExpedition.class.php');
                     $modellist=ModelePDFExpedition::liste_modeles($this->db);
                 }
             }
@@ -258,7 +256,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/livraison/modules_livraison.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/livraison/modules_livraison.php');
                     $modellist=ModelePDFDeliveryOrder::liste_modeles($this->db);
                 }
             }
@@ -267,7 +265,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/fichinter/modules_fichinter.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/fichinter/modules_fichinter.php');
                     $modellist=ModelePDFFicheinter::liste_modeles($this->db);
                 }
             }
@@ -276,19 +274,8 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/facture/modules_facture.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php');
                     $modellist=ModelePDFFactures::liste_modeles($this->db);
-
-                    // This is to allow to join external files to invoices
-                    if (! empty($conf->concatpdf->enabled))
-                    {
-                        $filescgv=glob($conf->concatpdf->dir_output."/invoices/*.pdf");
-                        if ($filescgv) {
-                            foreach ($filescgv as $cgvfilename) {
-                                $cgvlist[] = basename($cgvfilename, ".pdf");
-                            }
-                        }
-                    }
                 }
             }
             elseif ($modulepart == 'project')
@@ -296,7 +283,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/project/modules_project.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/project/modules_project.php');
                     $modellist=ModelePDFProjects::liste_modeles($this->db);
                 }
             }
@@ -305,7 +292,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/export/modules_export.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/export/modules_export.php');
                     $modellist=ModeleExports::liste_modeles($this->db);
                 }
             }
@@ -314,7 +301,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/supplier_order/modules_commandefournisseur.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/supplier_order/modules_commandefournisseur.php');
                     $modellist=ModelePDFSuppliersOrders::liste_modeles($this->db);
                 }
             }
@@ -323,7 +310,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/supplier_invoice/modules_facturefournisseur.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/supplier_invoice/modules_facturefournisseur.php');
                     $modellist=ModelePDFSuppliersInvoices::liste_modeles($this->db);
                 }
             }
@@ -332,7 +319,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/cheque/pdf/modules_chequereceipts.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/cheque/pdf/modules_chequereceipts.php');
                     $modellist=ModeleChequeReceipts::liste_modeles($this->db);
                 }
             }
@@ -341,7 +328,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/dons/modules_don.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/dons/modules_don.php');
                     $modellist=ModeleDon::liste_modeles($this->db);
                 }
             }
@@ -352,7 +339,7 @@ class FormFile
             else
             {
                 // Generic feature, for external modules
-                $file=dol_buildpath('/includes/modules/'.$modulepart.'/modules_'.$modulepart.'.php',0);
+                $file=dol_buildpath('/core/modules/'.$modulepart.'/modules_'.$modulepart.'.php',0);
                 if (file_exists($file))
                 {
                     $res=include_once($file);
@@ -395,10 +382,6 @@ class FormFile
                     $modelselected=$arraykeys[0];
                 }
                 $out.= $html->selectarray('model',$modellist,$modelselected,$showempty,0,0);
-                if (count($cgvlist) > 0)
-                {
-                    $out.= $html->selectarray('cgv',$cgvlist,"-1",1,0,1);
-                }
                 $out.= '</td>';
             }
             else
@@ -563,7 +546,7 @@ class FormFile
 
         $nboffiles=count($filearray);
 
-        if ($nboffiles > 0) include_once(DOL_DOCUMENT_ROOT.'/lib/images.lib.php');
+        if ($nboffiles > 0) include_once(DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php');
 
         $var=true;
         foreach($filearray as $key => $file)      // filearray must be only files here
@@ -811,7 +794,7 @@ class FormFile
 				</script>';
 
         print '<div id="fileupload">';
-        print '<form action="'.DOL_URL_ROOT.'/core/ajaxfileupload.php" method="POST" enctype="multipart/form-data">';
+        print '<form action="'.DOL_URL_ROOT.'/core/ajax/fileupload.php" method="POST" enctype="multipart/form-data">';
         print '<input type="hidden" name="fk_element" value="'.$object->id.'">';
         print '<input type="hidden" name="element" value="'.$object->element.'">';
         print '<div class="fileupload-buttonbar">';

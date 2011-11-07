@@ -21,7 +21,7 @@
  *      \ingroup    notification
  *      \brief      File of class to manage notifications
  */
-require_once(DOL_DOCUMENT_ROOT ."/lib/CMailFile.class.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/class/CMailFile.class.php");
 
 
 /**
@@ -46,21 +46,21 @@ class Notify
     /**
 	 *	Constructor
 	 *
-	 *	@param 		DoliDB		$DB		Database handler
+	 *	@param 		DoliDB		$db		Database handler
      */
-    function Notify($DB)
+    function Notify($db)
     {
-        $this->db = $DB ;
+        $this->db = $db;
     }
 
 
     /**
-     *  Renvoie le message signalant les notifications qui auront lieu sur
-     *	un evenement pour affichage dans texte de confirmation evenement
+     *  Return message that say how many notification will occurs on requested event.
+     *	This is to show confirmation messages before event is done.
      *
-     * 	@param		action		Id of action in llx_c_action_trigger
-     * 	@param		socid		Id of third party
-     *	@return		string		Message
+     * 	@param	string	$action		Id of action in llx_c_action_trigger
+     * 	@param	int		$socid		Id of third party
+     *	@return	string				Message
      */
 	function confirmMessage($action,$socid)
 	{
@@ -75,10 +75,11 @@ class Notify
 	}
 
     /**
-     *    	\brief      Return number of notifications activated for action code and third party
-     * 		\param		action		Code of action in llx_c_action_trigger (new usage) or Id of action in llx_c_action_trigger (old usage)
-     * 		\param		socid		Id of third party
-     * 		\return		int			<0 si ko, sinon nombre de notifications definies
+     * Return number of notifications activated for action code and third party
+     *
+     * @param	string	$action		Code of action in llx_c_action_trigger (new usage) or Id of action in llx_c_action_trigger (old usage)
+     * @param	int		$socid		Id of third party
+     * @return	int					<0 if KO, nb of notifications sent if OK
      */
 	function countDefinedNotifications($action,$socid)
 	{
@@ -96,10 +97,10 @@ class Notify
         $sql.= " AND n.fk_soc = s.rowid";
         if (is_numeric($action)) $sql.= " AND n.fk_action = ".$action;	// Old usage
         else $sql.= " AND a.code = '".$action."'";	// New usage
-        $sql.= " AND a.entity = ".$conf->entity;
+        //$sql.= " AND n.entity = ".$conf->entity;
         $sql.= " AND s.rowid = ".$socid;
 
-		dol_syslog("Notify.class::countDefinedNotifications $action, $socid");
+		dol_syslog("Notify.class::countDefinedNotifications ".$action.", ".$socid." sql=".$sql);
 
         $resql = $this->db->query($sql);
         if ($resql)
@@ -161,7 +162,7 @@ class Notify
 
                 if (dol_strlen($sendto))
                 {
-                	include_once(DOL_DOCUMENT_ROOT.'/lib/files.lib.php');
+                	include_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
                 	$application=($conf->global->MAIN_APPLICATION_TITLE?$conf->global->MAIN_APPLICATION_TITLE:'Dolibarr ERP/CRM');
 
                 	$subject = '['.$application.'] '.$langs->transnoentitiesnoconv("DolibarrNotification");

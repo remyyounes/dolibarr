@@ -25,7 +25,7 @@
 
 require("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/usergroups.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/usergroups.lib.php");
 if(! empty($conf->multicompany->enabled)) dol_include_once("/multicompany/class/actions_multicompany.class.php");
 
 // Defini si peux lire/modifier utilisateurs et permisssions
@@ -51,7 +51,7 @@ $userid=GETPOST("user","int");
 // Security check
 $result = restrictedArea($user, 'user', $_GET["id"], 'usergroup', 'user');
 
-if(! empty($conf->multicompany->enabled) && $conf->entity > 1 && $conf->global->MULTICOMPANY_TRANSVERSE_MODE)
+if(! empty($conf->multicompany->enabled) && $conf->entity > 1 && $conf->multicompany->transverse_mode)
 {
     accessforbidden();
 }
@@ -73,6 +73,7 @@ if ($action == 'confirm_delete' && $confirm == "yes")
     }
     else
     {
+    	$langs->load("errors");
         $message = '<div class="error">'.$langs->trans('ErrorForbidden').'</div>';
     }
 }
@@ -94,10 +95,10 @@ if ($action == 'add')
 		if (! $message)
 		{
 			$object->nom	= trim($_POST["nom"]);
-                        if($conf->multicompany->enabled && !empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE))
-                            $object->entity = 0;
-                        else
-                            $object->entity = $_POST["entity"];
+			if($conf->multicompany->enabled && !empty($conf->multicompany->transverse_mode))
+				$object->entity = 0;
+			else
+				$object->entity = $_POST["entity"];
 			$object->note	= trim($_POST["note"]);
 
             $db->begin();
@@ -123,6 +124,7 @@ if ($action == 'add')
     }
     else
     {
+    	$langs->load("errors");
         $message = '<div class="error">'.$langs->trans('ErrorForbidden').'</div>';
     }
 }
@@ -139,8 +141,8 @@ if ($action == 'adduser' || $action =='removeuser')
 
 			$edituser = new User($db);
 			$edituser->fetch($userid);
-			if ($action == 'adduser')    $result=$edituser->SetInGroup($object->id,($conf->global->MULTICOMPANY_TRANSVERSE_MODE?GETPOST("entity"):$object->entity));
-			if ($action == 'removeuser') $result=$edituser->RemoveFromGroup($object->id,($conf->global->MULTICOMPANY_TRANSVERSE_MODE?GETPOST("entity"):$object->entity));
+			if ($action == 'adduser')    $result=$edituser->SetInGroup($object->id,($conf->multicompany->transverse_mode?GETPOST("entity"):$object->entity));
+			if ($action == 'removeuser') $result=$edituser->RemoveFromGroup($object->id,($conf->multicompany->transverse_mode?GETPOST("entity"):$object->entity));
 
             if ($result > 0)
             {
@@ -155,6 +157,7 @@ if ($action == 'adduser' || $action =='removeuser')
     }
     else
     {
+    	$langs->load("errors");
         $message = '<div class="error">'.$langs->trans('ErrorForbidden').'</div>';
     }
 }
@@ -173,7 +176,7 @@ if ($action == 'update')
         $object->oldcopy=dol_clone($object);
 
 		$object->nom	= trim($_POST["group"]);
-		if($conf->multicompany->enabled && !empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE))
+		if($conf->multicompany->enabled && !empty($conf->multicompany->transverse_mode))
                             $object->entity = 0;
                         else
                             $object->entity = $_POST["entity"];
@@ -194,6 +197,7 @@ if ($action == 'update')
     }
     else
     {
+    	$langs->load("errors");
         $message = '<div class="error">'.$langs->trans('ErrorForbidden').'</div>';
     }
 }
@@ -227,7 +231,7 @@ if ($action == 'create')
 	// Multicompany
 	if (! empty($conf->multicompany->enabled))
 	{
-		if (empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE) && $conf->entity == 1 && $user->admin && ! $user->entity)
+		if (empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && ! $user->entity)
 		{
 			$mc = new ActionsMulticompany($db);
 			print "<tr>".'<td valign="top">'.$langs->trans("Entity").'</td>';
@@ -241,18 +245,10 @@ if ($action == 'create')
 	}
 
     print "<tr>".'<td valign="top">'.$langs->trans("Note").'</td><td>';
-    if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_USER)
-    {
-        require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
-        $doleditor=new DolEditor('note','','',240,'dolibarr_notes','',false);
-        $doleditor->Create();
-    }
-    else
-    {
-        print '<textarea class="flat" name="note" rows="'.ROWS_8.'" cols="90">';
-        print '</textarea>';
-    }
-    print "</textarea></td></tr>\n";
+    require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
+    $doleditor=new DolEditor('note','','',240,'dolibarr_notes','',false,true,$conf->global->FCKEDITOR_ENABLE_SOCIETE,ROWS_8,90);
+    $doleditor->Create();
+    print "</td></tr>\n";
     print "</table>\n";
 
     print '<center><br><input class="button" value="'.$langs->trans("CreateGroup").'" type="submit"></center>';
@@ -313,7 +309,7 @@ else
 			print "</td></tr>\n";
 
 			// Multicompany
-			if (! empty($conf->multicompany->enabled) && empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE) && $conf->entity == 1 && $user->admin && ! $user->entity)
+			if (! empty($conf->multicompany->enabled) && empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && ! $user->entity)
 			{
 				$mc = new ActionsMulticompany($db);
 				$mc->getInfo($object->entity);
@@ -349,7 +345,7 @@ else
 			print "<br>\n";
 
 
-            dol_htmloutput_errors($message);
+            dol_htmloutput_mesg($message);
 
             /*
              * Liste des utilisateurs dans le groupe
@@ -362,7 +358,7 @@ else
 
             if (! empty($object->members))
             {
-                if( !($conf->multicompany->enabled && $conf->global->MULTICOMPANY_TRANSVERSE_MODE))
+                if( !($conf->multicompany->enabled && $conf->multicompany->transverse_mode))
                 {
                     foreach($object->members as $useringroup)
                     {
@@ -384,7 +380,7 @@ else
                 // Multicompany
                 if (! empty($conf->multicompany->enabled))
                 {
-                    if ($conf->entity == 1 && $conf->global->MULTICOMPANY_TRANSVERSE_MODE)
+                    if ($conf->entity == 1 && $conf->multicompany->transverse_mode)
                     {
                         $mc = new ActionsMulticompany($db);
                         print '</td><td valign="top">'.$langs->trans("Entity").'</td>';
@@ -482,7 +478,7 @@ else
             // Multicompany
             if (! empty($conf->multicompany->enabled))
             {
-                if (empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE) && $conf->entity == 1 && $user->admin && ! $user->entity)
+                if (empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && ! $user->entity)
                 {
                     $mc = new ActionsMulticompany($db);
                     print "<tr>".'<td valign="top">'.$langs->trans("Entity").'</td>';
@@ -497,23 +493,15 @@ else
 
             print '<tr><td width="25%" valign="top">'.$langs->trans("Note").'</td>';
             print '<td class="valeur">';
-
-            if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_USER)
-            {
-                require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
-                $doleditor=new DolEditor('note',$object->note,'',240,'dolibarr_notes','',true);
-                $doleditor->Create();
-            }
-            else
-            {
-                print '<textarea class="flat" name="note" rows="'.ROWS_8.'" cols="90">';
-                print dol_htmlentitiesbr_decode($object->note);
-                print '</textarea>';
-            }
+            require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
+            $doleditor=new DolEditor('note',$object->note,'',240,'dolibarr_notes','',true,false,$conf->global->FCKEDITOR_ENABLE_SOCIETE,ROWS_8,90);
+            $doleditor->Create();
             print '</td>';
             print "</tr>\n";
-            print '<tr><td align="center" colspan="2"><input class="button" value="'.$langs->trans("Save").'" type="submit"></td></tr>';
             print "</table>\n";
+
+            print '<center><br><input class="button" value="'.$langs->trans("Save").'" type="submit"></center>';
+
             print '</form>';
 
             print '</div>';
@@ -522,7 +510,7 @@ else
     }
 }
 
-$db->close();
-
 llxFooter();
+
+if (is_object($db)) $db->close();
 ?>

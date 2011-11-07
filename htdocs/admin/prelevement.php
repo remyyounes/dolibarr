@@ -26,7 +26,7 @@
 
 require('../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/compta/prelevement/class/bon-prelevement.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/compta/bank/class/account.class.php");
 
 $langs->load("admin");
@@ -190,6 +190,7 @@ if ($conf->global->MAIN_MODULE_NOTIFICATION)
         $db->free($resql);
     }
 
+    // Get list of triggers for module withdraw
     $sql = "SELECT rowid, code, label";
     $sql.= " FROM ".MAIN_DB_PREFIX."c_action_trigger";
     $sql.= " WHERE elementtype = 'withdraw'";

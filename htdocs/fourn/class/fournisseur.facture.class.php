@@ -658,8 +658,6 @@ class FactureFournisseur extends Facture
         $resql = $this->db->query($sql);
         if ($resql)
         {
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface=new Interfaces($this->db);
@@ -709,8 +707,6 @@ class FactureFournisseur extends Facture
         $resql = $this->db->query($sql);
         if ($resql)
         {
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface=new Interfaces($this->db);
@@ -928,7 +924,7 @@ class FactureFournisseur extends Facture
     function addline($desc, $pu, $txtva, $txlocaltax1=0, $txlocaltax2=0, $qty, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits='', $price_base_type='HT', $type=0)
     {
         dol_syslog("FactureFourn::Addline $desc,$pu,$qty,$txtva,$fk_product,$remise_percent,$date_start,$date_end,$ventil,$info_bits,$price_base_type,$type", LOG_DEBUG);
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
         // Clean parameters
         if ($txtva == '') $txtva=0;
@@ -988,7 +984,7 @@ class FactureFournisseur extends Facture
      */
     function updateline($id, $label, $pu, $vatrate, $txlocaltax1=0, $txlocaltax2=0, $qty=1, $idproduct=0, $price_base_type='HT', $info_bits=0, $type=0)
     {
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
         $pu = price2num($pu);
         $qty  = price2num($qty);

@@ -25,9 +25,9 @@
 require('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/compta/tva/class/tva.class.php");
 require_once(DOL_DOCUMENT_ROOT."/compta/sociales/class/chargesociales.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/report.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/tax.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/date.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/report.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/tax.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 
 
 $langs->load("bills");
@@ -87,7 +87,7 @@ else
 }
 
 // Define modecompta ('CREANCES-DETTES' or 'RECETTES-DEPENSES')
-$modecompta = $conf->compta->mode;
+$modecompta = $conf->global->COMPTA_MODE;
 if ($_GET["modecompta"]) $modecompta=$_GET["modecompta"];
 
 
@@ -648,7 +648,9 @@ else
             }
         }
         $db->free($result);
-    } else {
+    }
+    else
+    {
         dol_print_error($db);
     }
     print "<tr $bc[$var]><td>&nbsp;</td>";
@@ -662,8 +664,8 @@ else
 if ($mysoc->tva_assuj != 'franchise')	// Assujeti
 {
     print '<tr class="liste_total">';
-    if ($modecompta == 'CREANCES-DETTES') print '<td colspan="3" align="right">'.price(price2num($subtotal_ht)).'</td>';
-    print '<td colspan="3" align="right">'.price(price2num($subtotal_ttc)).'</td>';
+    if ($modecompta == 'CREANCES-DETTES') print '<td colspan="3" align="right">'.price(price2num($subtotal_ht,'MT')).'</td>';
+    print '<td colspan="3" align="right">'.price(price2num($subtotal_ttc,'MT')).'</td>';
     print '</tr>';
 }
 
@@ -676,16 +678,15 @@ if ($mysoc->tva_assuj != 'franchise')	// Assujeti
     print '</tr>';
 
     print '<tr class="liste_total"><td align="left" colspan="2">'.$langs->trans("Profit").'</td>';
-    if ($modecompta == 'CREANCES-DETTES') print '<td class="liste_total" align="right">'.price(price2num($total_ht)).'</td>';
-    print '<td class="liste_total" align="right">'.price(price2num($total_ttc)).'</td>';
+    if ($modecompta == 'CREANCES-DETTES') print '<td class="liste_total" align="right">'.price(price2num($total_ht,'MT')).'</td>';
+    print '<td class="liste_total" align="right">'.price(price2num($total_ttc,'MT')).'</td>';
     print '</tr>';
 }
 
 print "</table>";
 print '<br>';
 
+llxFooter();
 
 $db->close();
-
-llxFooter();
 ?>

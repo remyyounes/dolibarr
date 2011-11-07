@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2006-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2011	   Juanjo Menent		<jmenent@2byte.es>
  *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,8 +22,8 @@
  */
 
 require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
 $what=$_REQUEST["what"];
@@ -168,7 +169,8 @@ if ($what == 'mysql')
         {
             $read = fgets($handlein);
             fwrite($handle,$read);
-            if (preg_match('/-- Dump completed/i',$read)) $ok=1;
+            if (preg_match('/'.preg_quote('-- Dump completed').'/i',$read)) $ok=1;
+            elseif (preg_match('/'.preg_quote('SET SQL_NOTES=@OLD_SQL_NOTES').'/i',$read)) $ok=1;
         }
         pclose($handlein);
 
@@ -206,7 +208,11 @@ if ($what == 'mysql')
             @dol_delete_file($outputerror,1);
             @rename($outputfile,$outputerror);
             // Si safe_mode on et command hors du parametre exec, on a un fichier out vide donc errormsg vide
-            if (! $errormsg) $errormsg=$langs->trans("ErrorFailedToRunExternalCommand");
+            if (! $errormsg) 
+            {
+            	$langs->load("errors");
+            	$errormsg=$langs->trans("ErrorFailedToRunExternalCommand");
+            }
         }
     }
     // Fin execution commande

@@ -25,7 +25,7 @@
  */
 
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 $action = isset($_GET["action"])?$_GET["action"]:$_POST["action"];
 
@@ -119,8 +119,8 @@ if ($socid > 0)
         print "<input type=\"hidden\" name=\"socid\" value=\"".$societe->id."\">";
 
         // Editeur wysiwyg
-        require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
-        $doleditor=new DolEditor('note',$societe->note,'',360,'dolibarr_notes','In',true,false,$conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE,20,70);
+        require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
+        $doleditor=new DolEditor('note',$societe->note,'',360,'dolibarr_notes','In',true,false,$conf->global->FCKEDITOR_ENABLE_SOCIETE,20,70);
         $doleditor->Create();
     }
     else
@@ -129,16 +129,16 @@ if ($socid > 0)
     }
     print "</td></tr>";
 
+    print "</table>";
+
     if ($action == 'edit')
     {
-        print '<tr><td colspan="2" align="center">';
+        print '<center><br>';
         print '<input type="submit" class="button" name="save" value="'.$langs->trans("Save").'">';
         print ' &nbsp; ';
         print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
-        print '</td></tr>';
+        print '</center>';
     }
-
-    print "</table>";
 
     print '</form>';
 }

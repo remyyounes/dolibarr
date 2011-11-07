@@ -1,8 +1,8 @@
 <?php
-/* Copyright (C) 2003      Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2004      Eric Seigne          <eric.seigne@ryxeo.com>
- * Copyright (C) 2005-2009 Regis Houssin        <regis@dolibarr.fr>
+/* Copyright (C) 2003		Rodolphe Quiedeville <rodolphe@quiedeville.org>
+ * Copyright (C) 2004-2011	Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004		Eric Seigne          <eric.seigne@ryxeo.com>
+ * Copyright (C) 2005-2011	Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ $langs->load("users");
 $langs->load("trips");
 
 // Security check
-$socid = $_GET["socid"]?$_GET["socid"]:'';
+$socid = GETPOST('socid');
 if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'deplacement','','');
 
@@ -64,6 +64,7 @@ llxHeader('',$langs->trans("ListOfFees"),$help_url);
 $totalnb=0;
 $sql = "SELECT count(d.rowid) as nb, sum(d.km) as km, d.type";
 $sql.= " FROM ".MAIN_DB_PREFIX."deplacement as d";
+$sql.= " WHERE d.entity = ".$conf->entity;
 $sql.= " GROUP BY d.type";
 $sql.= " ORDER BY d.type";
 
@@ -102,9 +103,9 @@ print '<td colspan="4">'.$langs->trans("Statistics").'</td>';
 print "</tr>\n";
 
 $listoftype=$tripandexpense_static->listOfTypes();
-foreach ($listoftype as $typefee)
+foreach ($listoftype as $code => $label)
 {
-    $dataseries[]=array('label'=>$typefee['label'],'values'=>array(0=>(isset($nb[$typefee['code']])?$nb[$typefee['code']]:0)));
+    $dataseries[]=array('label'=>$label,'values'=>array(0=>(isset($nb[$code])?$nb[$code]:0)));
 }
 
 if ($conf->use_javascript_ajax)

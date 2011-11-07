@@ -28,8 +28,8 @@
 
 require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
 require_once(DOL_DOCUMENT_ROOT."/adherents/class/cotisation.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/functions2.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/date.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 
 
 /**
@@ -162,7 +162,7 @@ class Adherent extends CommonObject
         $from=$conf->email_from;
         if ($conf->global->ADHERENT_MAIL_FROM) $from=$conf->global->ADHERENT_MAIL_FROM;
 
-        include_once(DOL_DOCUMENT_ROOT."/lib/CMailFile.class.php");
+        include_once(DOL_DOCUMENT_ROOT."/core/class/CMailFile.class.php");
         $mailfile = new CMailFile($subjecttosend, $this->email, $from, $texttosend, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml);
         if ($mailfile->sendfile())
         {
@@ -324,8 +324,6 @@ class Adherent extends CommonObject
                     }
                 }
 
-                $this->use_webcal=($conf->global->PHPWEBCALENDAR_MEMBERSTATUS=='always'?1:0);
-
                 if (! $notrigger)
                 {
                     // Appel des triggers
@@ -433,7 +431,7 @@ class Adherent extends CommonObject
         {
             $nbrowsaffected+=$this->db->affected_rows($resql);
 
-            // Actions on extra fields (by external module or standard code)
+            // Actions on extra fields (by external module)
             include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
             $hookmanager=new HookManager($this->db);
             $hookmanager->callHooks(array('memberdao'));
@@ -564,8 +562,6 @@ class Adherent extends CommonObject
 
                 if (! $error && ! $notrigger)
                 {
-                    $this->use_webcal=($conf->global->PHPWEBCALENDAR_MEMBERSTATUS=='always'?1:0);
-
                     // Appel des triggers
                     include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                     $interface=new Interfaces($this->db);
@@ -687,8 +683,6 @@ class Adherent extends CommonObject
                 {
                     if ($this->db->affected_rows($resql))
                     {
-                        $this->use_webcal=($conf->global->PHPWEBCALENDAR_MEMBERSTATUS=='always'?1:0);
-
                         // Appel des triggers
                         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                         $interface=new Interfaces($this->db);
@@ -1181,7 +1175,6 @@ class Adherent extends CommonObject
                 $this->last_subscription_amount=$montant;
                 $this->last_subscription_date_start=$date;
                 $this->last_subscription_date_end=$datefin;
-                $this->use_webcal=($conf->global->PHPWEBCALENDAR_MEMBERSTATUS=='always'?1:0);
 
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -1236,8 +1229,6 @@ class Adherent extends CommonObject
         {
             $this->statut=1;
 
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_MEMBERSTATUS=='always'?1:0);
-
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface=new Interfaces($this->db);
@@ -1283,8 +1274,6 @@ class Adherent extends CommonObject
         if ($result)
         {
             $this->statut=0;
-
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_MEMBERSTATUS=='always'?1:0);
 
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");

@@ -11,6 +11,8 @@
 
 UPDATE llx_c_paper_format SET active=1 WHERE active=0;
 
+ALTER TABLE llx_actioncomm ADD COLUMN ref_ext varchar(128) after id;
+
 ALTER TABLE llx_product_fournisseur_price ADD COLUMN fk_availability integer AFTER fk_product_fournisseur;
 
 ALTER TABLE llx_element_element MODIFY COLUMN sourcetype varchar(32) NOT NULL;
@@ -65,3 +67,34 @@ ALTER TABLE llx_product_fournisseur_price ADD CONSTRAINT fk_product_fournisseur_
 
 ALTER TABLE llx_product_fournisseur_price DROP FOREIGN KEY fk_product_fournisseur_price_fk_product_fournisseur;
 
+DROP TABLE IF EXISTS llx_pos_tmp;
+
+ALTER TABLE llx_deplacement ADD COLUMN fk_user_modif integer AFTER fk_user_author;
+
+CREATE TABLE IF NOT EXISTS llx_localtax
+(
+	rowid			integer		AUTO_INCREMENT PRIMARY KEY,
+	entity			integer			NOT NULL DEFAULT '1',
+	tms				timestamp,
+	datep			date			DEFAULT NULL,
+	datev			date			DEFAULT NULL,
+	amount			double			NOT NULL DEFAULT '0',
+	label			varchar(255)	DEFAULT NULL,
+	note			text,
+	fk_bank			integer			DEFAULT NULL,
+	fk_user_creat	integer			DEFAULT NULL,
+	fk_user_modif	integer			DEFAULT NULL
+	
+) ENGINE=InnoDB;
+
+ALTER TABLE llx_propal MODIFY ref_int varchar(255);
+ALTER TABLE llx_propal MODIFY ref_ext varchar(255);
+ALTER TABLE llx_propal MODIFY ref_client varchar(255);
+
+ALTER TABLE llx_commande MODIFY ref_int varchar(255);
+ALTER TABLE llx_commande MODIFY ref_ext varchar(255);
+ALTER TABLE llx_commande MODIFY ref_client varchar(255);
+
+ALTER TABLE llx_facture MODIFY ref_int varchar(255);
+ALTER TABLE llx_facture MODIFY ref_ext varchar(255);
+ALTER TABLE llx_facture MODIFY ref_client varchar(255);

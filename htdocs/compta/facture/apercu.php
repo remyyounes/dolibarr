@@ -3,6 +3,7 @@
  * Copyright (C) 2004      Eric Seigne          <eric.seigne@ryxeo.com>
  * Copyright (C) 2004-2007 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin        <regis@dolibarr.fr>
+ * Copyright (C) 2011	   Juanjo Menent        <jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +28,8 @@
 
 require("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
-require_once(DOL_DOCUMENT_ROOT.'/lib/invoice.lib.php');
-require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+require_once(DOL_DOCUMENT_ROOT.'/core/lib/invoice.lib.php');
+require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 if ($conf->projet->enabled) require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
 $langs->load("bills");
@@ -334,7 +335,7 @@ if ($id > 0 || ! empty($ref))
                 }
                 else
                 {
-                    $langs->load("other");
+                    $langs->load("errors");
                     print '<font class="error">'.$langs->trans("ErrorNoImagickReadimage").'</font>';
                 }
             }

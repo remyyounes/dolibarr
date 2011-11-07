@@ -1009,7 +1009,7 @@ class Product extends CommonObject
 	 */
 	function fetch($id='',$ref='',$ref_ext='')
 	{
-	    include_once(DOL_DOCUMENT_ROOT.'/lib/company.lib.php');
+	    include_once(DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php');
 
 		global $langs, $conf;
 
@@ -1897,28 +1897,6 @@ class Product extends CommonObject
 	}
 
 	/**
-	 *  Saisie une commande fournisseur
-	 *
-	 *	@param		user		Objet user de celui qui demande
-	 *	@return		int			<0 si ko, >0 si ok
-	 */
-	function fastappro($user)
-	{
-		include_once DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.class.php";
-
-		$list = $this->list_suppliers();
-		if (count($list) > 0)
-		{
-			dol_syslog("Product::fastappro");
-			$fournisseur = new Fournisseur($this->db);
-			$fournisseur->fetch($this->fourn_appro_open);
-
-			$fournisseur->ProductCommande($user, $this->id);
-		}
-		return 1;
-	}
-
-	/**
 	 *  Recopie les prix d'un produit/service sur un autre
 	 *
 	 *  @param    fromId      Id produit source
@@ -2459,7 +2437,7 @@ class Product extends CommonObject
 	 */
 	function add_photo($sdir, $file, $maxWidth = 160, $maxHeight = 120)
 	{
-		require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+		require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
 		$dir = $sdir .'/'. get_exdir($this->id,2) . $this->id ."/photos";
 
@@ -2491,7 +2469,7 @@ class Product extends CommonObject
 	 */
 	function add_thumb($file, $maxWidth = 160, $maxHeight = 120)
 	{
-		require_once(DOL_DOCUMENT_ROOT ."/lib/images.lib.php");
+		require_once(DOL_DOCUMENT_ROOT ."/core/lib/images.lib.php");
 
 		$file_osencoded=dol_osencode($file);
 		if (file_exists($file_osencoded))
@@ -2544,7 +2522,7 @@ class Product extends CommonObject
 	 */
 	function is_photo_available($sdir)
 	{
-		include_once(DOL_DOCUMENT_ROOT ."/lib/files.lib.php");
+		include_once(DOL_DOCUMENT_ROOT ."/core/lib/files.lib.php");
 
 		$pdir = get_exdir($this->id,2) . $this->id ."/photos/";
 		$dir = $sdir . '/'. $pdir;
@@ -2585,8 +2563,8 @@ class Product extends CommonObject
 	{
 		global $conf,$user,$langs;
 
-		include_once(DOL_DOCUMENT_ROOT ."/lib/files.lib.php");
-		include_once(DOL_DOCUMENT_ROOT ."/lib/images.lib.php");
+		include_once(DOL_DOCUMENT_ROOT ."/core/lib/files.lib.php");
+		include_once(DOL_DOCUMENT_ROOT ."/core/lib/images.lib.php");
 
 		$pdir = get_exdir($this->id,2) . $this->id ."/photos/";
 		$dir = $sdir . '/'. $pdir;
@@ -2745,7 +2723,7 @@ class Product extends CommonObject
 	 */
 	function liste_photos($dir,$nbmax=0)
 	{
-		include_once(DOL_DOCUMENT_ROOT.'/lib/files.lib.php');
+		include_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
 
 		$nbphoto=0;
 		$tabobj=array();
@@ -2797,7 +2775,7 @@ class Product extends CommonObject
 	 */
 	function delete_photo($file)
 	{
-        require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
         $dir = dirname($file).'/'; // Chemin du dossier contenant l'image d'origine
 		$dirthumb = $dir.'/thumbs/'; // Chemin du dossier contenant la vignette

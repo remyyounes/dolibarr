@@ -23,7 +23,7 @@
  */
 
 require('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/lib/report.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/report.lib.php");
 
 
 $year_start=isset($_GET["year_start"])?$_GET["year_start"]:$_POST["year_start"];
@@ -45,7 +45,7 @@ if (!$user->rights->compta->resultat->lire && !$user->rights->accounting->compta
 accessforbidden();
 
 // Define modecompta ('CREANCES-DETTES' or 'RECETTES-DEPENSES')
-$modecompta = $conf->compta->mode;
+$modecompta = $conf->global->COMPTA_MODE;
 if ($_GET["modecompta"]) $modecompta=$_GET["modecompta"];
 
 

@@ -41,7 +41,7 @@ require_once(DOL_DOCUMENT_ROOT."/adherents/class/adherent.class.php");
 require_once(DOL_DOCUMENT_ROOT."/adherents/class/adherent_type.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/extrafields.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 // Init vars
 $errmsg='';
@@ -67,7 +67,13 @@ if (empty($conf->global->MEMBER_ENABLE_PUBLIC))
 }
 
 
-// Function for page HTML header
+/**
+ * Show header for new member
+ *
+ * @param 	string		$title
+ * @param 	string		$head
+ * @return	void
+ */
 function llxHeaderVierge($title, $head="", $disablejs=0, $disablehead=0, $arrayofjs='', $arrayofcss='')
 {
     global $user, $conf, $langs, $mysoc;
@@ -97,10 +103,16 @@ function llxHeaderVierge($title, $head="", $disablejs=0, $disablehead=0, $arrayo
     print '<div style="margin-left: 50px; margin-right: 50px;">';
 }
 
-// Function for page HTML footer
+/**
+ * Show footer for new member
+ *
+ * @return	void
+ */
 function llxFooterVierge()
 {
     print '</div>';
+
+    printCommonFooter('public');
 
     print "</body>\n";
     print "</html>\n";
@@ -386,7 +398,7 @@ else
 }
 // Civility
 print '<tr><td>'.$langs->trans("Civility").'</td><td>';
-print $formcompany->select_civilite(GETPOST('civilite_id'),'civilite_id').'</td></tr>'."\n";
+print $formcompany->select_civility(GETPOST('civilite_id'),'civilite_id').'</td></tr>'."\n";
 // Lastname
 print '<tr><td>'.$langs->trans("Lastname").' <FONT COLOR="red">*</FONT></td><td><input type="text" name="nom" size="40" value="'.dol_escape_htmltag(GETPOST('nom')).'"></td></tr>'."\n";
 // Firstname

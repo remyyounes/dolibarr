@@ -83,7 +83,7 @@ DetailMenuIdParent= Id du menu parent (0 pour un menu du haut)
 DetailPosition= Numéro d'ordre déterminant la position du menu
 PersonalizedMenusNotSupported= Menus personnalisés non gérés
 AllMenus= Tous
-NotConfigured= Non configuré
+NotConfigured=Module non configuré
 Setup= Configuration
 Activation= Activation
 Active= Actif
@@ -808,7 +808,7 @@ ToActivateModule= Pour activer des modules, aller dans l'espace Configuration (A
 SessionTimeOut= Time out des sessions
 SessionExplanation= Ce nombre garanti que la session n'expire pas avant ce délai. Mais la gestion de session PHP ne garantie pas que la session expire après ce délai: Ce sera le cas si un système de nettoyage des caches sessions est en place.<br>Note: Sans mécanisme spécial, le mécanisme interne à PHP nettoie la session tous les <b>%s/%s</b> accès environ mais uniquement lors d'accès fait par d'autres sessions. 
 TriggersAvailable= Triggers disponibles
-TriggersDesc= Les triggers sont des fichiers qui, une fois déposés dans le répertoire <b>htdocs/includes/triggers</b>, modifient le comportement du workflow de Dolibarr. Ils réalisent des actions supplémentaires, déclenchées par les événements Dolibarr (création société, validation facture, clôture contrat...).
+TriggersDesc= Les triggers sont des fichiers qui, une fois déposés dans le répertoire <b>htdocs/core/triggers</b>, modifient le comportement du workflow de Dolibarr. Ils réalisent des actions supplémentaires, déclenchées par les événements Dolibarr (création société, validation facture, clôture contrat...).
 TriggerDisabledByName= Triggers de ce fichier désactivés par le suffix <b>-NORUN</b> dans le nom du fichier.
 TriggerDisabledAsModuleDisabled= Triggers de ce fichier désactivés car le module <b>%s</b> n'est pas actif.
 TriggerAlwaysActive= Triggers de ce fichier toujours actifs, quelque soient les modules Dolibarr activés.
@@ -864,6 +864,8 @@ DefineHereComplementaryAttributes=Definissez ici la liste des attributs supplém
 ExtraFields=Attributs suplémentaires
 SendingMailSetup=Configuration de l'envoi par mail
 SendmailOptionNotComplete=Attention, sur certains systèmes Linux, avec cette méthode d'envoi, pour pouvoir envoyer des mails en votre nom, la configuration d'exécution de sendmail doit contenir l'option <b>-ba</b> (paramètre <b>mail.force_extra_parameters</b> dans le fichier <b>php.ini</b>). Si certains de vos destinataires ne reçoivent pas de message, essayer de modifer ce paramètre PHP avec <b>mail.force_extra_parameters = -ba</b>.
+PathToDocuments= Chemin d'accès aux documents
+PathDirectory= Répertoire
 
 ##### Module password generation= undefined
 PasswordGenerationStandard= Renvoie un mot de passe généré selon algorithme interne Dolibarr: 8 caractères, chiffres et caractères en minuscules mélangés.
@@ -937,8 +939,6 @@ WatermarkOnDraftInvoices= Filigrane sur les brouillons de factures (aucun si vid
 PropalSetup= Configuration du module Propositions Commerciales
 CreateForm= Création formulaire
 NumberOfProductLines= Nombre de lignes produits
-PathToDocuments= Chemin d'accès aux documents
-PathDirectory= Répertoire
 ProposalsNumberingModules= Modèles de numérotation des propositions commerciales
 ProposalsPDFModules= Modèles de documents de propositions commerciales
 ClassifiedInvoiced= Classer facturée
@@ -1176,12 +1176,9 @@ FreeLegalTextOnDeliveryReceipts= Mention complémentaire sur les bons de récept
 ##### FCKeditor #####
 AdvancedEditor=Editeur avancé
 ActivateFCKeditor= Activer éditeur avancé pour :
-FCKeditorForUsers= Création/édition WYSIWIG de la description et note des utilisateurs
-FCKeditorForCompany= Création/édition WYSIWIG de la description et note des tiers
+FCKeditorForCompany= Création/édition WYSIWIG de la description et note des éléments (autre que produits/services)
 FCKeditorForProduct= Création/édition WYSIWIG de la description et note des produits/services
-FCKeditorForMembers= Création/édition WYSIWIG de la description et note des adhérents
 FCKeditorForProductDetails= Création/édition WYSIWIG des lignes détails produits (sur commandes, propales, factures, etc...). <font class="warning">Attention: L'utilisation pour ce cas est fortement déconseillée car peut poser des problèmes dans la gestion de caractères et mise en page des fichiers PDF générés.</font>
-FCKeditorForProductDetailsPerso= Création/édition WYSIWIG des lignes détails produits personnalisées (sur commandes, propales, factures, etc...)
 FCKeditorForMailing= Création/édition WYSIWIG des mailings
 ##### OSCommerce 1 #####
 OSCommerceErrorConnectOkButWrongDatabase= La connexion a réussi mais la base ne semble pas être une base OSCommerce (clé %s  non trouvée dans la table %s).

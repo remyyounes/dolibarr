@@ -742,11 +742,9 @@ class Facture extends CommonObject
         $sql.= ', f.fk_mode_reglement, f.fk_cond_reglement, f.fk_projet';
         $sql.= ', p.code as mode_reglement_code, p.libelle as mode_reglement_libelle';
         $sql.= ', c.code as cond_reglement_code, c.libelle as cond_reglement_libelle, c.libelle_facture as cond_reglement_libelle_doc';
-        $sql.= ', el.fk_source';
         $sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f';
         $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_payment_term as c ON f.fk_cond_reglement = c.rowid';
         $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_paiement as p ON f.fk_mode_reglement = p.id';
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element as el ON el.fk_target = f.rowid AND el.targettype = '".$this->element."'";
         $sql.= ' WHERE f.entity = '.$conf->entity;
         if ($rowid)   $sql.= " AND f.rowid=".$rowid;
         if ($ref)     $sql.= " AND f.facnumber='".$this->db->escape($ref)."'";
@@ -761,63 +759,45 @@ class Facture extends CommonObject
             {
                 $obj = $this->db->fetch_object($result);
 
-                $this->id                     = $obj->rowid;
-                $this->ref                    = $obj->facnumber;
-                $this->ref_client             = $obj->ref_client;
-                $this->ref_ext				  = $obj->ref_ext;
-                $this->ref_int				  = $obj->ref_int;
-                $this->type                   = $obj->type;
-                $this->date                   = $this->db->jdate($obj->df);
-                $this->date_creation          = $this->db->jdate($obj->datec);
-                $this->date_validation        = $this->db->jdate($obj->datev);
-                $this->datem                  = $this->db->jdate($obj->datem);
-                $this->amount                 = $obj->amount;
-                $this->remise_percent         = $obj->remise_percent;
-                $this->remise_absolue         = $obj->remise_absolue;
-                $this->remise                 = $obj->remise;
-                $this->total_ht               = $obj->total;
-                $this->total_tva              = $obj->tva;
-                $this->total_localtax1		  = $obj->localtax1;
-                $this->total_localtax2		  = $obj->localtax2;
-                $this->total_ttc              = $obj->total_ttc;
-                $this->paye                   = $obj->paye;
-                $this->close_code             = $obj->close_code;
-                $this->close_note             = $obj->close_note;
-                $this->socid                  = $obj->fk_soc;
-                $this->statut                 = $obj->fk_statut;
-                $this->date_lim_reglement     = $this->db->jdate($obj->dlr);
-                $this->mode_reglement_id      = $obj->fk_mode_reglement;
-                $this->mode_reglement_code    = $obj->mode_reglement_code;
-                $this->mode_reglement         = $obj->mode_reglement_libelle;
-                $this->cond_reglement_id      = $obj->fk_cond_reglement;
-                $this->cond_reglement_code    = $obj->cond_reglement_code;
-                $this->cond_reglement         = $obj->cond_reglement_libelle;
-                $this->cond_reglement_doc     = $obj->cond_reglement_libelle_doc;
-                $this->fk_project             = $obj->fk_projet;
-                $this->fk_facture_source      = $obj->fk_facture_source;
-                $this->note                   = $obj->note;
-                $this->note_public            = $obj->note_public;
-                $this->user_author            = $obj->fk_user_author;
-                $this->user_valid             = $obj->fk_user_valid;
-                $this->modelpdf               = $obj->model_pdf;
-
-                $this->commande_id            = $obj->fk_commande;
-
-                if ($this->commande_id)
-                {
-                    $sql = "SELECT ref";
-                    $sql.= " FROM ".MAIN_DB_PREFIX."commande";
-                    $sql.= " WHERE rowid = ".$this->commande_id;
-
-                    $resqlcomm = $this->db->query($sql);
-
-                    if ($resqlcomm)
-                    {
-                        $objc = $this->db->fetch_object($resqlcomm);
-                        $this->commande_ref = $objc->ref;
-                        $this->db->free($resqlcomm);
-                    }
-                }
+                $this->id					= $obj->rowid;
+                $this->ref					= $obj->facnumber;
+                $this->ref_client			= $obj->ref_client;
+                $this->ref_ext				= $obj->ref_ext;
+                $this->ref_int				= $obj->ref_int;
+                $this->type					= $obj->type;
+                $this->date					= $this->db->jdate($obj->df);
+                $this->date_creation		= $this->db->jdate($obj->datec);
+                $this->date_validation		= $this->db->jdate($obj->datev);
+                $this->datem				= $this->db->jdate($obj->datem);
+                $this->amount				= $obj->amount;
+                $this->remise_percent		= $obj->remise_percent;
+                $this->remise_absolue		= $obj->remise_absolue;
+                $this->remise				= $obj->remise;
+                $this->total_ht				= $obj->total;
+                $this->total_tva			= $obj->tva;
+                $this->total_localtax1		= $obj->localtax1;
+                $this->total_localtax2		= $obj->localtax2;
+                $this->total_ttc			= $obj->total_ttc;
+                $this->paye					= $obj->paye;
+                $this->close_code			= $obj->close_code;
+                $this->close_note			= $obj->close_note;
+                $this->socid				= $obj->fk_soc;
+                $this->statut				= $obj->fk_statut;
+                $this->date_lim_reglement	= $this->db->jdate($obj->dlr);
+                $this->mode_reglement_id	= $obj->fk_mode_reglement;
+                $this->mode_reglement_code	= $obj->mode_reglement_code;
+                $this->mode_reglement		= $obj->mode_reglement_libelle;
+                $this->cond_reglement_id	= $obj->fk_cond_reglement;
+                $this->cond_reglement_code	= $obj->cond_reglement_code;
+                $this->cond_reglement		= $obj->cond_reglement_libelle;
+                $this->cond_reglement_doc	= $obj->cond_reglement_libelle_doc;
+                $this->fk_project			= $obj->fk_projet;
+                $this->fk_facture_source	= $obj->fk_facture_source;
+                $this->note					= $obj->note;
+                $this->note_public			= $obj->note_public;
+                $this->user_author			= $obj->fk_user_author;
+                $this->user_valid			= $obj->fk_user_valid;
+                $this->modelpdf				= $obj->model_pdf;
 
                 if ($this->statut == 0)	$this->brouillon = 1;
 
@@ -1064,7 +1044,7 @@ class Facture extends CommonObject
     {
         global $langs;
 
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
         include_once(DOL_DOCUMENT_ROOT.'/core/class/discount.class.php');
 
         $this->db->begin();
@@ -1354,8 +1334,6 @@ class Facture extends CommonObject
             $resql = $this->db->query($sql);
             if ($resql)
             {
-                $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface=new Interfaces($this->db);
@@ -1410,8 +1388,6 @@ class Facture extends CommonObject
         $resql = $this->db->query($sql);
         if ($resql)
         {
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface=new Interfaces($this->db);
@@ -1472,8 +1448,6 @@ class Facture extends CommonObject
             $resql=$this->db->query($sql);
             if ($resql)
             {
-                $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface=new Interfaces($this->db);
@@ -1508,7 +1482,7 @@ class Facture extends CommonObject
     function validate($user, $force_number='')
     {
         global $conf,$langs;
-        require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
         $error=0;
 
@@ -1684,8 +1658,6 @@ class Facture extends CommonObject
                 $this->statut=1;
             }
 
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
             // Trigger calls
             if (! $error)
             {
@@ -1810,7 +1782,7 @@ class Facture extends CommonObject
     function addline($facid, $desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=0, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0)
     {
         dol_syslog("Facture::Addline facid=$facid,desc=$desc,pu_ht=$pu_ht,qty=$qty,txtva=$txtva, txlocaltax1=$txlocaltax1, txlocaltax2=$txlocaltax2, fk_product=$fk_product,remise_percent=$remise_percent,date_start=$date_start,date_end=$date_end,ventil=$ventil,info_bits=$info_bits,fk_remise_except=$fk_remise_except,price_base_type=$price_base_type,pu_ttc=$pu_ttc,type=$type", LOG_DEBUG);
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
         // Clean parameters
         if (empty($remise_percent)) $remise_percent=0;
@@ -1967,22 +1939,25 @@ class Facture extends CommonObject
      */
     function updateline($rowid, $desc, $pu, $qty, $remise_percent=0, $date_start, $date_end, $txtva, $txlocaltax1=0, $txlocaltax2=0,$price_base_type='HT', $info_bits=0, $type=0, $fk_parent_line=0, $skip_update_total=0)
     {
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
-        dol_syslog("Facture::UpdateLine $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type", LOG_DEBUG);
+        dol_syslog("Facture::UpdateLine $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $type, $fk_parent_line", LOG_DEBUG);
 
         if ($this->brouillon)
         {
             $this->db->begin();
 
             // Clean parameters
-            $remise_percent=price2num($remise_percent);
-            $qty=price2num($qty);
-            if (! $qty) $qty=0;
-            $pu = price2num($pu);
-            $txtva=price2num($txtva);
-            $txlocaltax1=price2num($txlocaltax1);
-            $txlocaltax2=price2num($txlocaltax2);
+            if (empty($qty)) $qty=0;
+            if (empty($fk_parent_line) || $fk_parent_line < 0) $fk_parent_line=0;
+            
+            $remise_percent	= price2num($remise_percent);
+            $qty			= price2num($qty);
+            $pu 			= price2num($pu);
+            $txtva			= price2num($txtva);
+            $txlocaltax1	= price2num($txlocaltax1);
+            $txlocaltax2	= price2num($txlocaltax2);
+            
             // Check parameters
             if ($type < 0) return -1;
 
@@ -2577,7 +2552,7 @@ class Facture extends CommonObject
         // Include file with class
         foreach ($conf->file->dol_document_root as $dirroot)
         {
-            $dir = $dirroot."/includes/modules/facture/";
+            $dir = $dirroot."/core/modules/facture/";
             // Load file with numbering class (if found)
             $mybool|=@include_once($dir.$file);
         }
@@ -2590,7 +2565,7 @@ class Facture extends CommonObject
             // Include file with class
             foreach ($conf->file->dol_document_root as $dirroot)
             {
-                $dir = $dirroot."/includes/modules/facture/";
+                $dir = $dirroot."/core/modules/facture/";
                 // Load file with numbering class (if found)
                 $mybool|=@include_once($dir.$file);
             }
@@ -3621,7 +3596,6 @@ class FactureLigne
         if ($this->date_end) { $sql.= ",date_end='".$this->db->idate($this->date_end)."'"; }
         else { $sql.=',date_end=null'; }
         $sql.= ",product_type=".$this->product_type;
-        $sql.= ",rang='".$this->rang."'";
         $sql.= ",info_bits='".$this->info_bits."'";
         if (empty($this->skip_update_total))
         {

@@ -28,7 +28,7 @@
  */
 
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php');
 require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
 require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
@@ -55,7 +55,7 @@ if ($action == 'updateMask')
 	$maskconstorder=$_POST['maskconstorder'];
 	$maskorder=$_POST['maskorder'];
 	if ($maskconstorder)  $res = dolibarr_set_const($db,$maskconstorder,$maskorder,'chaine',0,'',$conf->entity);
-	
+
 	if (! $res > 0) $error++;
 
  	if (! $error)
@@ -77,7 +77,7 @@ if ($action == 'specimen')  // For orders
     $commande->thirdparty=$specimenthirdparty;
 
 	// Charge le modele
-	$dir = "/includes/modules/supplier_order/pdf/";
+	$dir = "/core/modules/supplier_order/pdf/";
 	$file = "pdf_".$modele.".modules.php";
 	$file = dol_buildpath($dir.$file);
 	if (file_exists($file))
@@ -114,7 +114,7 @@ if ($action == 'specimenfacture')   // For invoices
     $facture->thirdparty=$specimenthirdparty;    // Define who should has build the invoice (so the supplier)
 
 	// Charge le modele
-	$dir = "/includes/modules/supplier_invoice/pdf/";
+	$dir = "/core/modules/supplier_invoice/pdf/";
 	$file = "pdf_".$modele.".modules.php";
 	$file = dol_buildpath($dir.$file);
     if (file_exists($file))
@@ -226,7 +226,7 @@ if ($action == 'set_SUPPLIER_INVOICE_FREE_TEXT')
 {
 	$free = GETPOST("SUPPLIER_INVOICE_FREE_TEXT");
 	$res = dolibarr_set_const($db, "SUPPLIER_INVOICE_FREE_TEXT",$free,'chaine',0,'',$conf->entity);
-	
+
 	if (! $res > 0) $error++;
 
  	if (! $error)
@@ -269,7 +269,7 @@ clearstatcache();
 
 foreach ($conf->file->dol_document_root as $dirroot)
 {
-	$dir = $dirroot . "/includes/modules/supplier_order/";
+	$dir = $dirroot . "/core/modules/supplier_order/";
 
 	if (is_dir($dir))
 	{
@@ -301,13 +301,10 @@ foreach ($conf->file->dol_document_root as $dirroot)
 
 						// Show example of numbering module
 						print '<td nowrap="nowrap">';
-						$tmp=$module->getExample();
-						if (preg_match('/^Error/',$tmp)) 
-						{
-							$langs->load("errors");
-							print $langs->trans($tmp);
-						}
-						else print $tmp;
+                        $tmp=$module->getExample();
+                        if (preg_match('/^Error/',$tmp)) { $langs->load("errors"); print '<div class="error">'.$langs->trans($tmp).'</div>'; }
+                        elseif ($tmp=='NotConfigured') print $langs->trans($tmp);
+                        else print $tmp;
 						print '</td>'."\n";
 
 						print '<td align="center">';
@@ -404,7 +401,7 @@ clearstatcache();
 
 foreach ($conf->file->dol_document_root as $dirroot)
 {
-	$dir = $dirroot . "/includes/modules/supplier_order/pdf/";
+	$dir = $dirroot . "/core/modules/supplier_order/pdf/";
 
 	if (is_dir($dir))
 	{
@@ -537,7 +534,7 @@ clearstatcache();
 
 foreach ($conf->file->dol_document_root as $dirroot)
 {
-	$dir = $dirroot . "/includes/modules/supplier_invoice/pdf/";
+	$dir = $dirroot . "/core/modules/supplier_invoice/pdf/";
 
 	if (is_dir($dir))
 	{

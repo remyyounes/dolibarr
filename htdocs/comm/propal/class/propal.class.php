@@ -209,7 +209,7 @@ class Propal extends CommonObject
 	{
 		global $langs;
 
-		include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+		include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 		include_once(DOL_DOCUMENT_ROOT.'/core/class/discount.class.php');
 
 		$this->db->begin();
@@ -306,7 +306,7 @@ class Propal extends CommonObject
 		global $conf;
 
 		dol_syslog("Propal::Addline propalid=$propalid, desc=$desc, pu_ht=$pu_ht, qty=$qty, txtva=$txtva, fk_product=$fk_product, remise_except=$remise_percent, price_base_type=$price_base_type, pu_ttc=$pu_ttc, info_bits=$info_bits, type=$type");
-		include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+		include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
 		// Clean parameters
 		if (empty($remise_percent)) $remise_percent=0;
@@ -453,7 +453,7 @@ class Propal extends CommonObject
 		global $conf,$user,$langs;
 
 		dol_syslog("Propal::UpdateLine $rowid, $pu, $qty, $remise_percent, $txtva, $desc, $price_base_type, $info_bits");
-		include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+		include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
 		// Clean parameters
 		$remise_percent=price2num($remise_percent);
@@ -495,14 +495,14 @@ class Propal extends CommonObject
 			$staticline=new PropaleLigne($this->db);
 			$staticline->fetch($rowid);
 			$this->line->oldline = $staticline;
-			
+
 			// Reorder if fk_parent_line change
 			if (! empty($fk_parent_line) && ! empty($staticline->fk_parent_line) && $fk_parent_line != $staticline->fk_parent_line)
 			{
 				$rangmax = $this->line_max($fk_parent_line);
 				$this->line->rang = $rangmax + 1;
 			}
-			
+
 			$this->line->rowid				= $rowid;
 			$this->line->desc				= $desc;
 			$this->line->qty				= $qty;
@@ -530,7 +530,7 @@ class Propal extends CommonObject
 			{
 				// Reorder if child line
 				if (! empty($fk_parent_line)) $this->line_order(true,'DESC');
-				
+
 				$this->update_price(1);
 
 				$this->fk_propal = $this->id;
@@ -885,7 +885,7 @@ class Propal extends CommonObject
 
 		$objsoc->fetch($object->socid);
 
-		if (empty($conf->global->PROPALE_ADDON) || ! is_readable(DOL_DOCUMENT_ROOT ."/includes/modules/propale/".$conf->global->PROPALE_ADDON.".php"))
+		if (empty($conf->global->PROPALE_ADDON) || ! is_readable(DOL_DOCUMENT_ROOT ."/core/modules/propale/".$conf->global->PROPALE_ADDON.".php"))
 		{
 			$this->error='ErrorSetupNotComplete';
 			return -1;
@@ -900,7 +900,7 @@ class Propal extends CommonObject
 		$object->ref_client		= '';
 
 		// Set ref
-		require_once(DOL_DOCUMENT_ROOT ."/includes/modules/propale/".$conf->global->PROPALE_ADDON.".php");
+		require_once(DOL_DOCUMENT_ROOT ."/core/modules/propale/".$conf->global->PROPALE_ADDON.".php");
 		$obj = $conf->global->PROPALE_ADDON;
 		$modPropale = new $obj;
 		$object->ref = $modPropale->getNextValue($objsoc,$object);
@@ -1139,9 +1139,10 @@ class Propal extends CommonObject
 	}
 
 	/**
-	 *      \brief      Passe au statut valider une propale
-	 *      \param      user        Objet utilisateur qui valide
-	 *      \return     int         <0 si ko, >=0 si ok
+	 *  Set status to validated
+	 *
+	 *  @param	User	$user       Object user that validate
+	 *  @return int         		<0 if KO, >=0 if OK
 	 */
 	function valid($user, $notrigger=0)
 	{
@@ -1157,10 +1158,9 @@ class Propal extends CommonObject
 			$sql.= " SET fk_statut = 1, date_valid='".$this->db->idate($now)."', fk_user_valid=".$user->id;
 			$sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
+			dol_syslog(get_class($this).'::valid sql='.$sql);
 			if ($this->db->query($sql))
 			{
-				$this->use_webcal=($conf->global->PHPWEBCALENDAR_PROPALSTATUS=='always'?1:0);
-
 				if (! $notrigger)
 				{
 					// Appel des triggers
@@ -1196,10 +1196,11 @@ class Propal extends CommonObject
 
 
 	/**
-	 *      \brief      Define proposal date
-	 *      \param      user        		Object user that modify
-	 *      \param      date				Date
-	 *      \return     int         		<0 if KO, >0 if OK
+	 *  Define proposal date
+	 *
+	 *  @param  User		$user      		Object user that modify
+	 *  @param  timestamp	$date			Date
+	 *  @return	int         				<0 if KO, >0 if OK
 	 */
 	function set_date($user, $date)
 	{
@@ -1207,6 +1208,8 @@ class Propal extends CommonObject
 		{
 			$sql = "UPDATE ".MAIN_DB_PREFIX."propal SET datep = ".$this->db->idate($date);
 			$sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
+
+			dol_syslog(get_class($this)."::set_date sql=".$sql);
 			if ($this->db->query($sql) )
 			{
 				$this->date = $date;
@@ -1215,8 +1218,8 @@ class Propal extends CommonObject
 			}
 			else
 			{
-				$this->error=$this->db->error();
-				dol_syslog("Propal::set_date Erreur SQL".$this->error, LOG_ERR);
+				$this->error=$this->db->lasterror();
+				dol_syslog(get_class($this)."::set_date ".$this->error, LOG_ERR);
 				return -1;
 			}
 		}
@@ -1497,8 +1500,6 @@ class Propal extends CommonObject
 					return -2;
 				}
 
-				$this->use_webcal=($conf->global->PHPWEBCALENDAR_PROPALSTATUS=='always'?1:0);
-
 				// Appel des triggers
 				include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
 				$interface=new Interfaces($this->db);
@@ -1508,8 +1509,6 @@ class Propal extends CommonObject
 			}
 			else
 			{
-				$this->use_webcal=($conf->global->PHPWEBCALENDAR_PROPALSTATUS=='always'?1:0);
-
 				// Appel des triggers
 				include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
 				$interface=new Interfaces($this->db);
@@ -1734,7 +1733,7 @@ class Propal extends CommonObject
 	function delete($user, $notrigger=0)
 	{
 		global $conf,$langs;
-        require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
 		$error=0;
 
@@ -1763,7 +1762,7 @@ class Propal extends CommonObject
 					$file = $conf->propale->dir_output . "/" . $propalref . "/" . $propalref . ".pdf";
 					if (file_exists($file))
 					{
-						propale_delete_preview($this->db, $this->id, $this->ref);
+						dol_delete_preview($this);
 
 						if (!dol_delete_file($file))
 						{
@@ -2265,17 +2264,18 @@ class Propal extends CommonObject
 
 
 	/**
-	 *      \brief      Renvoie la reference de propale suivante non utilisee en fonction du module
-	 *                  de numerotation actif defini dans PROPALE_ADDON
-	 *      \param	    soc  		            objet societe
-	 *      \return     string              reference libre pour la propale
+	 *  Renvoie la reference de propale suivante non utilisee en fonction du module
+	 *  de numerotation actif defini dans PROPALE_ADDON
+	 *
+	 *  @param	Societe		$soc  	Object thirdparty
+	 *  @return string      		Reference libre pour la propale
 	 */
 	function getNextNumRef($soc)
 	{
 		global $conf, $db, $langs;
 		$langs->load("propal");
 
-		$dir = DOL_DOCUMENT_ROOT . "/includes/modules/propale/";
+		$dir = DOL_DOCUMENT_ROOT . "/core/modules/propale/";
 
 		if (! empty($conf->global->PROPALE_ADDON))
 		{
@@ -2296,13 +2296,15 @@ class Propal extends CommonObject
 			}
 			else
 			{
-				dol_print_error($db,"Propale::getNextNumRef ".$obj->error);
+				$this->error=$obj->error;
+			    //dol_print_error($db,"Propale::getNextNumRef ".$obj->error);
 				return "";
 			}
 		}
 		else
 		{
-			print $langs->trans("Error")." ".$langs->trans("Error_PROPALE_ADDON_NotDefined");
+		    $langs->load("errors");
+			print $langs->trans("Error")." ".$langs->trans("ErrorModuleSetupNotComplete");
 			return "";
 		}
 	}

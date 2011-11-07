@@ -156,7 +156,7 @@ $dolibarr_main_db_collation='latin1_swedish_ci';
 # This parameter contains the way authentication is done.
 # If value "ldap" is used, you must also set parameters dolibarr_main_auth_ldap_*
 # Default value: dolibarr
-# Possible values: Any values found in files in htdocs/includes/login directory after
+# Possible values: Any values found in files in htdocs/core/login directory after
 # the "function_" string and before the ".php" string. You can also separate several
 # values using a ",". In this case, Dolibarr will check login/pass for each value in 
 # order defined into value. However, note that this can't work with all values.
@@ -278,5 +278,18 @@ $dolibarr_main_prod='0';
 # Value to overwrite some path to use font instead of embedded one
 #$dolibarr_font_DOL_DEFAULT_TTF="/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf";
 #$dolibarr_font_DOL_DEFAULT_TTF_BOLD="/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf";
+
+##############################
+# Extrernal module           #
+##############################
+
+# multicompany_transverse_mode
+# Pyramidal (0): The rights and groups are managed in each entity,
+# users belong to the entity for their rights.
+# Transversal (1): The groups can belong only to the master entity
+# and that the user belongs to a particular entity
+# Default value: 0 (pyramidal)
+# Examples:
+# $multicompany_transverse_mode='1';
 
 ?>

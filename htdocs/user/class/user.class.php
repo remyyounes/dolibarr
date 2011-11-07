@@ -81,8 +81,6 @@ class User extends CommonObject
 	var $photo;
 	var $lang;
 
-	var $userpref_limite_liste;
-
 	//! Liste des entrepots auquel a acces l'utilisateur
 	var $entrepots;
 
@@ -504,7 +502,7 @@ class User extends CommonObject
 		$sql.= " FROM ".MAIN_DB_PREFIX."user_rights as ur";
 		$sql.= ", ".MAIN_DB_PREFIX."rights_def as r";
 		$sql.= " WHERE r.id = ur.fk_id";
-		$sql.= " AND r.entity in (0,".(!empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE)?"1,":"").$conf->entity.")";
+		$sql.= " AND r.entity in (0,".(!empty($conf->multicompany->transverse_mode)?"1,":"").$conf->entity.")";
 		$sql.= " AND ur.fk_user= ".$this->id;
 		$sql.= " AND r.perms IS NOT NULL";
 		if ($moduletag) $sql.= " AND r.module = '".$this->db->escape($moduletag)."'";
@@ -1231,7 +1229,7 @@ class User extends CommonObject
 	function setPassword($user, $password='', $changelater=0, $notrigger=0, $nosyncmember=0)
 	{
 		global $conf, $langs;
-		require_once(DOL_DOCUMENT_ROOT ."/lib/security.lib.php");
+		require_once(DOL_DOCUMENT_ROOT ."/core/lib/security.lib.php");
 
 		$error=0;
 
@@ -1249,7 +1247,9 @@ class User extends CommonObject
 		// Mise a jour
 		if (! $changelater)
 		{
-			$sql = "UPDATE ".MAIN_DB_PREFIX."user";
+		    if (! is_object($this->oldcopy)) $this->oldcopy=dol_clone($this);
+
+		    $sql = "UPDATE ".MAIN_DB_PREFIX."user";
 			$sql.= " SET pass_crypted = '".$this->db->escape($password_crypted)."',";
 			$sql.= " pass_temp = null";
 			if (! empty($conf->global->DATABASE_PWD_ENCRYPTED))
@@ -1359,7 +1359,7 @@ class User extends CommonObject
 	{
 		global $conf,$langs;
 
-		require_once DOL_DOCUMENT_ROOT."/lib/CMailFile.class.php";
+		require_once DOL_DOCUMENT_ROOT."/core/class/CMailFile.class.php";
 
 		$subject = $langs->trans("SubjectNewPassword");
 		$msgishtml=0;

@@ -24,7 +24,7 @@
  */
 
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/includes/barcode/html.formbarcode.class.php");
 
 $langs->load("admin");
@@ -77,9 +77,9 @@ else if ($action == 'GENBARCODE_BARCODETYPE_THIRDPARTY')
 if($action && $action!='setcoder')
 {
 	if (! $res > 0) $error++;
-    
+
 	if (! $error)
-    {   
+    {
         $mesg = "<font class=\"ok\">".$langs->trans("SetupSaved")."</font>";
     }
     else
@@ -108,7 +108,7 @@ clearstatcache();
 
 foreach ($conf->file->dol_document_root as $dirroot)
 {
-	$dir = $dirroot . "/includes/modules/barcode/";
+	$dir = $dirroot . "/core/modules/barcode/";
 
 	$handle=@opendir($dir);
 	if (is_resource($handle))
@@ -193,7 +193,7 @@ if ($resql)
 			// Chargement de la classe de codage
 			foreach ($conf->file->dol_document_root as $dirroot)
 			{
-				$dir=$dirroot . "/includes/modules/barcode/";
+				$dir=$dirroot . "/core/modules/barcode/";
 				$result=@include_once($dir.$obj->coder.".modules.php");
 				//print $dir.$obj->coder.".modules.php - ".$result;
 				if ($result) break;
@@ -207,8 +207,7 @@ if ($resql)
 					if ($module->encodingIsSupported($obj->encoding))
 					{
 						// Build barcode on disk (not used, this is done to make debug easier)
-						$result=$module->writeBarCode($obj->example,$obj->encoding,'Y');
-
+					    $result=$module->writeBarCode($obj->example,$obj->encoding,'Y');
 						// Generate on the fly and output barcode with generator
 						$url=DOL_URL_ROOT.'/viewimage.php?modulepart=barcode&generator='.urlencode($obj->coder).'&code='.urlencode($obj->example).'&encoding='.urlencode($obj->encoding);
 						//print $url;

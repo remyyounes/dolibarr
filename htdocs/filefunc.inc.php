@@ -33,30 +33,29 @@ if (! defined('DOL_VERSION')) define('DOL_VERSION','3.2.0-alpha');	// Also defin
 if (! defined('EURO')) define('EURO',chr(128));
 
 // Definition des constantes syslog
-if (function_exists("define_syslog_variables"))
+if (! defined('LOG_DEBUG'))
 {
-	if (version_compare(PHP_VERSION, '5.3.0', '<'))
-	{
-		define_syslog_variables(); // Deprecated since php 5.3.0, syslog variables no longer need to be initialized
-	}
+    if (function_exists("define_syslog_variables"))
+    {
+    	define_syslog_variables(); // Deprecated since php 5.3.0, syslog variables no longer need to be initialized
+    }
+    else
+    {
+    	// Pour PHP sans syslog (comme sous Windows)
+    	define('LOG_EMERG',0);
+    	define('LOG_ALERT',1);
+    	define('LOG_CRIT',2);
+    	define('LOG_ERR',3);
+    	define('LOG_WARNING',4);
+    	define('LOG_NOTICE',5);
+    	define('LOG_INFO',6);
+    	define('LOG_DEBUG',7);
+    }
 }
-else
-{
-	// Pour PHP sans syslog (comme sous Windows)
-	define('LOG_EMERG',0);
-	define('LOG_ALERT',1);
-	define('LOG_CRIT',2);
-	define('LOG_ERR',3);
-	define('LOG_WARNING',4);
-	define('LOG_NOTICE',5);
-	define('LOG_INFO',6);
-	define('LOG_DEBUG',7);
-}
-
 
 // Forcage du parametrage PHP error_reporting (Dolibarr non utilisable en mode error E_ALL)
 error_reporting(E_ALL ^ E_NOTICE);
-//error_reporting(E_ALL);
+//error_reporting(E_ALL | E_STRICT);
 
 
 // Define vars
@@ -87,6 +86,7 @@ if (empty($dolibarr_main_db_cryptkey)) $dolibarr_main_db_cryptkey='';
 if (empty($dolibarr_main_limit_users)) $dolibarr_main_limit_users=0;
 if (empty($dolibarr_mailing_limit_sendbyweb)) $dolibarr_mailing_limit_sendbyweb=0;
 if (empty($force_charset_do_notuse)) $force_charset_do_notuse='UTF-8';
+if (empty($multicompany_transverse_mode)) $multicompany_transverse_mode=0;
 
 // Security: CSRF protection
 // This test check if referrer ($_SERVER['HTTP_REFERER']) is same web site than Dolibarr ($_SERVER['HTTP_HOST'])
@@ -205,15 +205,15 @@ if (! defined('DOL_DEFAULT_TTF_BOLD')) { define('DOL_DEFAULT_TTF_BOLD', (!isset(
 
 if (! defined('ADODB_DATE_VERSION'))    include_once(ADODB_PATH.'adodb-time.inc.php');
 
-if (! file_exists(DOL_DOCUMENT_ROOT ."/lib/functions.lib.php"))
+if (! file_exists(DOL_DOCUMENT_ROOT ."/core/lib/functions.lib.php"))
 {
 	print "Error: Dolibarr config file content seems to be not correctly defined.<br>\n";
 	print "Please run dolibarr setup by calling page <b>/install</b>.<br>\n";
 	exit;
 }
 
-include_once(DOL_DOCUMENT_ROOT ."/lib/functions.lib.php");	// Need 970ko memory (1.1 in 2.2)
-include_once(DOL_DOCUMENT_ROOT ."/lib/security.lib.php");	// Include by default
+include_once(DOL_DOCUMENT_ROOT ."/core/lib/functions.lib.php");	// Need 970ko memory (1.1 in 2.2)
+include_once(DOL_DOCUMENT_ROOT ."/core/lib/security.lib.php");	// Include by default
 
 // If password is encoded, we decode it
 if (preg_match('/crypted:/i',$dolibarr_main_db_pass) || ! empty($dolibarr_main_db_encrypted_pass))

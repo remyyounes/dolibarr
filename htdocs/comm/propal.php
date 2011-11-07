@@ -30,12 +30,12 @@
 
 require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php');
-require_once(DOL_DOCUMENT_ROOT."/includes/modules/propale/modules_propale.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
 require_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/propal.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/functions2.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/propal.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
 if ($conf->projet->enabled)   require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
 
 $langs->load('companies');
@@ -399,7 +399,7 @@ if (GETPOST('action') == 'setstatut' && $user->rights->propale->cloturer)
  */
 if ($_POST['addfile'])
 {
-	require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+	require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
 	// Set tmp user directory TODO Use a dedicated directory for temp mails files
 	$vardir=$conf->user->dir_output."/".$user->id;
@@ -416,7 +416,7 @@ if ($_POST['addfile'])
  */
 if (! empty($_POST['removedfile']))
 {
-	require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+	require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
 	// Set tmp user directory
 	$vardir=$conf->user->dir_output."/".$user->id;
@@ -501,7 +501,7 @@ if ($_POST['action'] == 'send' && ! $_POST['addfile'] && ! $_POST['removedfile']
 				$mimetype = $attachedfiles['mimes'];
 
 				// Envoi de la propal
-				require_once(DOL_DOCUMENT_ROOT.'/lib/CMailFile.class.php');
+				require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
 				$mailfile = new CMailFile($subject,$sendto,$from,$message,$filepath,$mimetype,$filename,$sendtocc,'',$deliveryreceipt);
 				if ($mailfile->error)
 				{
@@ -569,7 +569,7 @@ if ($_POST['action'] == 'send' && ! $_POST['addfile'] && ! $_POST['removedfile']
 		}
 		else
 		{
-			$langs->load("other");
+			$langs->load("errors");
 			$mesg='<div class="error">'.$langs->trans('ErrorCantReadFile',$file).'</div>';
 			dol_syslog('Failed to read file: '.$file);
 		}
@@ -1050,11 +1050,18 @@ if ($id > 0 || ! empty($ref))
 	 */
 	if ($action == 'validate')
 	{
+	    $error=0;
+
 		// on verifie si l'objet est en numerotation provisoire
 		$ref = substr($object->ref, 1, 4);
 		if ($ref == 'PROV')
 		{
 			$numref = $object->getNextNumRef($soc);
+			if (empty($numref))
+			{
+			    $error++;
+			    dol_htmloutput_errors($object->error);
+			}
 		}
 		else
 		{
@@ -1070,7 +1077,7 @@ if ($id > 0 || ! empty($ref))
 			$text.=$notify->confirmMessage('NOTIFY_VAL_PROPAL',$object->socid);
 		}
 
-		$formconfirm=$html->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateProp'), $text, 'confirm_validate','',0,1);
+		if (! $error) $formconfirm=$html->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateProp'), $text, 'confirm_validate','',0,1);
 	}
 
 	if (! $formconfirm)
@@ -1094,7 +1101,7 @@ if ($id > 0 || ! empty($ref))
 
 	// Ref client
 	print '<tr><td>';
-	print '<table class="nobordernopadding" width="100%"><tr><td nowrap>';
+	print '<table class="nobordernopadding" width="100%"><tr><td nowrap="nowrap">';
 	print $langs->trans('RefCustomer').'</td><td align="left">';
 	print '</td>';
 	if ($action != 'refclient' && $object->brouillon) print '<td align="right"><a href="'.$_SERVER['PHP_SELF'].'?action=refclient&amp;id='.$object->id.'">'.img_edit($langs->trans('Modify')).'</a></td>';
@@ -1817,7 +1824,7 @@ else
 		print '<td class="liste_titre" align="left">';
 		print '<input class="flat" type="text" size="16" name="search_societe" value="'.GETPOST('search_societe').'">';
 		print '</td>';
-		print '<td class="liste_titre" colspan="1" align="right">';
+		print '<td class="liste_titre" colspan="1" align="center">';
 		print $langs->trans('Month').': <input class="flat" type="text" size="1" maxlength="2" name="month" value="'.$month.'">';
 		print '&nbsp;'.$langs->trans('Year').': ';
 		$syear = $year;

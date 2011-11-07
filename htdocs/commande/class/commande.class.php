@@ -126,7 +126,7 @@ class Commande extends CommonObject
         global $db, $langs, $conf;
         $langs->load("order");
 
-        $dir = DOL_DOCUMENT_ROOT . "/includes/modules/commande";
+        $dir = DOL_DOCUMENT_ROOT . "/core/modules/commande";
 
         if (! empty($conf->global->COMMANDE_ADDON))
         {
@@ -174,7 +174,7 @@ class Commande extends CommonObject
     function valid($user)
     {
         global $conf,$langs;
-        require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
         $error=0;
 
@@ -418,8 +418,6 @@ class Commande extends CommonObject
         $resql = $this->db->query($sql);
         if ($resql)
         {
-            $this->use_webcal=($conf->global->PHPWEBCALENDAR_BILLSTATUS=='always'?1:0);
-
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface=new Interfaces($this->db);
@@ -975,7 +973,7 @@ class Commande extends CommonObject
     {
         dol_syslog("Commande::addline commandeid=$commandeid, desc=$desc, pu_ht=$pu_ht, qty=$qty, txtva=$txtva, fk_product=$fk_product, remise_percent=$remise_percent, info_bits=$info_bits, fk_remise_except=$fk_remise_except, price_base_type=$price_base_type, pu_ttc=$pu_ttc, date_start=$date_start, date_end=$date_end, type=$type", LOG_DEBUG);
 
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
         // Clean parameters
         if (empty($remise_percent)) $remise_percent=0;
@@ -1320,7 +1318,7 @@ class Commande extends CommonObject
     {
         global $langs;
 
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
         include_once(DOL_DOCUMENT_ROOT.'/core/class/discount.class.php');
 
         $this->db->begin();
@@ -2173,7 +2171,7 @@ class Commande extends CommonObject
         global $conf;
 
         dol_syslog("CustomerOrder::UpdateLine $rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type");
-        include_once(DOL_DOCUMENT_ROOT.'/lib/price.lib.php');
+        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 
         if ($this->brouillon)
         {
@@ -2290,7 +2288,7 @@ class Commande extends CommonObject
     function delete($user)
     {
         global $conf, $langs;
-        require_once(DOL_DOCUMENT_ROOT."/lib/files.lib.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
         $err = 0;
 
@@ -2342,7 +2340,7 @@ class Commande extends CommonObject
             $file = $conf->commande->dir_output . "/" . $comref . "/" . $comref . ".pdf";
             if (file_exists($file))	// We must delete all files before deleting directory
             {
-                dol_delete_preview($object);
+                dol_delete_preview($this);
 
                 if (!dol_delete_file($file))
                 {

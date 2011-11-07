@@ -23,9 +23,9 @@
  */
 
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/usergroups.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/functions2.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/usergroups.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formadmin.class.php");
 
@@ -37,24 +37,21 @@ $langs->load("companies");
 $langs->load("products");
 $langs->load("members");
 
-if (!$user->admin)
-  accessforbidden();
+if (! $user->admin) accessforbidden();
+
+$action = GETPOST('action');
 
 
 if (! defined("MAIN_MOTD")) define("MAIN_MOTD","");
 
 // List of supported permanent search area
-$searchform=array(	"MAIN_SEARCHFORM_SOCIETE","MAIN_SEARCHFORM_CONTACT",
-					"MAIN_SEARCHFORM_PRODUITSERVICE","MAIN_SEARCHFORM_ADHERENT");
-$searchformconst=array($conf->global->MAIN_SEARCHFORM_SOCIETE,$conf->global->MAIN_SEARCHFORM_CONTACT,
-					$conf->global->MAIN_SEARCHFORM_PRODUITSERVICE,$conf->global->MAIN_SEARCHFORM_ADHERENT);
-$searchformtitle=array($langs->trans("Companies"),$langs->trans("Contacts"),
-					$langs->trans("ProductsAndServices"),$langs->trans("Members"));
-$searchformmodule=array('Module1Name','Module1Name',
-					'Module50Name','Module310Name');
+$searchform=array("MAIN_SEARCHFORM_SOCIETE","MAIN_SEARCHFORM_CONTACT", "MAIN_SEARCHFORM_PRODUITSERVICE","MAIN_SEARCHFORM_ADHERENT");
+$searchformconst=array($conf->global->MAIN_SEARCHFORM_SOCIETE,$conf->global->MAIN_SEARCHFORM_CONTACT,$conf->global->MAIN_SEARCHFORM_PRODUITSERVICE,$conf->global->MAIN_SEARCHFORM_ADHERENT);
+$searchformtitle=array($langs->trans("Companies"),$langs->trans("Contacts"),$langs->trans("ProductsAndServices"),$langs->trans("Members"));
+$searchformmodule=array('Module1Name','Module1Name','Module50Name','Module310Name');
 
 
-if (isset($_POST["action"]) && $_POST["action"] == 'update')
+if ($action == 'update')
 {
 	dolibarr_set_const($db, "MAIN_LANG_DEFAULT",       $_POST["main_lang_default"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_MULTILANGS",         $_POST["main_multilangs"],'chaine',0,'',$conf->entity);
@@ -66,9 +63,6 @@ if (isset($_POST["action"]) && $_POST["action"] == 'update')
 	dolibarr_set_const($db, "MAIN_FIRSTNAME_NAME_POSITION",          $_POST["MAIN_FIRSTNAME_NAME_POSITION"],'chaine',0,'',$conf->entity);
 
 	dolibarr_set_const($db, "MAIN_THEME",              $_POST["main_theme"],'chaine',0,'',$conf->entity);
-	if (file_exists(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/init_ihm.php')){
-		include_once (DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/init_ihm.php');
-	}
 
 	dolibarr_set_const($db, "MAIN_SEARCHFORM_CONTACT", $_POST["MAIN_SEARCHFORM_CONTACT"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_SEARCHFORM_SOCIETE", $_POST["MAIN_SEARCHFORM_SOCIETE"],'chaine',0,'',$conf->entity);
@@ -105,7 +99,7 @@ print $langs->trans("DisplayDesc")."<br>\n";
 print "<br>\n";
 
 
-if (isset($_GET["action"]) && $_GET["action"] == 'edit')	// Edit
+if ($action == 'edit')	// Edit
 {
     print '<form method="post" action="'.$_SERVER["PHP_SELF"].'">';
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -234,7 +228,7 @@ if (isset($_GET["action"]) && $_GET["action"] == 'edit')	// Edit
 	$var=!$var;
     print '<tr '.$bc[$var].'><td width="35%">'.$langs->trans("MessageLogin").'</td><td colspan="2">';
 	// Editeur wysiwyg
-	require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
+	require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 	$doleditor=new DolEditor('main_home',$conf->global->MAIN_HOME,'',142,'dolibarr_notes','In',false,true,true,ROWS_4,90);
 	$doleditor->Create();
 	print '</td></tr>'."\n";
@@ -242,7 +236,7 @@ if (isset($_GET["action"]) && $_GET["action"] == 'edit')	// Edit
 	// Message of the day on home page
     $var=!$var;
     print '<tr '.$bc[$var].'><td width="35%">'.$langs->trans("MessageOfDay").'</td><td colspan="2">';
-	require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
+	require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 	$doleditor=new DolEditor('main_motd',$conf->global->MAIN_MOTD,'',142,'dolibarr_notes','In',false,true,true,ROWS_4,90);
 	$doleditor->Create();
 	print '</td></tr>'."\n";
