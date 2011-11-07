@@ -183,7 +183,7 @@ class modCustomerBlocking extends DolibarrModules
         $size = "";
         $nulloption = "";
         $defaultvalue = null;
-        $constraint = "llx_c_customerblocking";
+        $constraint = MAIN_DB_PREFIX."c_customerblocking";
         $customtype = null;
         $customdef = null;
         $customsql = null;
@@ -207,7 +207,7 @@ class modCustomerBlocking extends DolibarrModules
         $defaultvalue = 'No';
         $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
       
-        $fieldname ="logdate";
+        $fieldname ="logdate_auto";
         $constraint = null;
         $type ="date";
         $size = "";
@@ -215,8 +215,8 @@ class modCustomerBlocking extends DolibarrModules
         $defaultvalue = '';
         $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
       
-        $fieldname ="login_author";
-        $constraint = "llx_user";
+        $fieldname ="login_author_auto";
+        $constraint = MAIN_DB_PREFIX."user";
         $type ="other";
         $size = "";
         $nulloption = 0;
