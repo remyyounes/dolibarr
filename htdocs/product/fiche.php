@@ -1001,9 +1001,9 @@ else
             if ($object->isservice()) $nblignes++;
             else $nblignes+=4;
 
+            // Photo
             if ($isphoto)
             {
-                // Photo
                 print '<td valign="middle" align="center" width="25%" rowspan="'.$nblignes.'">';
                 print $object->show_photos($conf->product->dir_output,1,1,0,0,0,80);
                 print '</td>';
@@ -1012,13 +1012,13 @@ else
             print '</tr>';
 
             // Accountancy sell code
-            print '<tr><td>'.$form->editfieldkey("ProductAccountancySellCode",'productaccountancycodesell',$object->accountancy_code_sell,$object,$user->rights->produit->creer).'</td><td colspan="2">';
-            print $form->editfieldval("ProductAccountancySellCode",'productaccountancycodesell',$object->accountancy_code_sell,$object,$user->rights->produit->creer);
+            print '<tr><td>'.$form->editfieldkey("ProductAccountancySellCode",'productaccountancycodesell',$object->accountancy_code_sell,$object,$user->rights->produit->creer|$user->rights->service->creer).'</td><td colspan="2">';
+            print $form->editfieldval("ProductAccountancySellCode",'productaccountancycodesell',$object->accountancy_code_sell,$object,$user->rights->produit->creer|$user->rights->service->creer);
             print '</td></tr>';
 
             // Accountancy buy code
-            print '<tr><td>'.$form->editfieldkey("ProductAccountancyBuyCode",'productaccountancycodebuy',$object->accountancy_code_buy,$object,$user->rights->produit->creer).'</td><td colspan="2">';
-            print $form->editfieldval("ProductAccountancyBuyCode",'productaccountancycodebuy',$object->accountancy_code_buy,$object,$user->rights->produit->creer);
+            print '<tr><td>'.$form->editfieldkey("ProductAccountancyBuyCode",'productaccountancycodebuy',$object->accountancy_code_buy,$object,$user->rights->produit->creer|$user->rights->service->creer).'</td><td colspan="2">';
+            print $form->editfieldval("ProductAccountancyBuyCode",'productaccountancycodebuy',$object->accountancy_code_buy,$object,$user->rights->produit->creer|$user->rights->service->creer);
             print '</td></tr>';
 
             // Status (to sell)
