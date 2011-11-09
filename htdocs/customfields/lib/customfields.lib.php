@@ -84,9 +84,11 @@ function customfields_print_creation_form($currentmodule, $id = null, $customfie
         $fields = $customfields->fetchAllCustomFields(0,0,0,0); // fetching the customfields list (Without the _unit fields)
         $customfields->fetchAllCustomFields(); // fetching the customfields list (reload to retrieve _unit fields)
         if (isset($id)) $datas = $customfields->fetch($id); // fetching the record - the values of the customfields for this id (if it exists)
+        $var = 1;
+        print '<tr>';
         foreach ($fields as $field) {
             $name = $field->column_name;
-            print '<tr><td>'.$customfields->findLabel($name).'</td><td colspan="2">';
+            print '<td>'.$customfields->findLabel($name).'</td><td colspan="1">';
             $value = ''; // by default the value of this property is empty
             $name = $field->column_name; // the name of the customfield (which is the property of the record)
             $postvalue = GETPOST($customfields->varprefix.$name);
@@ -99,8 +101,13 @@ function customfields_print_creation_form($currentmodule, $id = null, $customfie
             $unit_key = $name."_unit";
             $unitvalue  = $datas->$unit_key;
             print $customfields->ShowInputField($field, $value, '', $unitvalue);
-            print '</td></tr>';
+            print '</td>';
+            if($var%2==0){
+                print '</tr><tr>';
+            }
+            $var++;
         }
+        print '</tr>';
     }
 }
 
@@ -129,6 +136,8 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
         $datas = $customfields->fetch($object->id); // fetching the record - the values of the customfields for this id (if it exists)
         $datas->id = $object->id; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
 
+        $var=1;
+        print '<tr>';
         foreach ($fields as $field) { // for each customfields, we will print/save the edits
 
             // == Default values from database record
@@ -162,14 +171,14 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
 
             // == Print the record
 
-            print '<tr><td>';
+            print '<td width="15%">';
             print $customfields->findLabel($name);
             // checking the user's rights for edition
             $rightok = customfields_check_right($currentmodule,$user,$rights);
             // print the edit button only if authorized
             if (!($action == 'editcustomfields' && GETPOST('field') == $name) && !(isset($objet->brouillon) and $object->brouillon == false) && $rightok) print '<span align="right"><a href="'.$_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&amp;action=editcustomfields&amp;field='.$field->column_name.'">'.img_edit("default",1).'</a></td>';
             print '</td>';
-            print '<td colspan="3">';
+            print '<td colspan="1">';
             $unit_key = $name."_unit";
             $unitvalue  = $datas->$unit_key;
             // print the editing form...
@@ -178,9 +187,14 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
             } else { // ... or print the field's value
                 print $customfields->printField($field, $value, '', '', $unitvalue);
             }
-            print '</td></tr>';
-        }
+            print '</td>';
+            if($var%2==0){
+                print '</tr><tr>';
+            }
+            $var++;
 
+        }
+        print '</tr>';
         //print '</table><br>';
     }
 }
@@ -199,26 +213,26 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
     // Init and main vars
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php'); // for images img_edit()
-    
+
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
-    
+
     if($action == 'remove_customfield_log'){
         $logid = GETPOST('logid');
         if(!empty($logid)){
             $customfields->delete_log($logid);
         }
     }
-    
+
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
-        
+
         // == Fetching customfields
         $fields = $customfields->fetchAllCustomFields(false, 0, true,0); // fetching the customfields list
         $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
         $fetch = $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
         $datas = $customfields->records;
-        
+
         //insert unique row into array if array is empty. Rerturn if there is nothing to insert
-        if(!is_array($datas)){ 
+        if(!is_array($datas)){
             if($fetch){
                 $datas=array($fetch);
             }else{
@@ -235,7 +249,6 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
             print "</td>";
         }
         print "</tr>";
-
         foreach ($datas as $data){
             print "<tr>";
             foreach ($fields as $field) { // for each customfields, we will print/save the edits
@@ -252,13 +265,12 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
                 print '</td>';
             }
             $rightok = customfields_check_right($currentmodule,$user,$rights);
-            
+
             if($rightok){
-                print '<td><a href="'. $_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&action=remove_customfield_log&logid='.$data->rowid.'">X</a></td>';
+                print '<td style="text-align:center;"><a href="'. $_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&action=remove_customfield_log&logid='.$data->rowid.'">'.img_delete().'</a></td>';
             }
             print "</tr>";
         }
-
         print '</table><br>';
     }
 }

@@ -27,41 +27,56 @@
  */
 
 require("../main.inc.php");
+require_once(DOL_DOCUMENT_ROOT."/core/class/canvas.class.php");
+require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
+require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/class/extrafields.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/product.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/functions.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/user/class/user.class.php");
 
-// Load traductions files required by by page
-$langs->load("companies");
-$action		= (GETPOST('action') ? GETPOST('action') : 'view');
-$confirm	= GETPOST('confirm');
-$socid		= GETPOST("socid");
-$customfields_table = "customerblocking";
+$langs->load("products");
+$langs->load("productunits@productunits");
+$langs->load("other");
+if ($conf->stock->enabled) $langs->load("stocks");
+if ($conf->facture->enabled) $langs->load("bills");
 
+$mesg=''; $error=0; $errors=array();
+
+$id=GETPOST('id');
+$ref=GETPOST('ref');
+$action=(GETPOST('action') ? GETPOST('action') : 'view');
+$confirm=GETPOST('confirm');
+$socid=GETPOST("socid");
 if ($user->societe_id) $socid=$user->societe_id;
+$currentmodule = "product";
+$customfields_table = "units";
 
-$object = new Societe($db);
+$object = new Product($db);
+$extrafields = new ExtraFields($db);
+
 foreach ($_POST as $key=>$value) { // Generic way to fill all the fields to the object (particularly useful for triggers and customfields)
     $object->$key = $value;
 }
 
 // Get object canvas (By default, this is not defined, so standard usage of dolibarr)
-$object->getCanvas($socid);
+$object->getCanvas($id,$ref);
 $canvas = $object->canvas?$object->canvas:GETPOST("canvas");
 if (! empty($canvas))
 {
     require_once(DOL_DOCUMENT_ROOT."/core/class/canvas.class.php");
-    $objcanvas = new Canvas($db, $action);
-    $objcanvas->getCanvas('thirdparty', 'card', $canvas);
+    $objcanvas = new Canvas($db,$action);
+    $objcanvas->getCanvas('product','card',$canvas);
 }
 
 // Security check
-$result = restrictedArea($user, 'societe', $socid, '', '', '', '', $objcanvas);
+$value = $ref?$ref:$id;
+$type = $ref?'ref':'rowid';
+$result=restrictedArea($user,'produit|service',$value,'product','','',$type, $objcanvas);
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-//include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
-//$hookmanager=new HookManager($db);
-//$hookmanager->callHooks(array('thirdpartyblocking'));
+include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
+$hookmanager=new HookManager($db);
+$hookmanager->callHooks(array('productcard'));
 
 /*******************************************************************
  * ACTIONS
@@ -69,12 +84,11 @@ $result = restrictedArea($user, 'societe', $socid, '', '', '', '', $objcanvas);
 
 if ($_POST["action"] == 'update' && ! $_POST["cancel"] )
 {
-    $object->fetch($socid);
+    $object->fetch($id);
     //update
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    $currentmodule = "societe";
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
-    $upd = $customfields->create($object, 0, 1);
+    $upd = $customfields->create($object);
      
     //display status message from update/create
     if ($upd > 0){
@@ -97,64 +111,45 @@ $form = new Form($db);
 
 llxHeader();
 
-if ($socid > 0)
+if ($id > 0)
 {
-    $object->fetch($socid);
+    $object->fetch($id);
 
-    /*
-     * Affichage onglets
-     */
-    if ($conf->notification->enabled) $langs->load("mails");
 
-    $head = societe_prepare_head($object);
-    dol_fiche_head($head, 'customerblocking', $langs->trans("ThirdParty"),0,'company');
+    $head=product_prepare_head($object, $user);
+    $titre=$langs->trans("CardProduct".$object->type);
+    $picto=($object->type==1?'service':'product');
+    dol_fiche_head($head, 'productunits', $titre, 0, $picto);
 
     if ($action == 'edit')
     {
-        print '<form action="customerblocking.php?socid='.$socid.'" method="post">';
+        print '<form action="productunits.php?id='.$id.'" method="post">';
         print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
         print '<input type="hidden" name="action" value="update">';
-        print '<input type="hidden" name="id" value="'.$socid.'">';
-
+        print '<input type="hidden" name="id" value="'.$id.'">';
     }
 
-    print '<table class="border" width="100%">';
-    print '<tr><td width="20%">'.$langs->trans('Name').'</td>';
-    print '<td colspan="3">';
-    print $form->showrefnav($object,'socid','',1,'rowid','nom');
-    print '</td></tr>';
+    // En mode visu
+    print '<table class="border" width="100%"><tr>';
 
-    print '<tr><td>'.$langs->trans('Prefix').'</td><td colspan="3">'.$object->prefix_comm.'</td></tr>';
+    // Ref
+    print '<td width="15%">'.$langs->trans("Ref").'</td><td colspan="3">';
+    print $form->showrefnav($object,'ref','',1,'ref');
+    print '</td>';
 
-    if ($object->client)
-    {
-        print '<tr><td>';
-        print $langs->trans('CustomerCode').'</td><td colspan="3">';
-        print $object->code_client;
-        if ($object->check_codeclient() <> 0) print ' <font class="error">('.$langs->trans("WrongCustomerCode").')</font>';
-        print '</td></tr>';
-    }
+    print '</tr>';
 
-    if ($object->fournisseur)
-    {
-        print '<tr><td>';
-        print $langs->trans('SupplierCode').'</td><td colspan="3">';
-        print $object->code_fournisseur;
-        if ($object->check_codefournisseur() <> 0) print ' <font class="error">('.$langs->trans("WrongSupplierCode").')</font>';
-        print '</td></tr>';
-    }
+    // Label
+    print '<tr><td>'.$langs->trans("Label").'</td><td colspan="3">'.$object->libelle.'</td>';
 
-    // Insert hooks
-    //    $parameters=array();
-    //    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $currentmodule = "societe";
+
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $rights = 1;
-    $idvar = "socid";
+    $idvar = "id";
     if($action == "edit"){
-        customfields_print_creation_form($currentmodule, $socid,$customfields_table);
+        customfields_print_creation_form($currentmodule, $id,$customfields_table);
     }else{
         customfields_print_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
     }
@@ -165,7 +160,6 @@ if ($socid > 0)
     }
 
     print "</table>";
-
     if ($action == 'edit'){
         print "</form>";
     }
@@ -187,7 +181,7 @@ if (empty($action) || $action != 'edit')
 
     if ($user->rights->societe->creer)
     {
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/customerblocking/customerblocking.php?action=edit&amp;socid='.$socid.'">'.$langs->trans("Editer les parametres de blocage").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/productunits/productunits.php?action=edit&amp;id='.$id.'">'.$langs->trans("Editer les Unites Produit").'</a>';
     }
 
     print "\n</div>\n";
@@ -196,24 +190,6 @@ if (empty($action) || $action != 'edit')
 if ($mesg)
 {
     print $mesg;
-}
-
-/* ************************************************************************** */
-/*                                                                            */
-/* Log			                                                              */
-/*                                                                            */
-/* ************************************************************************** */
-if ($socid > 0)
-{
-    print "</br>";
-    include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $currentmodule = "societe";
-    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
-    $rights = 1;
-    $idvar = "socid";
-    customfields_print_log($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
-    
 }
 
 // End of page
