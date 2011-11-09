@@ -207,7 +207,7 @@ class modCustomerBlocking extends DolibarrModules
         $defaultvalue = 'No';
         $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
       
-        $fieldname ="poids";
+        $fieldname ="test_weight";
         $type ="";
         $type = "int";
         $size = "";
@@ -215,7 +215,23 @@ class modCustomerBlocking extends DolibarrModules
         $defaultvalue = '0';
         $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
       
-        $fieldname ="poids_wunit";
+        $fieldname ="test_weight_unit";
+        $type ="";
+        $type = "int";
+        $size = "";
+        $nulloption = 0;
+        $defaultvalue = '0';
+        $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
+      
+        $fieldname ="prodvolume";
+        $type ="";
+        $type = "int";
+        $size = "";
+        $nulloption = 0;
+        $defaultvalue = '0';
+        $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
+      
+        $fieldname ="prodvolume_unit";
         $type ="";
         $type = "int";
         $size = "";

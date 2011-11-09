@@ -599,7 +599,7 @@ class CustomFields // extends CommonObject
 	*    @param    noautofields			defines if the auto fields (field ending in 'auto') must be hidden in the fetched results
 	*    @return     int/null/obj/obj[]         <0 if KO, null if no field found, one field object if only one field could be found, an array of fields objects if OK
 	*/
-       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $noautofields=false) {
+       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $noautofields=false, $hideunitfields=true) {
 
 		// Forging the SQL statement
 		$whereaddendum = '';
@@ -617,6 +617,10 @@ class CustomFields // extends CommonObject
 		
 		if(!$noautofields){
 		    $whereaddendum .= " AND c.column_name NOT LIKE '%auto'";
+		}
+		
+		if(!$hideunitfields){
+		    $whereaddendum .= " AND c.column_name NOT LIKE '%_unit'";
 		}
 
 		$sql = "SELECT c.ordinal_position,c.column_name,c.column_default,c.is_nullable,c.data_type,c.column_type,c.character_maximum_length,
@@ -686,8 +690,8 @@ class CustomFields // extends CommonObject
 	*    @param     noautofields			defines if the auto fields (field ending in 'auto') must be hidden in the fetched results
 	*    @return     int/null/obj[]         <0 if KO, null if no field found, an array of fields objects if OK (even if only one field is found)
 	*/
-       function fetchAllCustomFields($nohide=false, $notrigger=0, $noautofields=false) {
-		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $noautofields);
+       function fetchAllCustomFields($nohide=false, $notrigger=0, $noautofields=false,$hideunitfields=true) {
+		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $noautofields,$hideunitfields);
 		if ( !(is_array($fields) or is_null($fields) or is_integer($fields)) ) { $fields = array($fields); } // we convert to an array if we've got only one field, functions relying on this one expect to get an array if OK
 		return $fields;
        }
@@ -1193,24 +1197,27 @@ class CustomFields // extends CommonObject
 				$out.='<option value="false" '.($currentvalue=='false'?'selected="selected"':'').'>'.$langs->trans("False").'</option>';
 				$out.='</select>';
             // Module Defined Fields
-            //TODO: datatype hook here for now but should be earlier
-            //weight unit
-			} elseif (preg_match('/^(.*)((poids).*)$/i', $key, $matches)) {
-			    $key_unit = $key."_wunit";
-                if(!empty($this->fields->$key_unit)){
-                    $out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
-                    require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
-                    include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
-        			$formproduct = new FormProduct($this->db);
-        			if(empty($this->$key_unit)){
-        				$this->$key_unit = -3;
-        			}
-        			$out .= $formproduct->load_measuring_units($this->varprefix.$key_unit, "weight", $this->$key_unit);
-			   }
+            //TODO: datatype hook should be here for now but should be earlier
 			// Any other field
 			} else { // for all other types (custom types and other undefined), we use a basic text input
 				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			}
+			if (preg_match('/^(.*)((weight|size|volume|surface).*)$/i', $key, $matches)) {
+			    $unit_type = $matches[2];
+			    $key_unit = $key."_unit";
+                if(!empty($this->fields->$key_unit)){
+                    require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+                    include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
+        			$formproduct = new FormProduct($this->db);
+        			if(empty($this->$key_unit)){
+        			    if($unit_type == 'weight'){
+        			        $this->$key_unit = -3;
+        			    }
+        				$this->$key_unit = 0;
+        			}
+        			$out .= $formproduct->load_measuring_units($this->varprefix.$key_unit, $unit_type, $this->$key_unit);
+                }
+            }
 		}
 
 	    return $out;

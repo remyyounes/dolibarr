@@ -81,7 +81,8 @@ function customfields_print_creation_form($currentmodule, $id = null, $customfie
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
 
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
-        $fields = $customfields->fetchAllCustomFields();
+        $fields = $customfields->fetchAllCustomFields(0,0,0,0); // fetching the customfields list (Without the _unit fields)
+        $customfields->fetchAllCustomFields(); // fetching the customfields list (reload to retrieve _unit fields)
         if (isset($id)) $datas = $customfields->fetch($id); // fetching the record - the values of the customfields for this id (if it exists)
         foreach ($fields as $field) {
             $name = $field->column_name;
@@ -121,7 +122,8 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
         //print '<table class="border" width="100%">';
 
         // == Fetching customfields
-        $fields = $customfields->fetchAllCustomFields(); // fetching the customfields list
+        $fields = $customfields->fetchAllCustomFields(0,0,0,0); // fetching the customfields list
+        $customfields->fetchAllCustomFields(); // fetching the customfields list
         $datas = $customfields->fetch($object->id); // fetching the record - the values of the customfields for this id (if it exists)
         $datas->id = $object->id; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
 
@@ -204,14 +206,22 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
     }
     
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
-        print '<table class="border" width="100%">';
-
+        
         // == Fetching customfields
         $fields = $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
         $fetch = $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
         $datas = $customfields->records;
-        if(!is_array($datas) && $fetch){ $datas=array($fetch);}
+        
+        //insert unique row into array if array is empty. Rerturn if there is nothing to insert
+        if(!is_array($datas)){ 
+            if($fetch){
+                $datas=array($fetch);
+            }else{
+                return;
+            }
+        }
 
+        print '<table class="border" width="100%">';
         print "<tr class='liste_titre'>";
         foreach ($fields as $field) {
             $name = $field->column_name;
