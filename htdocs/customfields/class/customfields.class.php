@@ -357,6 +357,32 @@ class CustomFields // extends CommonObject
 
 		return $rtncode;
 	}
+	
+/**
+	 *      Delete a record in the database (meaning an instance of the custom fields, the values if you prefer)
+	 *      @param      rowid				rowid of the record to find 
+	 *      @param      notrigger	    0=launch triggers after, 1=disable triggers
+	 *      @return     int         	<0 if KO, >0 if OK
+	 */
+	function delete_log($rowid, $notrigger=0)
+	{
+		// Forging the SQL statement
+		$sql = "DELETE FROM ".$this->moduletable." WHERE rowid=".$rowid;
+
+		// Trigger or not?
+		if ($notrigger) {
+			$trigger = null;
+		} else {
+			$trigger = strtoupper($this->module).'_CUSTOMFIELD_DELETE_LOG';
+		}
+
+		// Executing the SQL statement
+		$rtncode = $this->executeSQL($sql, 'deleteLog_CustomFields',$trigger);
+
+		$this->id = $id;
+
+		return $rtncode;
+	}
 
 
 	/**

@@ -215,9 +215,6 @@ if ($socid > 0)
     
 }
 
-print '<script src="../makinalib/js/numbers.js"></script>';
-print '<script src="../makinalib/js/keyboardNav.js"></script>';
-
 // End of page
 $db->close();
 llxFooter('$Date: 2009/03/09 11:28:12 $ - $Revision: 1.8 $');

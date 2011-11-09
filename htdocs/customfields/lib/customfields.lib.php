@@ -50,12 +50,12 @@ function customfields_admin_prepare_head($modulesarray, $currentmodule = null)
     /*
      // detecting the index of the current tab
      // almost identical to the code above , but this one is less logical since we here detect the index in the $modulesarray when we need the index in $h array. Concretely, we get the same result in the end, but this is not the right method here.
-    if (in_array($currentmodule, $modulesarray)) {
-        $currentmoduleindex = array_search($currentmodule, $modulesarray);
-    } else {
-        $currentmoduleindex = 0;
-    }
-    */
+     if (in_array($currentmodule, $modulesarray)) {
+     $currentmoduleindex = array_search($currentmodule, $modulesarray);
+     } else {
+     $currentmoduleindex = 0;
+     }
+     */
 
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
@@ -161,18 +161,7 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
             print '<tr><td>';
             print $customfields->findLabel($name);
             // checking the user's rights for edition
-            if (!empty($rights)) { // if a list of rights have been specified, we check the rights for creation/edition for each one
-                $rightok = true;
-                if (!is_array($rights)) { $rights = array($rights); }
-                foreach ($rights as $moduleright) {
-                    if (isset($user->rights->$moduleright->creer) and !$user->rights->$moduleright->creer) {
-                        $rightok = false;
-                        break;
-                    }
-                }
-            } else { // else by default we just check for the current module (in the hope the current module has the same name in the rights array... eg: product module is produit in the rights property...)
-                $rightok = $user->rights->$currentmodule->creer;
-            }
+            $rightok = customfields_check_right($currentmodule,$user,$rights);
             // print the edit button only if authorized
             if (!($action == 'editcustomfields' && GETPOST('field') == $name) && !(isset($objet->brouillon) and $object->brouillon == false) && $rightok) print '<span align="right"><a href="'.$_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&amp;action=editcustomfields&amp;field='.$field->column_name.'">'.img_edit("default",1).'</a></td>';
             print '</td>';
@@ -204,8 +193,17 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
     // Init and main vars
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php'); // for images img_edit()
+    
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
-
+    
+    //TODO: action needs to take place before the VIEW
+    if($action == 'remove_customfield_log'){
+        $logid = GETPOST('logid');
+        if(!empty($logid)){
+            $customfields->delete_log($logid);
+        }
+    }
+    
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
         print '<table class="border" width="100%">';
 
@@ -213,7 +211,7 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
         $fields = $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
         $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
         $datas = $customfields->records;
-        
+
         print "<tr class='liste_titre'>";
         foreach ($fields as $field) {
             $name = $field->column_name;
@@ -222,7 +220,7 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
             print "</td>";
         }
         print "</tr>";
-        
+
         foreach ($datas as $data){
             print "<tr>";
             foreach ($fields as $field) { // for each customfields, we will print/save the edits
@@ -236,11 +234,32 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
                 print $customfields->printField($field, $value);
                 print '</td>';
             }
+            $rightok = customfields_check_right($currentmodule,$user,$rights);
+            
+            if($rightok){
+                print '<td><a href="'. $_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&action=remove_customfield_log&logid='.$data->rowid.'">X</a></td>';
+            }
             print "</tr>";
         }
 
         print '</table><br>';
     }
+}
+
+function customfields_check_right($currentmodule, $user, $rights){
+    if (!empty($rights)) { // if a list of rights have been specified, we check the rights for creation/edition for each one
+        $rightok = true;
+        if (!is_array($rights)) { $rights = array($rights); }
+        foreach ($rights as $moduleright) {
+            if (isset($user->rights->$moduleright->creer) and !$user->rights->$moduleright->creer) {
+                $rightok = false;
+                break;
+            }
+        }
+    } else { // else by default we just check for the current module (in the hope the current module has the same name in the rights array... eg: product module is produit in the rights property...)
+        $rightok = $user->rights->$currentmodule->creer;
+    }
+    return $rightok;
 }
 
 ?>
