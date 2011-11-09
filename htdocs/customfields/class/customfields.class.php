@@ -1101,7 +1101,7 @@ class CustomFields // extends CommonObject
 	 *     @param      moreparam       To add more parametes on html input tag
 	 *     @return       out			An html string ready to be printed
 	 */
-	function showInputField($field,$currentvalue=null,$moreparam='') {
+	function showInputField($field,$currentvalue=null,$moreparam='',$unitvalue=0) {
 		global $conf, $langs;
 
 		$key=$field->column_name;
@@ -1209,13 +1209,14 @@ class CustomFields // extends CommonObject
                     require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
                     include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
         			$formproduct = new FormProduct($this->db);
-        			if(empty($this->$key_unit)){
+        			if(empty($unitvalue)){
+        			    $unitvalue = 0;
         			    if($unit_type == 'weight'){
-        			        $this->$key_unit = -3;
+        			        $unitvalue = -3;
         			    }
-        				$this->$key_unit = 0;
+        				
         			}
-        			$out .= $formproduct->load_measuring_units($this->varprefix.$key_unit, $unit_type, $this->$key_unit);
+        			$out .= $formproduct->load_measuring_units($this->varprefix.$key_unit, $unit_type, $unitvalue);
                 }
             }
 		}
@@ -1231,7 +1232,7 @@ class CustomFields // extends CommonObject
 	 *	@param	$moreparam	More parameters
 	 *	@return	$out			An html form ready to be printed
 	 */
-	function showInputForm($field, $currentvalue=null, $page=null, $moreparam='') {
+	function showInputForm($field, $currentvalue=null, $page=null, $moreparam='', $unitvalue=0) {
 		global $langs;
 
 		$out = '';
@@ -1243,7 +1244,7 @@ class CustomFields // extends CommonObject
 		$out.='<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 		$out.='<table class="nobordernopadding" cellpadding="0" cellspacing="0">';
 		$out.='<tr><td>';
-		$out.=$this->showInputField($field, $currentvalue, $moreparam);
+		$out.=$this->showInputField($field, $currentvalue, $moreparam, $unitvalue);
 		$out.='</td>';
 		$out.='<td align="left"><input type="submit" class="button" value="'.$langs->trans("Modify").'"></td>';
 		$out.='</tr></table></form>';
@@ -1259,12 +1260,12 @@ class CustomFields // extends CommonObject
 	 *     @param      	moreparam       To add more parametes on html input tags
 	 *     @return	html				An html string ready to be printed (without input fields, just html text)
 	 */
-	function printField($field, $value, $outputlangs='', $moreparam='') {
+	function printField($field, $value, $outputlangs='', $moreparam='', $unitvalue) {
 		if ($outputlangs == '') {
 			global $langs;
 			$outputlangs = $langs;
 		}
-
+        $langs->load("other");
 		$out = '';
 		if (isset($value)) {
 			// Constrained field
@@ -1281,6 +1282,7 @@ class CustomFields // extends CommonObject
 					$record = $this->fetchAny($column, $table, $where);
 
 					// Outputting the value
+					//user reference -> user formatting
 					if($field->referenced_table_name == MAIN_DB_PREFIX.'user'){
 					    $userstatic = new User($this->db);
 					    $userstatic->fetch($value);
@@ -1308,6 +1310,22 @@ class CustomFields // extends CommonObject
 				// every other type
 				} else {
 					$out.=$value;
+				}
+				if (preg_match('/^(.*)((weight|size|volume|surface).*)$/i', $field->column_name, $matches)) {
+			        $unit_type = $matches[2];
+			        $key_unit = $field->column_name."_unit";
+                    if(!empty($this->fields->$key_unit)){
+                        require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+                        include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
+            			$formproduct = new FormProduct($this->db);
+            			if(empty($unitvalue)){
+            			    $unitvalue = 0;
+            			    if($unit_type == 'weight'){
+            			        $unitvalue = -3;
+            			    }
+            			}
+            			$out .= ' '.measuring_units_string($unitvalue,$unit_type);
+                    }
 				}
 			}
 		}

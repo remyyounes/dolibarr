@@ -96,7 +96,9 @@ function customfields_print_creation_form($currentmodule, $id = null, $customfie
                 // Default values from database record
                 $value = $datas->$name; // if the property exists (the record is not empty), then we fill in this value
             }
-            print $customfields->ShowInputField($field, $value);
+            $unit_key = $name."_unit";
+            $unitvalue  = $datas->$unit_key;
+            print $customfields->ShowInputField($field, $value, '', $unitvalue);
             print '</td></tr>';
         }
     }
@@ -115,7 +117,7 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
 
     // Init and main vars
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    include_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php'); // for images img_edit()
+    include_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php'); // for images img_edit()
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
 
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
@@ -168,11 +170,13 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
             if (!($action == 'editcustomfields' && GETPOST('field') == $name) && !(isset($objet->brouillon) and $object->brouillon == false) && $rightok) print '<span align="right"><a href="'.$_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&amp;action=editcustomfields&amp;field='.$field->column_name.'">'.img_edit("default",1).'</a></td>';
             print '</td>';
             print '<td colspan="3">';
+            $unit_key = $name."_unit";
+            $unitvalue  = $datas->$unit_key;
             // print the editing form...
             if ($action == 'editcustomfields' && GETPOST('field') == $name) {
-                print $customfields->showInputForm($field, $value, $_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id);
+                print $customfields->showInputForm($field, $value, $_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id, $unitvalue);
             } else { // ... or print the field's value
-                print $customfields->printField($field, $value);
+                print $customfields->printField($field, $value, '', '', $unitvalue);
             }
             print '</td></tr>';
         }
@@ -208,7 +212,8 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
         
         // == Fetching customfields
-        $fields = $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
+        $fields = $customfields->fetchAllCustomFields(false, 0, true,0); // fetching the customfields list
+        $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
         $fetch = $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
         $datas = $customfields->records;
         
@@ -238,10 +243,12 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
                 // == Default values from database record
                 $name = $field->column_name; // the name of the customfield (which is the property of the record)
                 $value = ''; // by default the value of this property is empty
+                $unit_key = $name."_unit";
+                $unitvalue  = $data->$unit_key;
                 if (isset($data->$name)) { $value = $data->$name; } // if the property exists (the record is not empty), then we fill in this value
                 // == Print the record
                 print '<td>';
-                print $customfields->printField($field, $value);
+                print $customfields->printField($field, $value, '', '', $unitvalue);
                 print '</td>';
             }
             $rightok = customfields_check_right($currentmodule,$user,$rights);
