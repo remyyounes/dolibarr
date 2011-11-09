@@ -1192,7 +1192,21 @@ class CustomFields // extends CommonObject
 				$out.='<option value="1" '.($currentvalue=='1'?'selected="selected"':'').'>'.$langs->trans("True").'</option>';
 				$out.='<option value="false" '.($currentvalue=='false'?'selected="selected"':'').'>'.$langs->trans("False").'</option>';
 				$out.='</select>';
-
+            // Module Defined Fields
+            //TODO: datatype hook here for now but should be earlier
+            //weight unit
+			} elseif (preg_match('/^(.*)((poids).*)$/i', $key, $matches)) {
+			    $key_unit = $key."_wunit";
+                if(!empty($this->fields->$key_unit)){
+                    $out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
+                    require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+                    include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
+        			$formproduct = new FormProduct($this->db);
+        			if(empty($this->$key_unit)){
+        				$this->$key_unit = -3;
+        			}
+        			$out .= $formproduct->load_measuring_units($this->varprefix.$key_unit, "weight", $this->$key_unit);
+			   }
 			// Any other field
 			} else { // for all other types (custom types and other undefined), we use a basic text input
 				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';

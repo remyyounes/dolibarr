@@ -207,6 +207,23 @@ class modCustomerBlocking extends DolibarrModules
         $defaultvalue = 'No';
         $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
       
+        $fieldname ="poids";
+        $type ="";
+        $type = "int";
+        $size = "";
+        $nulloption = 0;
+        $defaultvalue = '0';
+        $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
+      
+        $fieldname ="poids_wunit";
+        $type ="";
+        $type = "int";
+        $size = "";
+        $nulloption = 0;
+        $defaultvalue = '0';
+        $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
+      
+        
         $fieldname ="logdate_auto";
         $constraint = null;
         $type ="date";

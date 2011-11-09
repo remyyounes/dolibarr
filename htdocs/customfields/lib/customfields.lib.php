@@ -192,11 +192,10 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
 
     // Init and main vars
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    include_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php'); // for images img_edit()
+    include_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php'); // for images img_edit()
     
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     
-    //TODO: action needs to take place before the VIEW
     if($action == 'remove_customfield_log'){
         $logid = GETPOST('logid');
         if(!empty($logid)){
@@ -209,6 +208,7 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
 
         // == Fetching customfields
         $fields = $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
+        //TODO: $fetch in data array if datas is empty)
         $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
         $datas = $customfields->records;
 
