@@ -208,9 +208,9 @@ function customfields_print_log($currentmodule, $object, $action, $user, $idvar 
 
         // == Fetching customfields
         $fields = $customfields->fetchAllCustomFields(false, 0, true); // fetching the customfields list
-        //TODO: $fetch in data array if datas is empty)
-        $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
+        $fetch = $customfields->fetch($object->id, 0, 1); // fetching the records ($log=1)
         $datas = $customfields->records;
+        if(!is_array($datas) && $fetch){ $datas=array($fetch);}
 
         print "<tr class='liste_titre'>";
         foreach ($fields as $field) {
