@@ -599,7 +599,7 @@ class CustomFields // extends CommonObject
 	*    @param    noautofields			defines if the auto fields (field ending in 'auto') must be hidden in the fetched results
 	*    @return     int/null/obj/obj[]         <0 if KO, null if no field found, one field object if only one field could be found, an array of fields objects if OK
 	*/
-       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $noautofields=false, $hideunitfields=true) {
+       function fetchCustomField($id=null, $nohide=false, $notrigger=0, $noautofields=false) {
 
 		// Forging the SQL statement
 		$whereaddendum = '';
@@ -619,10 +619,6 @@ class CustomFields // extends CommonObject
 		    $whereaddendum .= " AND c.column_name NOT LIKE '%auto'";
 		}
 		
-		if(!$hideunitfields){
-		    $whereaddendum .= " AND c.column_name NOT LIKE '%_unit'";
-		}
-
 		$sql = "SELECT c.ordinal_position,c.column_name,c.column_default,c.is_nullable,c.data_type,c.column_type,c.character_maximum_length,
 		k.referenced_table_name, k.referenced_column_name, k.constraint_name,
                 s.index_name
@@ -690,8 +686,8 @@ class CustomFields // extends CommonObject
 	*    @param     noautofields			defines if the auto fields (field ending in 'auto') must be hidden in the fetched results
 	*    @return     int/null/obj[]         <0 if KO, null if no field found, an array of fields objects if OK (even if only one field is found)
 	*/
-       function fetchAllCustomFields($nohide=false, $notrigger=0, $noautofields=false,$hideunitfields=true) {
-		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $noautofields,$hideunitfields);
+       function fetchAllCustomFields($nohide=false, $notrigger=0, $noautofields=false) {
+		$fields = $this->fetchCustomField(null, $nohide, $notrigger, $noautofields);
 		if ( !(is_array($fields) or is_null($fields) or is_integer($fields)) ) { $fields = array($fields); } // we convert to an array if we've got only one field, functions relying on this one expect to get an array if OK
 		return $fields;
        }
@@ -1101,7 +1097,7 @@ class CustomFields // extends CommonObject
 	 *     @param      moreparam       To add more parametes on html input tag
 	 *     @return       out			An html string ready to be printed
 	 */
-	function showInputField($field,$currentvalue=null,$moreparam='',$unitvalue=0) {
+	function showInputField($field,$currentvalue=null,$moreparam='') {
 		global $conf, $langs;
 
 		$key=$field->column_name;
@@ -1199,26 +1195,22 @@ class CustomFields // extends CommonObject
             // Module Defined Fields
             //TODO: datatype hook should be here for now but should be earlier
 			// Any other field
-			} else { // for all other types (custom types and other undefined), we use a basic text input
+			} 
+			elseif (preg_match('/^(.*)(weight|size|volume|surface)_unit.*$/i', $key, $matches)) {
+			    $unit_type = $matches[2];
+                require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+                include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
+    			$formproduct = new FormProduct($this->db);
+    			if(empty($value)){
+    			    $value = 0;
+    			    if($unit_type == 'weight'){
+    			        $value = -3;
+    			    }
+    			}
+    			$out .= $formproduct->load_measuring_units($this->varprefix.$key, $unit_type, $value);
+            }else { // for all other types (custom types and other undefined), we use a basic text input
 				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			}
-			if (preg_match('/^(.*)((weight|size|volume|surface).*)$/i', $key, $matches)) {
-			    $unit_type = $matches[2];
-			    $key_unit = $key."_unit";
-                if(!empty($this->fields->$key_unit)){
-                    require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
-                    include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
-        			$formproduct = new FormProduct($this->db);
-        			if(empty($unitvalue)){
-        			    $unitvalue = 0;
-        			    if($unit_type == 'weight'){
-        			        $unitvalue = -3;
-        			    }
-        				
-        			}
-        			$out .= $formproduct->load_measuring_units($this->varprefix.$key_unit, $unit_type, $unitvalue);
-                }
-            }
 		}
 
 	    return $out;
@@ -1232,7 +1224,7 @@ class CustomFields // extends CommonObject
 	 *	@param	$moreparam	More parameters
 	 *	@return	$out			An html form ready to be printed
 	 */
-	function showInputForm($field, $currentvalue=null, $page=null, $moreparam='', $unitvalue=0) {
+	function showInputForm($field, $currentvalue=null, $page=null, $moreparam='') {
 		global $langs;
 
 		$out = '';
@@ -1244,7 +1236,7 @@ class CustomFields // extends CommonObject
 		$out.='<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 		$out.='<table class="nobordernopadding" cellpadding="0" cellspacing="0">';
 		$out.='<tr><td>';
-		$out.=$this->showInputField($field, $currentvalue, $moreparam, $unitvalue);
+		$out.=$this->showInputField($field, $currentvalue, $moreparam);
 		$out.='</td>';
 		$out.='<td align="left"><input type="submit" class="button" value="'.$langs->trans("Modify").'"></td>';
 		$out.='</tr></table></form>';
@@ -1260,7 +1252,7 @@ class CustomFields // extends CommonObject
 	 *     @param      	moreparam       To add more parametes on html input tags
 	 *     @return	html				An html string ready to be printed (without input fields, just html text)
 	 */
-	function printField($field, $value, $outputlangs='', $moreparam='', $unitvalue) {
+	function printField($field, $value, $outputlangs='', $moreparam='') {
 		if ($outputlangs == '') {
 			global $langs;
 			$outputlangs = $langs;
@@ -1308,24 +1300,20 @@ class CustomFields // extends CommonObject
 						$out.=$outputlangs->trans('False');
 					}
 				// every other type
-				} else {
-					$out.=$value;
-				}
-				if (preg_match('/^(.*)((weight|size|volume|surface).*)$/i', $field->column_name, $matches)) {
+				} elseif (preg_match('/^(.*)(weight|size|volume|surface)_unit.*$/i', $field->column_name, $matches)) {
 			        $unit_type = $matches[2];
-			        $key_unit = $field->column_name."_unit";
-                    if(!empty($this->fields->$key_unit)){
-                        require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
-                        include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
-            			$formproduct = new FormProduct($this->db);
-            			if(empty($unitvalue)){
-            			    $unitvalue = 0;
-            			    if($unit_type == 'weight'){
-            			        $unitvalue = -3;
-            			    }
-            			}
-            			$out .= ' '.measuring_units_string($unitvalue,$unit_type);
-                    }
+                    require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+                    include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
+        			$formproduct = new FormProduct($this->db);
+        			if(empty($value)){
+        			    $value = 0;
+        			    if($unit_type == 'weight'){
+        			        $value = -3;
+        			    }
+        			}
+        			$out .= ' '.measuring_units_string($value,$unit_type);
+				}else {
+					$out.=$value;
 				}
 			}
 		}

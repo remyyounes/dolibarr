@@ -133,7 +133,7 @@ if ($id > 0)
     print '<table class="border" width="100%"><tr>';
 
     // Ref
-    print '<td width="15%">'.$langs->trans("Ref").'</td><td colspan="3">';
+    print '<td>'.$langs->trans("Ref").'</td><td colspan="3">';
     print $form->showrefnav($object,'ref','',1,'ref');
     print '</td>';
 
@@ -148,11 +148,18 @@ if ($id > 0)
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $rights = 1;
     $idvar = "id";
+    /*
     if($action == "edit"){
         customfields_print_creation_form($currentmodule, $id,$customfields_table);
     }else{
         customfields_print_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
     }
+    */
+    $fields_data = customfields_load_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
+    printCustomForm($fields_data);
+    
+    
+    
     if ($action == 'edit')
     {
         print '<tr><td colspan="4" align="center"><input type="submit" class="button" value="'.$langs->trans("Save").'">';
@@ -195,6 +202,32 @@ if ($mesg)
 // End of page
 $db->close();
 llxFooter();
+
+function printCustomForm($fields_data){
+    print '<tr>';
+    print '<td width="15%">'.$fields_data['libelle_fk_marque']['label'].'</td>'.'<td width="35%">'.$fields_data['libelle_fk_marque']['data'].'</td>';
+    print '<td width="15%">'.$fields_data['libelle_fk_fabricant']['label'].'</td>'.'<td width="35%">'.$fields_data['libelle_fk_fabricant']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['libelle_unca']['label'].'</td>'.'<td>'.$fields_data['libelle_unca']['data'].'</td>';
+    print '<td>'.$fields_data['libelle_uncv']['label'].'</td>'.'<td>'.$fields_data['libelle_uncv']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['weight']['label'].'</td>'.'<td>'.$fields_data['weight']['data'].$fields_data['weight_unit']['data'].'</td>';
+    print '<td>'.$fields_data['publiable']['label'].'</td>'.'<td>'.$fields_data['publiable']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['volume']['label'].'</td>'.'<td>'.$fields_data['volume']['data'].$fields_data['volume_unit']['data'].'</td>';
+    print '<td>'.$fields_data['reprise']['label'].'</td>'.'<td>'.$fields_data['reprise']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['cfa']['label'].'</td>'.'<td>'.$fields_data['cfa']['data'].'</td>';
+    print '<td>'.$fields_data['cvs']['label'].'</td>'.'<td>'.$fields_data['cvs']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['libelle_fk_marque']['label'].'</td>'.'<td>'.$fields_data['libelle_fk_marque']['data'].'</td>';
+    print '<td>'.$fields_data['delailivraison']['label'].'</td>'.'<td>'.$fields_data['delailivraison']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['libelle_fk_fabricant']['label'].'</td>'.'<td>'.$fields_data['libelle_fk_fabricant']['data'].'</td>';
+    print '<td>'.$fields_data['delaifabrication']['label'].'</td>'.'<td>'.$fields_data['delaifabrication']['data'].'</td>';
+    print'</tr>';
+
+}
 
 
 ?>

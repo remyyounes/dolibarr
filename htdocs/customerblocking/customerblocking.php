@@ -119,7 +119,7 @@ if ($socid > 0)
     }
 
     print '<table class="border" width="100%">';
-    print '<tr><td width="20%">'.$langs->trans('Name').'</td>';
+    print '<tr><td>'.$langs->trans('Name').'</td>';
     print '<td colspan="3">';
     print $form->showrefnav($object,'socid','',1,'rowid','nom');
     print '</td></tr>';

@@ -100,7 +100,7 @@ function customfields_print_creation_form($currentmodule, $id = null, $customfie
             }
             $unit_key = $name."_unit";
             $unitvalue  = $datas->$unit_key;
-            print $customfields->ShowInputField($field, $value, '', $unitvalue);
+            print $customfields->ShowInputField($field, $value);
             print '</td>';
             if($var%2==0){
                 print '</tr><tr>';
@@ -197,6 +197,85 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
         print '</tr>';
         //print '</table><br>';
     }
+}
+
+
+/**
+ *      Load the customfields for template use
+ *      @param      currentmodule      the current module we are in (facture, propal, etc.)
+ *      @param      idvar                       the name of the POST or GET variable containing the id of the object
+ *      @param      object                     the object containing the required informations (if we are in facture's module, it will be the facture object, if we are in propal it will be the propal object etc..)
+ *      @param      customfields_table        	Replace the '_customfields' postfix
+ *      @return     void        returns nothing because this is a procedure : it just does what we want
+ */
+function customfields_load_main_form($currentmodule, $object, $action, $user, $idvar = 'id', $rights = null, $customfields_table = '') {
+    global $db, $langs, $conf;
+
+    // Init and main vars
+    include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
+    include_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php'); // for images img_edit()
+    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
+    $fields_data = array();
+    
+    if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
+
+        // == Fetching customfields
+        $fields = $customfields->fetchAllCustomFields(); // fetching the customfields list
+        $datas = $customfields->fetch($object->id); // fetching the record - the values of the customfields for this id (if it exists)
+        $datas->id = $object->id; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
+
+        foreach ($fields as $field) { // for each customfields, we will print/save the edits
+
+            // == Default values from database record
+            $name = $field->column_name; // the name of the customfield (which is the property of the record)
+            $value = ''; // by default the value of this property is empty
+            if (isset($datas->$name)) { $value = $datas->$name; } // if the property exists (the record is not empty), then we fill in this value
+
+            // == Save the edits
+            // TODO: also get units
+            /*
+            if ($action=='set_'.$customfields->varprefix.$name and isset($_POST[$customfields->varprefix.$name])) { // if we edited the value
+            
+                // Forging the new record
+                $newrecord->$name = $_POST[$customfields->varprefix.$name]; // we create a new record object with the field and the id
+                $newrecord->id = $object->id;
+
+                // Insert/update the record into the database by trigger
+                //$customfields->update($newrecord); // update or create the record in the database (will check automatically) - this does the same as the trigger below, but the trigger is more consistent with the rest (we need to use triggers for creation)
+                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                $interface=new Interfaces($db);
+                $newrecord->currentmodule = $currentmodule; // very important to pass the module as a property of the object
+                $newrecord->customfields_table = $customfields_table;// very important to pass the subtable (table postfix) as a property of the object
+                $result=$interface->run_triggers('CUSTOMFIELDS_MODIFY',$newrecord,$user,$langs,$conf);
+
+                // Updating the loaded record object
+                // deprecated, see below
+                // $datas->$name = $_POST[$customfields->varprefix.$name]; // we update the loaded record to the new value so that it gets printed asap
+                //$value = $datas->$name;
+                // Reloading the field from the database (we need to fetch from the database because there can be some not null fields with default values, and if we are creating the record, these will be filled it, and we have no way to know it when updating the database, so we need to fetch the record again)
+                $datas = $customfields->fetch($object->id); // fetching the record - the values of the customfields for this id (if it exists)
+                $value = $datas->$name;
+            }*/
+
+            $currentfield_data = array();
+            // == Load the record
+            $currentfield_data['label'] = $customfields->findLabel($name);
+            // checking the user's rights for edition
+            $rightok = customfields_check_right($currentmodule,$user,$rights);
+            // load the edit button only if authorized
+            //if (!($action == 'editcustomfields' && GETPOST('field') == $name) && !(isset($objet->brouillon) and $object->brouillon == false) && $rightok){
+            //     $currentfield_data['label'] .= '<span align="right"><a href="'.$_SERVER["PHP_SELF"].'?'.$idvar.'='.$object->id.'&amp;action=editcustomfields&amp;field='.$field->column_name.'">'.img_edit("default",1).'</a></td>';
+            //}
+            // load the editing form...
+            if (($action == 'editcustomfields' && GETPOST('field') == $name) || $action == 'edit') {
+                $currentfield_data['data'] = $customfields->ShowInputField($field, $value);
+            } else { // ... or load the field's value
+                $currentfield_data['data'] = $customfields->printField($field, $value);
+            }
+            $fields_data[$name] = $currentfield_data;
+        }
+    }
+    return $fields_data;
 }
 
 /**
