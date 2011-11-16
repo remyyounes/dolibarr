@@ -33,9 +33,11 @@ require_once(DOL_DOCUMENT_ROOT."/user/class/user.class.php");
 
 // Load traductions files required by by page
 $langs->load("companies");
+$langs->load("customerblocking@customerblocking");
 $action		= (GETPOST('action') ? GETPOST('action') : 'view');
 $confirm	= GETPOST('confirm');
 $socid		= GETPOST("socid");
+$currentmodule = "societe";
 $customfields_table = "customerblocking";
 
 if ($user->societe_id) $socid=$user->societe_id;
@@ -72,9 +74,8 @@ if ($_POST["action"] == 'update' && ! $_POST["cancel"] )
     $object->fetch($socid);
     //update
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    $currentmodule = "societe";
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
-    $upd = $customfields->create($object, 0, 1);
+    $upd = $customfields->create($object);
      
     //display status message from update/create
     if ($upd > 0){
@@ -117,15 +118,19 @@ if ($socid > 0)
         print '<input type="hidden" name="id" value="'.$socid.'">';
 
     }
-
+    // En mode visu
     print '<table class="border" width="100%">';
+    
+    //name
     print '<tr><td>'.$langs->trans('Name').'</td>';
     print '<td colspan="3">';
     print $form->showrefnav($object,'socid','',1,'rowid','nom');
     print '</td></tr>';
 
+    //prefix
     print '<tr><td>'.$langs->trans('Prefix').'</td><td colspan="3">'.$object->prefix_comm.'</td></tr>';
 
+    //tier code
     if ($object->client)
     {
         print '<tr><td>';
@@ -144,28 +149,23 @@ if ($socid > 0)
         print '</td></tr>';
     }
 
-    // Insert hooks
-    //    $parameters=array();
-    //    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $currentmodule = "societe";
+
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $rights = 1;
-    $idvar = "socid";
-    if($action == "edit"){
-        customfields_print_creation_form($currentmodule, $socid,$customfields_table);
-    }else{
-        customfields_print_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
-    }
+    $idvar = "id";
+    
+    $fields_data = customfields_load_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
+    printCustomForm($fields_data);
+    
     if ($action == 'edit')
     {
         print '<tr><td colspan="4" align="center"><input type="submit" class="button" value="'.$langs->trans("Save").'">';
         print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'"></td></tr>';
     }
-
+    
     print "</table>";
-
     if ($action == 'edit'){
         print "</form>";
     }
@@ -208,7 +208,6 @@ if ($socid > 0)
     print "</br>";
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $currentmodule = "societe";
     $customfields = new CustomFields($db, $currentmodule, $customfields_table);
     $rights = 1;
     $idvar = "socid";
@@ -219,6 +218,15 @@ if ($socid > 0)
 // End of page
 $db->close();
 llxFooter();
-
+//TODO: CANVAS or TEMPLATE
+function printCustomForm($fields_data){
+    print '<tr>';
+    print '<td width="15%">'.$fields_data['libelle_blockingcode']['label'].'</td>'.'<td>'.$fields_data['libelle_blockingcode']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td width="15%">'.$fields_data['plafond']['label'].'</td>'.'<td>'.$fields_data['plafond']['data'].'</td>';
+    print '</tr><tr>';
+    print '<td>'.$fields_data['depassement']['label'].'</td>'.'<td>'.$fields_data['depassement']['data'].'</td>';
+    print'</tr>';
+}
 
 ?>

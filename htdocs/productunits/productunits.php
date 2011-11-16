@@ -50,7 +50,7 @@ $socid=GETPOST("socid");
 if ($user->societe_id) $socid=$user->societe_id;
 $currentmodule = "product";
 $customfields_table = "units";
-
+    
 $object = new Product($db);
 $extrafields = new ExtraFields($db);
 
@@ -72,11 +72,6 @@ if (! empty($canvas))
 $value = $ref?$ref:$id;
 $type = $ref?'ref':'rowid';
 $result=restrictedArea($user,'produit|service',$value,'product','','',$type, $objcanvas);
-
-// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
-$hookmanager=new HookManager($db);
-$hookmanager->callHooks(array('productcard'));
 
 /*******************************************************************
  * ACTIONS
@@ -223,7 +218,6 @@ function printCustomForm($fields_data){
     print '<td>'.$fields_data['libelle_fk_fabricant']['label'].'</td>'.'<td>'.$fields_data['libelle_fk_fabricant']['data'].'</td>';
     print '<td>'.$fields_data['delaifabrication']['label'].'</td>'.'<td>'.$fields_data['delaifabrication']['data'].'</td>';
     print'</tr>';
-
 }
 
 

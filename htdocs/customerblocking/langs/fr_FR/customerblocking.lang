@@ -1,6 +1,6 @@
 # Language file - fr_FR - CustomerBlocking
 CHARSET=UTF-8
-cb_plafond=Plafond
-cb_fk_code=Code Blocage
+plafond=Plafond
 AppliedCeilingFrom=Plafond pratiqués à partir du
-cb_depassement=Depassement Authorisé
+depassement=Depassement Authorisé
+libelle_blockingcode=Code Blocage
