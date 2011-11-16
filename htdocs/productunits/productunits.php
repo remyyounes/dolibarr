@@ -205,11 +205,8 @@ llxFooter();
 
 function printCustomForm($fields_data){
     print '<tr>';
-    print '<td width="15%">'.$fields_data['libelle_fk_marque']['label'].'</td>'.'<td width="35%">'.$fields_data['libelle_fk_marque']['data'].'</td>';
-    print '<td width="15%">'.$fields_data['libelle_fk_fabricant']['label'].'</td>'.'<td width="35%">'.$fields_data['libelle_fk_fabricant']['data'].'</td>';
-    print '</tr><tr>';
-    print '<td>'.$fields_data['libelle_unca']['label'].'</td>'.'<td>'.$fields_data['libelle_unca']['data'].'</td>';
-    print '<td>'.$fields_data['libelle_uncv']['label'].'</td>'.'<td>'.$fields_data['libelle_uncv']['data'].'</td>';
+    print '<td width="15%">'.$fields_data['libelle_unca']['label'].'</td>'.'<td width="15%">'.$fields_data['libelle_unca']['data'].'</td>';
+    print '<td width="15%">'.$fields_data['libelle_uncv']['label'].'</td>'.'<td width="15%">'.$fields_data['libelle_uncv']['data'].'</td>';
     print '</tr><tr>';
     print '<td>'.$fields_data['weight']['label'].'</td>'.'<td>'.$fields_data['weight']['data'].$fields_data['weight_unit']['data'].'</td>';
     print '<td>'.$fields_data['publiable']['label'].'</td>'.'<td>'.$fields_data['publiable']['data'].'</td>';

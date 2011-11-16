@@ -1201,13 +1201,13 @@ class CustomFields // extends CommonObject
                 require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
                 include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
     			$formproduct = new FormProduct($this->db);
-    			if(empty($value)){
-    			    $value = 0;
+    			if(empty($currentvalue)){
+    			    $currentvalue = 0;
     			    if($unit_type == 'weight'){
-    			        $value = -3;
+    			        $currentvalue = -3;
     			    }
     			}
-    			$out .= $formproduct->load_measuring_units($this->varprefix.$key, $unit_type, $value);
+    			$out .= $formproduct->load_measuring_units($this->varprefix.$key, $unit_type, $currentvalue);
             }else { // for all other types (custom types and other undefined), we use a basic text input
 				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			}
@@ -1257,7 +1257,6 @@ class CustomFields // extends CommonObject
 			global $langs;
 			$outputlangs = $langs;
 		}
-        $langs->load("other");
 		$out = '';
 		if (isset($value)) {
 			// Constrained field

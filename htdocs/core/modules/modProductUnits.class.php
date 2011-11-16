@@ -97,7 +97,7 @@ class modProductUnits extends DolibarrModules
             'tabfieldvalue'=>array("code,libelle,pays,nbdec,fmcal","code,libelle,pays","code,libelle,pays"),
             'tabfieldinsert'=>array("code,libelle,fk_pays,nbdec,fmcal","code,libelle,fk_pays","code,libelle,fk_pays"),
             'tabrowid'=>array("rowid","rowid","rowid"),
-            'tabcond'=>array($conf->productunits->enabled)
+            'tabcond'=>array($conf->productunits->enabled,$conf->productunits->enabled,$conf->productunits->enabled)
         );
 
         // Boxes
