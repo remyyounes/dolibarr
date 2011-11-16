@@ -1166,7 +1166,7 @@ else
         // Confirmation de la validation
         if ($action == 'valid')
         {
-            $ret=$form->form_confirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateBill'), $langs->trans('ConfirmValidateBill', $object->ref), 'confirm_valid', '', 0, 1);
+            $ret=$form->form_confirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateBill'), $langs->trans('ConfirmValidateBill', $object->getNextNumRef($socid)), 'confirm_valid', '', 0, 1);
             if ($ret == 'html') print '<br>';
         }
 
@@ -1194,7 +1194,7 @@ else
 
         // Ref
         print '<tr><td nowrap="nowrap" width="20%">'.$langs->trans("Ref").'</td><td colspan="4">';
-        print $form->showrefnav($object,'id','',1,'rowid','ref',$morehtmlref);
+        print $form->showrefnav($object,'id','',1,'rowid','ref_ext',$morehtmlref);
         print '</td>';
         print "</tr>\n";
 

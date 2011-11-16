@@ -257,6 +257,7 @@ class FactureFournisseur extends Facture
         global $langs;
         $sql = "SELECT";
         $sql.= " t.rowid,";
+        $sql.= " t.ref_ext,";
         $sql.= " t.facnumber,";
         $sql.= " t.entity,";
         $sql.= " t.type,";
@@ -304,7 +305,8 @@ class FactureFournisseur extends Facture
 
                 $this->id    = $obj->rowid;
                 $this->ref   = $obj->rowid;
-
+                $this->ref_ext = $obj->ref_ext?$obj->ref_ext:$this->ref;
+                
                 $this->ref_supplier = $obj->facnumber;
                 $this->facnumber = $obj->facnumber;
                 $this->entity = $obj->entity;
@@ -766,7 +768,7 @@ class FactureFournisseur extends Facture
         {
             $num = $force_number;
         }
-        else if (preg_match('/^[\(]?PROV/i', $this->ref))
+        else if (preg_match('/^[\(]?PROV/i', $this->ref) || 1)
         {
             $num = $this->getNextNumRef($this->client);
         }
@@ -777,6 +779,7 @@ class FactureFournisseur extends Facture
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."facture_fourn";
         $sql.= " SET fk_statut = 1, fk_user_valid = ".$user->id;
+        $sql.= " ,ref_ext='" . $num . "'";
         $sql.= " WHERE rowid = ".$this->id;
 
         dol_syslog("FactureFournisseur::validate sql=".$sql);
@@ -1192,7 +1195,8 @@ class FactureFournisseur extends Facture
         if ($this->ref_supplier) $label.=' / '.$this->ref_supplier;
 
         if ($withpicto) $result.=($lien.img_object($label,'bill').$lienfin.' ');
-        $result.=$lien.($max?dol_trunc($this->ref,$max):$this->ref).$lienfin;
+        if(empty($this->ref_ext))$this->ref_ext = $this->ref;
+        $result.=$lien.($max?dol_trunc($this->ref_ext,$max):$this->ref_ext).$lienfin;
         return $result;
     }
 
@@ -1361,6 +1365,23 @@ class FactureFournisseur extends Facture
             return -1;
         }
     }
+    
+    /**
+    *  Renvoie la reference de facture_fourn suivante non utilisee en fonction du modele
+    *                  de numerotation actif defini dans FOURN_SUPPLIER_ADDON
+    *  @param	    soc  		            objet societe
+    *  @return     string                  reference libre pour la facture
+    */
+    function getNextNumRef($soc)
+    {
+        global $db, $langs, $conf;
+        require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
+        $langs->load("orders");
+        $mask = "FF{dd}{mm}{yy}{0000}";
+        $numFinal=get_next_value($db,$mask,'facture_fourn','ref_ext','',$soc->code_fournisseur,$this->datec);
+        return $numFinal;
+    }
+    
 
 }
 ?>

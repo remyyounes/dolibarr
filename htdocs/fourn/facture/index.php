@@ -101,7 +101,7 @@ $htmlother=new FormOther($db);
 llxHeader('',$langs->trans("SuppliersInvoices"),'EN:Suppliers_Invoices|FR:FactureFournisseur|ES:Facturas_de_proveedores');
 
 $sql = "SELECT s.rowid as socid, s.nom, ";
-$sql.= " fac.rowid as ref, fac.rowid as facid, fac.facnumber, fac.datef, fac.date_lim_reglement as date_echeance,";
+$sql.= " fac.rowid as ref, fac.ref_ext, fac.rowid as facid, fac.facnumber, fac.datef, fac.date_lim_reglement as date_echeance,";
 $sql.= " fac.total_ht, fac.total_ttc, fac.paye as paye, fac.fk_statut as fk_statut, fac.libelle";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
 $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture_fourn as fac";
@@ -242,6 +242,7 @@ if ($resql)
 		print '<td nowrap>';
 		$facturestatic->id=$obj->facid;
 		$facturestatic->ref=$obj->ref;
+		$facturestatic->ref_ext=$obj->ref_ext;
 		$facturestatic->ref_supplier=$obj->facnumber;
 		print $facturestatic->getNomUrl(1);
 		print "</td>\n";
