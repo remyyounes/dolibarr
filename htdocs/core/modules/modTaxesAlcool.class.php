@@ -68,8 +68,7 @@ class modTaxesAlcool extends DolibarrModules
 		//$this->config_page_url = array("mymodulesetuppage.php");
 
 		// Dependencies
-		//TODO: fill depends array with proper values ("makinalib, etc...)
-		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
+		$this->depends = array('modTaxe','modCustomFields');		// List of modules id that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
