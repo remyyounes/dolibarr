@@ -1,0 +1,5 @@
+# Language file - fr_FR - taxesparafiscales
+CHARSET=UTF-8
+libelle_ctaom=Code DAOM
+libelle_ctax1=Code Taxe 1
+libelle_ctax2=Code Taxe 2

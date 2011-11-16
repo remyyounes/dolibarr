@@ -18,27 +18,27 @@
  */
 
 /**
- * 		\defgroup   taxesalcool    Module taxesalcool
- *      \brief      Module used to apply alcohol related taxes
- *      \file       htdocs/includes/modules/modTaxesAlcool.class.php
- *      \ingroup    taxesalcool
- *      \brief      Description and activation file for Taxes Alcool module 
+ * 		\defgroup   taxesparafiscales    Module taxesparafiscales
+ *      \brief      Module used to apply parafiscal taxes
+ *      \file       htdocs/includes/modules/modTaxesParafiscales.class.php
+ *      \ingroup    taxesparafiscales
+ *      \brief      Description and activation file for Parafiscal Taxes module 
  */
 include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
 
 
 /**
- * 		\class      modTaxesAlcool
- *      \brief      Description and activation class for module TaxesAlcool
+ * 		\class      modTaxesParafiscales
+ *      \brief      Description and activation class for module TaxesParafiscales
  */
-class modTaxesAlcool extends DolibarrModules
+class modTaxesParafiscales extends DolibarrModules
 {
 	/**
 	 *   Constructor. Define names, constants, directories, boxes, permissions
 	 *
 	 *   @param      DoliDB		$DB      Database handler
 	 */
-	function modTaxesAlcool($DB)
+	function modTaxesParafiscales($DB)
 	{
         global $langs,$conf;
 
@@ -47,7 +47,7 @@ class modTaxesAlcool extends DolibarrModules
 		$this->numero = 1334;
 		$this->family = "products";
 		$this->name = preg_replace('/^mod/i','',get_class($this));
-		$this->description = "Description of module TaxesAlcool";
+		$this->description = "Description of module TaxesParafiscales";
 		$this->version = "1.1";//'dolibarr';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->special = 0;
@@ -73,7 +73,7 @@ class modTaxesAlcool extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("taxesalcool@taxesalcool");
+		$this->langfiles = array("taxesparafiscales@taxesparafiscales");
 
 		// Constants
 		// List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -81,10 +81,10 @@ class modTaxesAlcool extends DolibarrModules
 		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0)
 		//                             2=>array('MAIN_MODULE_MYMODULE_HOOKS','chaine','hookcontext1:hookcontext2','To say: This module manage hooks in hookcontext1 and hookcontext2',1,'current',1)
 		// );
-		$this->const = array(0=>array('MAIN_MODULE_TAXESALCOOL_HOOKS','chaine','produitdao','This module manage hooks in productdao',1,'current',1));
+		$this->const = array(0=>array('MAIN_MODULE_TaxesParafiscales_HOOKS','chaine','produitdao','This module manage hooks in productdao',1,'current',1));
 		
 		// Tabs
-        $this->tabs = array('product:+taxesalcool:Alcool:@taxesalcool:$user->rights->taxesalcool->read:/taxesalcool/taxesalcool.php?id=__ID__');
+        $this->tabs = array('product:+taxesparafiscales:Taxes Parafiscales:@taxesparafiscales:$user->rights->taxesparafiscales->read:/taxesparafiscales/taxesparafiscales.php?id=__ID__');
 
         // Dictionnaries
         $this->dictionnaries=array();
@@ -94,19 +94,19 @@ class modTaxesAlcool extends DolibarrModules
 
 		// Permissions
 		// Key text used to identify module (for permissions, menus, etc...)
-		$this->rights_class = 'taxesalcool';
+		$this->rights_class = 'taxesparafiscales';
 		$this->rights = array();		// Permission array used by this module
 		
 		$r=0;
-		$this->rights[$r][0] = 99031;
-		$this->rights[$r][1] = 'Lire les informations liees à la taxation des produits alcooliques';
+		$this->rights[$r][0] = 99071;
+		$this->rights[$r][1] = 'Lire les informations liees aux taxes parafiscales';
 		$this->rights[$r][2] = 'r';
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'read';
 		
 		$r++;
-		$this->rights[$r][0] = 99032;
-		$this->rights[$r][1] = 'Modifier la taxation des produits alcooliques';
+		$this->rights[$r][0] = 99072;
+		$this->rights[$r][1] = 'Modifier la taxation parafiscales';
 		$this->rights[$r][2] = 'w';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'write';
@@ -144,7 +144,7 @@ class modTaxesAlcool extends DolibarrModules
 	 */
 	function remove($options='')
 	{
-		$sql = array("DROP TABLE ".MAIN_DB_PREFIX."product_taxesalcool");
+		$sql = array("DROP TABLE ".MAIN_DB_PREFIX."product_taxe");
         return $this->_remove($sql);
 	}
 
@@ -163,9 +163,9 @@ class modTaxesAlcool extends DolibarrModules
 	function initCustomFields(){
 	    require_once(DOL_DOCUMENT_ROOT."/customfields/lib/customfields.lib.php");
 	    require_once(DOL_DOCUMENT_ROOT."/customfields/class/customfields.class.php");
-	    $customfields = new CustomFields($this->db, "product", "taxesalcool");
+	    $customfields = new CustomFields($this->db, "product", "taxe");
 	    $customfields->initCustomFields();
-	    $fieldname ="libelle_ctar1";
+	    
 	    $type = "other";
 	    $size = "";
 	    $nulloption = "";
@@ -176,27 +176,15 @@ class modTaxesAlcool extends DolibarrModules
 	    $customsql = null;
 	    $fieldid = null;
 	    $notrigger = 0;
+	    
+	    $fieldname ="libelle_ctaom";
 	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
 	
-	    $fieldname ="libelle_ctar2";
-	    $constraint = MAIN_DB_PREFIX."c_taxe";
+	    $fieldname ="libelle_ctax1";
 	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
 	
-	    $fieldname ="libelle_cvig";
-	    $constraint = MAIN_DB_PREFIX."c_taxe";
+	    $fieldname ="libelle_ctax2";
 	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
-	
-	    $constraint=null;
-	
-	    $fieldname ="cont";
-	    $type ="FLOAT";
-	    $nulloption = 0;
-	    $defaultvalue = '0';
-	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
-	
-	    $fieldname ="alcp";
-	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
-
 	}
 }
 
