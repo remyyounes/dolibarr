@@ -1,10 +1,25 @@
 // Copyright (C) 2011 Regis Houssin  <regis@dolibarr.fr>
+// Copyright (C) 2009 Laurent Destailleur  <eldy@users.sourceforge.net>
 //
-// Script javascript that contains functions for edit in place
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// or see http://www.gnu.org/
+//
+
 //
 // \file       htdocs/core/js/editinplace.js
 // \brief      File that include javascript functions for edit in place
-
+//
 
 $(document).ready(function() {
 	var element = $('#jeditable_element').html();
@@ -206,7 +221,7 @@ $(document).ready(function() {
 		onblur		: 'ignore',
 		cssclass	: 'flat',
 		tooltip		: tooltipInPlace,
-		placeholder	: placeholderInPlace,
+		placeholder	: '&nbsp;',
 		cancel		: cancelInPlace,
 		submit		: submitInPlace,
 		indicator	: indicatorInPlace,
@@ -246,22 +261,24 @@ $(document).ready(function() {
 		var element = $( '#element_' + htmlname ).val();
 		var table_element = $( '#table_element_' + htmlname ).val();
 		var fk_element = $( '#fk_element_' + htmlname ).val();
-		var method = false;
-		var timestamp = false;
-		
-		if (type == 'select') {
-			var method = $( '#loadmethod_' + htmlname ).val();
-		} else if (type == 'datepicker') {
-			var timestamp = $('#timestamp_' + htmlname ).val();
-		}
+		var loadmethod = $( '#loadmethod_' + htmlname ).val();
+		var savemethod = $( '#savemethod_' + htmlname ).val();
+		var ext_element = $( '#ext_element_' + htmlname ).val();
+		//var ext_table_element = $( '#ext_table_element_' + htmlname ).val();
+		//var ext_fk_element = $( '#ext_fk_element_' + htmlname ).val();
+		var timestamp = $('#timestamp').val();
 		
 		return {
 			type: type,
 			element: element,
 			table_element: table_element,
 			fk_element: fk_element,
-			method: method,
-			timestamp: timestamp
+			loadmethod: loadmethod,
+			savemethod: savemethod,
+			timestamp: timestamp,
+			ext_element: ext_element,
+			//ext_table_element: ext_table_element,
+			//ext_fk_element: ext_fk_element
 		};
 	}
 	

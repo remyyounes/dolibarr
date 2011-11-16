@@ -449,6 +449,12 @@ foreach($mainmenuusedarray as $key => $val)
 
 /* Login */
 
+table.login {
+    -moz-box-shadow: 4px 4px 4px #CCC;
+    -webkit-box-shadow: 4px 4px 4px #CCC;
+    box-shadow: 4px 4px 4px #CCC;
+}
+
 div.login_block {
 	position: absolute;
 	<?php print $right; ?>: 5px;
@@ -1070,6 +1076,14 @@ background-repeat: repeat-x;
 */
 
 
+.paddingrightonly {
+	border-collapse: collapse;
+	border: 0px;
+	margin-left: 0px;
+	spacing-left: 0px;
+	padding-left: 0px;
+	padding-right: 4px;
+}
 .nocellnopadd {
 list-style-type:none;
 margin: 0px;

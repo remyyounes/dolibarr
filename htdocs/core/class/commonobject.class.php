@@ -1341,28 +1341,29 @@ abstract class CommonObject
         $sql.= ", '".$this->element."'";
         $sql.= ")";
 
-        dol_syslog(get_class($this)."::add_object_linked sql=".$sql);
-        if ($this->db->query($sql))
-        {
-            $this->db->commit();
-            return 1;
-        }
-        else
-        {
-            $this->error=$this->db->lasterror();
-            $this->db->rollback();
-            return 0;
-        }
-    }
+        dol_syslog(get_class($this)."::add_object_linked sql=".$sql, LOG_DEBUG);
+		if ($this->db->query($sql))
+	  	{
+	  		$this->db->commit();
+	  		return 1;
+	  	}
+	  	else
+	  	{
+	  		$this->error=$this->db->lasterror();
+	  		$this->db->rollback();
+	  		return 0;
+	  	}
+	}
 
     /**
-     * 	   Fetch array of objects linked to current object. Links are loaded into this->linked_object array.
+     *	Fetch array of objects linked to current object. Links are loaded into this->linked_object array.
      *
-     *     @param  sourceid
-     *     @param  sourcetype
-     *     @param  targetid
-     *     @param  targettype
-     *     @param  clause			OR, AND
+     *	@param	int		$sourceid		Object source id
+     *	@param  string	$sourcetype		Object source type
+     *	@param  int		$targetid		Object target id
+     *	@param  string	$targettype		Object target type
+     *	@param  string	$clause			OR, AND clause
+     *	@return	void
      */
     function fetchObjectLinked($sourceid='',$sourcetype='',$targetid='',$targettype='',$clause='OR')
     {
@@ -1436,27 +1437,27 @@ abstract class CommonObject
                     if ($objecttype == 'facture')			{
                         $classpath = 'compta/facture/class';
                     }
-                    if ($objecttype == 'propal')			{
+                    else if ($objecttype == 'propal')			{
                         $classpath = 'comm/propal/class';
                     }
-                    if ($objecttype == 'shipping')			{
+                    else if ($objecttype == 'shipping')			{
                         $classpath = 'expedition/class'; $subelement = 'expedition'; $module = 'expedition_bon';
                     }
-                    if ($objecttype == 'delivery')			{
+                    else if ($objecttype == 'delivery')			{
                         $classpath = 'livraison/class'; $subelement = 'livraison'; $module = 'livraison_bon';
                     }
-                    if ($objecttype == 'invoice_supplier')	{
+                    else if ($objecttype == 'invoice_supplier')	{
                         $classpath = 'fourn/class';
                     }
-                    if ($objecttype == 'order_supplier')	{
+                    else if ($objecttype == 'order_supplier')	{
                         $classpath = 'fourn/class';
                     }
-                    if ($objecttype == 'fichinter')			{
+                    else if ($objecttype == 'fichinter')			{
                         $classpath = 'fichinter/class'; $subelement = 'fichinter'; $module = 'ficheinter';
                     }
 
                     // TODO ajout temporaire - MAXIME MANGIN
-                    if ($objecttype == 'contratabonnement')	{
+                    else if ($objecttype == 'contratabonnement')	{
                         $classpath = 'contrat/class'; $subelement = 'contrat'; $module = 'contratabonnement';
                     }
 
@@ -1464,7 +1465,7 @@ abstract class CommonObject
                     if ($objecttype == 'invoice_supplier') {
                         $classfile = 'fournisseur.facture'; $classname = 'FactureFournisseur';
                     }
-                    if ($objecttype == 'order_supplier')   {
+                    else if ($objecttype == 'order_supplier')   {
                         $classfile = 'fournisseur.commande'; $classname = 'CommandeFournisseur';
                     }
 
@@ -2022,6 +2023,7 @@ abstract class CommonObject
      *  TODO Move this into an output class file (htmlline.class.php)
      *  If lines are into a template, title must also be into a template
      *  But for the moment we don't know if it's possible as we keep a method available on overloaded objects.
+     *
      *  @param		$action			   GET/POST action
      * 	@param	    $line		       Selected object line to output
      *  @param      $var               Is it a an odd line

@@ -737,11 +737,13 @@ class FactureFournisseur extends Facture
 
     /**
      *      Tag invoice as validated + call trigger BILL_VALIDATE
-     *      @param      user            Object user that validate
-     *      @param      force_number    Reference to force on invoice
-     *      @return     int             <0 if KO, =0 if nothing to do, >0 if OK
+     *
+     *      @param	User	$user           Object user that validate
+     *      @param  string	$force_number   Reference to force on invoice
+     *      @param	int		$idwarehouse	Id of warehouse for stock change
+     *      @return int 			        <0 if KO, =0 if nothing to do, >0 if OK
      */
-    function validate($user, $force_number='')
+    function validate($user, $force_number='', $idwarehouse=0)
     {
         global $conf,$langs;
 
@@ -750,7 +752,7 @@ class FactureFournisseur extends Facture
         // Protection
         if ($this->statut > 0)	// This is to avoid to validate twice (avoid errors on logs and stock management)
         {
-            dol_syslog("FactureFournisseur::validate no draft status", LOG_WARNING);
+            dol_syslog(get_class($this)."::validate no draft status", LOG_WARNING);
             return 0;
         }
 
@@ -782,12 +784,12 @@ class FactureFournisseur extends Facture
         $sql.= " ,ref_ext='" . $num . "'";
         $sql.= " WHERE rowid = ".$this->id;
 
-        dol_syslog("FactureFournisseur::validate sql=".$sql);
+        dol_syslog(get_class($this)."::validate sql=".$sql);
         $resql = $this->db->query($sql);
         if ($resql)
         {
             // Si on incrémente le produit principal et ses composants à la validation de facture fournisseur
-            if ($conf->stock->enabled && $conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL)
+            if (! $error && $conf->stock->enabled && $conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL)
             {
                 require_once(DOL_DOCUMENT_ROOT."/product/stock/class/mouvementstock.class.php");
                 $langs->load("agenda");
@@ -799,14 +801,13 @@ class FactureFournisseur extends Facture
                     {
                         $mouvP = new MouvementStock($this->db);
                         // We increase stock for product
-                        $entrepot_id = "1"; // TODO ajouter possibilite de choisir l'entrepot
-                        $result=$mouvP->reception($user, $this->lines[$i]->fk_product, $entrepot_id, $this->lines[$i]->qty, $this->lines[$i]->pu_ht, $langs->trans("InvoiceValidatedInDolibarr",$num));
+                        $result=$mouvP->reception($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, $this->lines[$i]->pu_ht, $langs->trans("InvoiceValidatedInDolibarr",$num));
                         if ($result < 0) { $error++; }
                     }
                 }
             }
 
-            if ($error == 0)
+            if (! $error)
             {
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -816,7 +817,7 @@ class FactureFournisseur extends Facture
                 // Fin appel triggers
             }
 
-            if ($error == 0)
+            if (! $error)
             {
                 $this->db->commit();
                 return 1;
@@ -837,11 +838,13 @@ class FactureFournisseur extends Facture
 
 
     /**
-     *		Set draft status
-     *		@param		user		Object user that modify
-     *		@param		int			<0 if KO, >0 if OK
+     *	Set draft status
+     *
+     *	@param	User	$user			Object user that modify
+     *	@param	int		$idwarehouse	Id warehouse to use for stock change.
+     *	@return	int						<0 if KO, >0 if OK
      */
-    function set_draft($user)
+    function set_draft($user, $idwarehouse=-1)
     {
         global $conf,$langs;
 
@@ -849,7 +852,7 @@ class FactureFournisseur extends Facture
 
         if ($this->statut == 0)
         {
-            dol_syslog("FactureFournisseur::set_draft already draft status", LOG_WARNING);
+            dol_syslog(get_class($this)."::set_draft already draft status", LOG_WARNING);
             return 0;
         }
 
@@ -859,8 +862,9 @@ class FactureFournisseur extends Facture
         $sql.= " SET fk_statut = 0";
         $sql.= " WHERE rowid = ".$this->id;
 
-        dol_syslog("FactureFournisseur::set_draft sql=".$sql, LOG_DEBUG);
-        if ($this->db->query($sql))
+        dol_syslog(get_class($this)."::set_draft sql=".$sql, LOG_DEBUG);
+        $result=$this->db->query($sql);
+        if ($result)
         {
             // Si on incremente le produit principal et ses composants a la validation de facture fournisseur, on decremente
             if ($result >= 0 && $conf->stock->enabled && $conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL)
@@ -875,8 +879,7 @@ class FactureFournisseur extends Facture
                     {
                         $mouvP = new MouvementStock($this->db);
                         // We increase stock for product
-                        $entrepot_id = "1"; // TODO ajouter possibilite de choisir l'entrepot
-                        $result=$mouvP->livraison($user, $this->lines[$i]->fk_product, $entrepot_id, $this->lines[$i]->qty, $this->lines[$i]->subprice, $langs->trans("InvoiceBackToDraftInDolibarr",$this->ref));
+                        $result=$mouvP->livraison($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, $this->lines[$i]->subprice, $langs->trans("InvoiceBackToDraftInDolibarr",$this->ref));
                     }
                 }
             }
@@ -903,10 +906,10 @@ class FactureFournisseur extends Facture
 
     /**
      *	Ajoute une ligne de facture (associe a aucun produit/service predefini)
-     *		Les parametres sont deja cense etre juste et avec valeurs finales a l'appel
-     *		de cette methode. Aussi, pour le taux tva, il doit deja avoir ete defini
-     *		par l'appelant par la methode get_default_tva(societe_vendeuse,societe_acheteuse,idprod)
-     *		et le desc doit deja avoir la bonne valeur (a l'appelant de gerer le multilangue)
+     *	Les parametres sont deja cense etre juste et avec valeurs finales a l'appel
+     *	de cette methode. Aussi, pour le taux tva, il doit deja avoir ete defini
+     *	par l'appelant par la methode get_default_tva(societe_vendeuse,societe_acheteuse,idprod)
+     *	et le desc doit deja avoir la bonne valeur (a l'appelant de gerer le multilangue)
      *
      *	@param    	desc            Description de la ligne
      *	@param    	pu              Prix unitaire (HT ou TTC selon price_base_type)

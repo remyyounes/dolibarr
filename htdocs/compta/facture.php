@@ -321,7 +321,7 @@ if ($action == 'confirm_valid' && $confirm == 'yes' && $user->rights->facture->v
     $object->fetch_thirdparty();
 
     // Check parameters
-    if (! empty($conf->global->STOCK_CALCULATE_ON_BILL) && $object->hasProductsOrServices(1))
+    if ($object->type != 3 && ! empty($conf->global->STOCK_CALCULATE_ON_BILL) && $object->hasProductsOrServices(1))
     {
         if (! $idwarehouse || $idwarehouse == -1)
         {
@@ -355,56 +355,72 @@ if ($action == 'confirm_valid' && $confirm == 'yes' && $user->rights->facture->v
     }
 }
 
-// Repasse la facture en mode brouillon (unvalidate)
-if ($action == 'modif' && ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->valider) || $user->rights->facture->invoice_advance->unvalidate))
+// Go back to draft status (unvalidate)
+if ($action == 'confirm_modif' && ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->valider) || $user->rights->facture->invoice_advance->unvalidate))
 {
+    $idwarehouse=GETPOST('idwarehouse');
+
     $object->fetch($id);
     $object->fetch_thirdparty();
 
-    // On verifie si la facture a des paiements
-    $sql = 'SELECT pf.amount';
-    $sql.= ' FROM '.MAIN_DB_PREFIX.'paiement_facture as pf';
-    $sql.= ' WHERE pf.fk_facture = '.$object->id;
-
-    $result = $db->query($sql);
-    if ($result)
+    // Check parameters
+    if ($object->type != 3 && ! empty($conf->global->STOCK_CALCULATE_ON_BILL) && $object->hasProductsOrServices(1))
     {
-        $i = 0;
-        $num = $db->num_rows($result);
-
-        while ($i < $num)
+        if (! $idwarehouse || $idwarehouse == -1)
         {
-            $objp = $db->fetch_object($result);
-            $totalpaye += $objp->amount;
-            $i++;
+            $error++;
+            $errors[]=$langs->trans('ErrorFieldRequired',$langs->transnoentitiesnoconv("Warehouse"));
+            $action='';
         }
     }
-    else
+
+    if (! $error)
     {
-        dol_print_error($db,'');
-    }
+	    // On verifie si la facture a des paiements
+	    $sql = 'SELECT pf.amount';
+	    $sql.= ' FROM '.MAIN_DB_PREFIX.'paiement_facture as pf';
+	    $sql.= ' WHERE pf.fk_facture = '.$object->id;
 
-    $resteapayer = $object->total_ttc - $totalpaye;
+	    $result = $db->query($sql);
+	    if ($result)
+	    {
+	        $i = 0;
+	        $num = $db->num_rows($result);
 
-    // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees
-    $ventilExportCompta = $object->getVentilExportCompta();
+	        while ($i < $num)
+	        {
+	            $objp = $db->fetch_object($result);
+	            $totalpaye += $objp->amount;
+	            $i++;
+	        }
+	    }
+	    else
+	    {
+	        dol_print_error($db,'');
+	    }
 
-    // On verifie si aucun paiement n'a ete effectue
-    if ($resteapayer == $object->total_ttc	&& $object->paye == 0 && $ventilExportCompta == 0)
-    {
-        $object->set_draft($user);
+	    $resteapayer = $object->total_ttc - $totalpaye;
 
-        // Define output language
-        $outputlangs = $langs;
-        $newlang='';
-        if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($_REQUEST['lang_id'])) $newlang=$_REQUEST['lang_id'];
-        if ($conf->global->MAIN_MULTILANGS && empty($newlang)) $newlang=$object->client->default_lang;
-        if (! empty($newlang))
-        {
-            $outputlangs = new Translate("",$conf);
-            $outputlangs->setDefaultLang($newlang);
-        }
-        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+	    // On verifie si les lignes de factures ont ete exportees en compta et/ou ventilees
+	    $ventilExportCompta = $object->getVentilExportCompta();
+
+	    // On verifie si aucun paiement n'a ete effectue
+	    if ($resteapayer == $object->total_ttc	&& $object->paye == 0 && $ventilExportCompta == 0)
+	    {
+	        $object->set_draft($user, $idwarehouse);
+
+	        // Define output language
+	        $outputlangs = $langs;
+	        $newlang='';
+	        if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($_REQUEST['lang_id'])) $newlang=$_REQUEST['lang_id'];
+	        if ($conf->global->MAIN_MULTILANGS && empty($newlang)) $newlang=$object->client->default_lang;
+	        if (! empty($newlang))
+	        {
+	            $outputlangs = new Translate("",$conf);
+	            $outputlangs->setDefaultLang($newlang);
+	        }
+	        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+	    }
     }
 }
 
@@ -1921,8 +1937,13 @@ else
             if ($object->paye) $resteapayer=0;
             $resteapayeraffiche=$resteapayer;
 
-            $absolute_discount=$soc->getAvailableDiscounts('','fk_facture_source IS NULL');
-            $absolute_creditnote=$soc->getAvailableDiscounts('','fk_facture_source IS NOT NULL');
+            //$filterabsolutediscount="fk_facture_source IS NULL";  // If we want deposit to be substracted to payments only and not to total of final invoice
+            //$filtercreditnote="fk_facture_source IS NOT NULL";    // If we want deposit to be substracted to payments only and not to total of final invoice
+            $filterabsolutediscount="fk_facture_source IS NULL OR (fk_facture_source IS NOT NULL AND description='(DEPOSIT)')";
+            $filtercreditnote="fk_facture_source IS NOT NULL AND description <> '(DEPOSIT)'";
+
+            $absolute_discount=$soc->getAvailableDiscounts('',$filterabsolutediscount);
+            $absolute_creditnote=$soc->getAvailableDiscounts('',$filtercreditnote);
             $absolute_discount=price2num($absolute_discount,'MT');
             $absolute_creditnote=price2num($absolute_creditnote,'MT');
 
@@ -1985,7 +2006,7 @@ else
                     $text.=$notify->confirmMessage('NOTIFY_VAL_FAC',$object->socid);
                 }
                 $formquestion=array();
-                if (! empty($conf->global->STOCK_CALCULATE_ON_BILL) && $object->hasProductsOrServices(1))
+                if ($object->type != 3 && ! empty($conf->global->STOCK_CALCULATE_ON_BILL) && $object->hasProductsOrServices(1))
                 {
                     $langs->load("stocks");
                     require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
@@ -1998,6 +2019,26 @@ else
                 }
 
                 $formconfirm=$form->formconfirm($_SERVER["PHP_SELF"].'?facid='.$object->id,$langs->trans('ValidateBill'),$text,'confirm_valid',$formquestion,"yes",($conf->notification->enabled?0:2));
+            }
+
+            // Confirm back to draft status
+            if ($action == 'modif')
+            {
+                $text=$langs->trans('ConfirmUnvalidateBill',$object->ref);
+                $formquestion=array();
+                if ($object->type != 3 && ! empty($conf->global->STOCK_CALCULATE_ON_BILL) && $object->hasProductsOrServices(1))
+                {
+                    $langs->load("stocks");
+                    require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
+                    $formproduct=new FormProduct($db);
+                    $formquestion=array(
+                    //'text' => $langs->trans("ConfirmClone"),
+                    //array('type' => 'checkbox', 'name' => 'clone_content',   'label' => $langs->trans("CloneMainAttributes"),   'value' => 1),
+                    //array('type' => 'checkbox', 'name' => 'update_prices',   'label' => $langs->trans("PuttingPricesUpToDate"),   'value' => 1),
+                    array('type' => 'other', 'name' => 'idwarehouse',   'label' => $langs->trans("SelectWarehouseForStockIncrease"),   'value' => $formproduct->selectWarehouses(GETPOST('idwarehouse'),'idwarehouse','',1)));
+                }
+
+                $formconfirm=$form->formconfirm($_SERVER["PHP_SELF"].'?facid='.$object->id,$langs->trans('UnvalidateBill'),$text,'confirm_modif',$formquestion,"yes",1);
             }
 
             // Confirmation du classement paye
@@ -2223,14 +2264,13 @@ else
                 else
                 {
                     // Remise dispo de type remise fixe (not credit note)
-                    $filter='fk_facture_source IS NULL';
                     print '<br>';
-                    $form->form_remise_dispo($_SERVER["PHP_SELF"].'?facid='.$object->id, 0,  'remise_id',$soc->id, $absolute_discount, $filter, $resteapayer, ' ('.$addabsolutediscount.')');
+                    $form->form_remise_dispo($_SERVER["PHP_SELF"].'?facid='.$object->id, GETPOST('discountid'), 'remise_id', $soc->id, $absolute_discount, $filterabsolutediscount, $resteapayer, ' ('.$addabsolutediscount.')');
                 }
             }
             else
             {
-                if ($absolute_creditnote > 0)    // If not linke will be added later
+                if ($absolute_creditnote > 0)    // If not, link will be added later
                 {
                     if ($object->statut == 0 && $object->type != 2 && $object->type != 3) print ' ('.$addabsolutediscount.')<br>';
                     else print '.';
@@ -2255,9 +2295,8 @@ else
                 else
                 {
                     // Remise dispo de type avoir
-                    $filter='fk_facture_source IS NOT NULL';
                     if (! $absolute_discount) print '<br>';
-                    $form->form_remise_dispo($_SERVER["PHP_SELF"].'?facid='.$object->id, 0, 'remise_id_for_payment', $soc->id, $absolute_creditnote, $filter, $resteapayer);
+                    $form->form_remise_dispo($_SERVER["PHP_SELF"].'?facid='.$object->id, 0, 'remise_id_for_payment', $soc->id, $absolute_creditnote, $filtercreditnote, $resteapayer);
                 }
             }
             if (! $absolute_discount && ! $absolute_creditnote)
@@ -2877,7 +2916,8 @@ else
                 $delallowed=$user->rights->facture->supprimer;
 
                 print '<br>';
-                $somethingshown=$formfile->show_documents('facture',$filename,$filedir,$urlsource,$genallowed,$delallowed,$object->modelpdf,1,0,0,28,0,'','','',$soc->default_lang,$hookmanager);
+                print $formfile->showdocuments('facture',$filename,$filedir,$urlsource,$genallowed,$delallowed,$object->modelpdf,1,0,0,28,0,'','','',$soc->default_lang,$hookmanager);
+                $somethingshown=$formfile->numoffiles;
 
                 /*
                  * Linked object block
