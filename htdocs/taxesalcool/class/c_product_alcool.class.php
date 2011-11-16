@@ -18,12 +18,12 @@
  */
 
 /**
- *      \file       dev/skeletons/c_blocage.class.php
+ *      \file       dev/skeletons/c_product_alcool.class.php
  *      \ingroup    mymodule othermodule1 othermodule2
  *      \brief      This file is an example for a CRUD class file (Create/Read/Update/Delete)
- *		\version    $Id: c_blocage.class.php,v 1.29 2010/04/29 14:54:13 grandoc Exp $
+ *		\version    $Id: c_product_alcool.class.php,v 1.29 2010/04/29 14:54:13 grandoc Exp $
  *		\author		Put author name here
- *		\remarks	Initialy built by build_class_from_table on 2010-08-11 16:25
+ *		\remarks	Initialy built by build_class_from_table on 2010-08-05 04:04
  */
 
 // Put here all includes required by your class file
@@ -33,25 +33,34 @@
 
 
 /**
- *      \class      C_blocage
+ *      \class      C_product_alcool
  *      \brief      Put here description of your class
- *		\remarks	Initialy built by build_class_from_table on 2010-08-11 16:25
+ *		\remarks	Initialy built by build_class_from_table on 2010-08-05 04:04
  */
-class C_blocage // extends CommonObject
+class C_product_alcool // extends CommonObject
 {
 	var $db;							//!< To store db handler
 	var $error;							//!< To return error code (or message)
 	var $errors=array();				//!< To return several error codes (or messages)
-	//var $element='c_blocage';			//!< Id that identify managed objects
-	//var $table_element='c_blocage';	//!< Name of table without prefix where object is stored
+	//var $element='c_product_alcool';			//!< Id that identify managed objects
+	//var $table_element='c_product_alcool';	//!< Name of table without prefix where object is stored
     
     var $id;
     
-	var $code;
-	var $libelle;
-	var $fk_pays;
-	var $active;
-	var $cache_blockcode=array();
+	var $fk_product;
+	var $fk_ctar1;
+	var $fk_ctar2;
+	var $fk_cvig;
+	var $cont;
+	var $alcp;
+
+	var $editable_fields = array(
+		'fk_ctar1',
+		'fk_ctar2',
+		'fk_cvig',
+		'cont',
+		'alcp',
+	);
     
 
 	
@@ -59,7 +68,7 @@ class C_blocage // extends CommonObject
      *      \brief      Constructor
      *      \param      DB      Database handler
      */
-    function C_blocage($DB) 
+    function C_product_alcool($DB) 
     {
         $this->db = $DB;
         return 1;
@@ -79,10 +88,12 @@ class C_blocage // extends CommonObject
     	
 		// Clean parameters
         
-		if (isset($this->code)) $this->code=trim($this->code);
-		if (isset($this->libelle)) $this->libelle=trim($this->libelle);
-		if (isset($this->fk_pays)) $this->fk_pays=trim($this->fk_pays);
-		if (isset($this->active)) $this->active=trim($this->active);
+		if (isset($this->fk_product)) $this->fk_product=trim($this->fk_product);
+		if (isset($this->fk_ctar1)) $this->fk_ctar1=trim($this->fk_ctar1);
+		if (isset($this->fk_ctar2)) $this->fk_ctar2=trim($this->fk_ctar2);
+		if (isset($this->fk_cvig)) $this->fk_cvig=trim($this->fk_cvig);
+		if (isset($this->cont)) $this->cont=trim($this->cont);
+		if (isset($this->alcp)) $this->alcp=trim($this->alcp);
 
         
 
@@ -90,20 +101,24 @@ class C_blocage // extends CommonObject
 		// Put here code to add control on parameters values
 		
         // Insert request
-		$sql = "INSERT INTO ".MAIN_DB_PREFIX."c_blocage(";
+		$sql = "INSERT INTO ".MAIN_DB_PREFIX."c_product_alcool(";
 		
-		$sql.= "code,";
-		$sql.= "libelle,";
-		$sql.= "fk_pays,";
-		$sql.= "active";
+		$sql.= "fk_product,";
+		$sql.= "fk_ctar1,";
+		$sql.= "fk_ctar2,";
+		$sql.= "fk_cvig,";
+		$sql.= "cont,";
+		$sql.= "alcp";
 
 		
         $sql.= ") VALUES (";
         
-		$sql.= " ".(! isset($this->code)?'NULL':"'".addslashes($this->code)."'").",";
-		$sql.= " ".(! isset($this->libelle)?'NULL':"'".addslashes($this->libelle)."'").",";
-		$sql.= " ".(! isset($this->fk_pays)?'NULL':"'".$this->fk_pays."'").",";
-		$sql.= " ".(! isset($this->active)?'NULL':"'".$this->active."'")."";
+		$sql.= " ".(! isset($this->fk_product)?'NULL':"'".$this->fk_product."'").",";
+		$sql.= " ".(! isset($this->fk_ctar1)?'NULL':"'".addslashes($this->fk_ctar1)."'").",";
+		$sql.= " ".(! isset($this->fk_ctar2)?'NULL':"'".addslashes($this->fk_ctar2)."'").",";
+		$sql.= " ".(! isset($this->fk_cvig)?'NULL':"'".addslashes($this->fk_cvig)."'").",";
+		$sql.= " ".(! isset($this->cont)?'NULL':"'".$this->cont."'").",";
+		$sql.= " ".(! isset($this->alcp)?'NULL':"'".$this->alcp."'")."";
 
         
 		$sql.= ")";
@@ -116,7 +131,7 @@ class C_blocage // extends CommonObject
         
 		if (! $error)
         {
-            $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."c_blocage");
+            $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."c_product_alcool");
     
 			if (! $notrigger)
 			{
@@ -156,20 +171,27 @@ class C_blocage // extends CommonObject
      *    \param      id          id object
      *    \return     int         <0 if KO, >0 if OK
      */
-    function fetch($id)
+    function fetch($id,$fk=0)
     {
     	global $langs;
         $sql = "SELECT";
 		$sql.= " t.rowid,";
 		
-		$sql.= " t.code,";
-		$sql.= " t.libelle,";
-		$sql.= " t.fk_pays,";
-		$sql.= " t.active";
+		$sql.= " t.fk_product,";
+		$sql.= " t.fk_ctar1,";
+		$sql.= " t.fk_ctar2,";
+		$sql.= " t.fk_cvig,";
+		$sql.= " t.cont,";
+		$sql.= " t.alcp";
 
 		
-        $sql.= " FROM ".MAIN_DB_PREFIX."c_blocage as t";
-        $sql.= " WHERE t.rowid = ".$id;
+        $sql.= " FROM ".MAIN_DB_PREFIX."c_product_alcool as t";
+        
+        if($fk){
+        	$sql.= " WHERE t.fk_product = ".$id;
+        }else{
+        	$sql.= " WHERE t.rowid = ".$id;
+        }
     
     	dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
         $resql=$this->db->query($sql);
@@ -181,10 +203,12 @@ class C_blocage // extends CommonObject
     
                 $this->id    = $obj->rowid;
                 
-				$this->code = $obj->code;
-				$this->libelle = $obj->libelle;
-				$this->fk_pays = $obj->fk_pays;
-				$this->active = $obj->active;
+				$this->fk_product = $obj->fk_product;
+				$this->fk_ctar1 = $obj->fk_ctar1;
+				$this->fk_ctar2 = $obj->fk_ctar2;
+				$this->fk_cvig = $obj->fk_cvig;
+				$this->cont = $obj->cont;
+				$this->alcp = $obj->alcp;
 
                 
             }
@@ -214,10 +238,12 @@ class C_blocage // extends CommonObject
     	
 		// Clean parameters
         
-		if (isset($this->code)) $this->code=trim($this->code);
-		if (isset($this->libelle)) $this->libelle=trim($this->libelle);
-		if (isset($this->fk_pays)) $this->fk_pays=trim($this->fk_pays);
-		if (isset($this->active)) $this->active=trim($this->active);
+		if (isset($this->fk_product)) $this->fk_product=trim($this->fk_product);
+		if (isset($this->fk_ctar1)) $this->fk_ctar1=trim($this->fk_ctar1);
+		if (isset($this->fk_ctar2)) $this->fk_ctar2=trim($this->fk_ctar2);
+		if (isset($this->fk_cvig)) $this->fk_cvig=trim($this->fk_cvig);
+		if (isset($this->cont)) $this->cont=trim($this->cont);
+		if (isset($this->alcp)) $this->alcp=trim($this->alcp);
 
         
 
@@ -225,12 +251,14 @@ class C_blocage // extends CommonObject
 		// Put here code to add control on parameters values
 
         // Update request
-        $sql = "UPDATE ".MAIN_DB_PREFIX."c_blocage SET";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."c_product_alcool SET";
         
-		$sql.= " code=".(isset($this->code)?"'".addslashes($this->code)."'":"null").",";
-		$sql.= " libelle=".(isset($this->libelle)?"'".addslashes($this->libelle)."'":"null").",";
-		$sql.= " fk_pays=".(isset($this->fk_pays)?$this->fk_pays:"null").",";
-		$sql.= " active=".(isset($this->active)?$this->active:"null")."";
+		$sql.= " fk_product=".(isset($this->fk_product)?$this->fk_product:"null").",";
+		$sql.= " fk_ctar1=".(isset($this->fk_ctar1)?"'".addslashes($this->fk_ctar1)."'":"null").",";
+		$sql.= " fk_ctar2=".(isset($this->fk_ctar2)?"'".addslashes($this->fk_ctar2)."'":"null").",";
+		$sql.= " fk_cvig=".(isset($this->fk_cvig)?"'".addslashes($this->fk_cvig)."'":"null").",";
+		$sql.= " cont=".(isset($this->cont)?$this->cont:"null").",";
+		$sql.= " alcp=".(isset($this->alcp)?$this->alcp:"null");
 
         
         $sql.= " WHERE rowid=".$this->id;
@@ -287,7 +315,7 @@ class C_blocage // extends CommonObject
 		global $conf, $langs;
 		$error=0;
 		
-		$sql = "DELETE FROM ".MAIN_DB_PREFIX."c_blocage";
+		$sql = "DELETE FROM ".MAIN_DB_PREFIX."c_product_alcool";
 		$sql.= " WHERE rowid=".$this->id;
 	
 		$this->db->begin();
@@ -343,7 +371,7 @@ class C_blocage // extends CommonObject
 		
 		$error=0;
 		
-		$object=new C_blocage($this->db);
+		$object=new C_product_alcool($this->db);
 
 		$this->db->begin();
 
@@ -394,94 +422,39 @@ class C_blocage // extends CommonObject
 	{
 		$this->id=0;
 		
-		$this->code='';
-		$this->libelle='';
-		$this->fk_pays='';
-		$this->active='';
+		$this->fk_product='';
+		$this->fk_ctar1='';
+		$this->fk_ctar2='';
+		$this->fk_cvig='';
+		$this->cont='';
+		$this->alcp='';
 
 		
 	}
 	
-	function printBlockCode(){
-		$out = "";
-		$out = $this->code . " - " . $this->libelle;
-		if($this->libelle == ""){
-			$out = "";
-		}
-		return $out;
-	}
-	
-	
-	
-	/**
-	 *    	\brief      Return an html string with a select combo box to choose from load_cache_blockcode
-	 *    	\param      htmlname            Name of html select field
-	 *    	\param      selected           Pre-selected value
-	 *  	\param      addempty        add blank option
-	 * 		\return		string			form select field
-	 */
-	function select_blockcode($selected='',$htmlname='condid',$addempty=0)
-	{
-		global $langs,$user;
-	
-		$this->load_cache_blockcode();
-		$input = "";
-		$input .= '<select class="flat" name="'.$htmlname.'">';
-		if ($addempty) $input .= "<option value=''>&nbsp;</option>";
-		foreach($this->cache_blockcode as $id => $arrayconditions)
-		{
-			$code = $arrayconditions['code'];
-			if ($selected == $id)
-			{
-				$input .= '<option value="'.$id.'" selected="true">';
-			}
-			else
-			{
-				$input .= '<option value="'.$id.'">';
-			}
-			$input .= $arrayconditions['code'] . " - " . $arrayconditions['label'];
-			$input .= '</option>';
-		}
-		$input .= '</select>';
-		if ($user->admin) $input .= info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionnarySetup"),1);
-		return $input;
-	}
-	
-/**
-	 *      \brief      Charge dans cache la liste des code de taxes parafiscales
-	 *      \return     int             Nb lignes chargees, 0 si deja chargees, <0 si ko
-	 */
-	function load_cache_blockcode()
-	{
+function form_inputField($field,$html_name){
 		global $langs;
 
-		if (sizeof($this->cache_blockcode)) return 0;    // Cache deja charge
-
-		$sql = "SELECT rowid as id, code, libelle";
-		$sql.= " FROM ".MAIN_DB_PREFIX."c_blocage";
-		$sql.= " WHERE active > 0";
-		$sql.= " ORDER BY code ASC";
-		dol_syslog('c_blocage::load_cache_codeblock sql='.$sql,LOG_DEBUG);
-		$resql = $this->db->query($sql);
-		if ($resql)
-		{
-			$num = $this->db->num_rows($resql);
-			$i = 0;
-			while ($i < $num)
-			{
-				$obj = $this->db->fetch_object($resql);
-				$this->cache_blockcode[$obj->id]['code'] =$obj->code;
-				$this->cache_blockcode[$obj->id]['label']=$obj->libelle;
-				$i++;
-			}
-			return $num;
+		
+		
+		$input = "";
+		$input .= '<tr><td width="15%">';
+		$input .= $langs->trans($html_name);
+		$input .= '</td>';
+		$input .= '<td>';
+		if( strpos($field, "fk_") !== false) {
+			$c_taxe = new C_taxe($this->db);
+			$input .= $c_taxe->select_taxecode($this->$field, $html_name, 1);
+		}elseif( in_array($field, $this->editable_fields) ){
+			$input .= '<input type="text" name="'.$html_name.'" size="25" value="'.$this->$field.'"> ';
+		}else{
+			return "";
 		}
-		else {
-			dol_print_error($this->db);
-			return -1;
-		}
+		$input .= '</td>';
+		$input .= '</tr>';
+		
+		return $input;
 	}
-	
 
 }
 ?>

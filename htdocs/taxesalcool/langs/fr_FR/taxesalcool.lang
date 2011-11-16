@@ -1,0 +1,10 @@
+# Language file - fr_FR - taxesalcool
+CHARSET=UTF-8
+libelle_ctar1= Code taxe REGIE 1
+libelle_ctar2= Code taxe REGIE 2
+libelle_cvig = Code taxe vignette SS
+cont	= Contenance en Litre
+alcp	= Pourcentage d'alcool pur
+EditAlcoholTaxes=Editer les taxes alcool pour ce produit
+Module1334Name=Taxes Alcool
+Module1334Desc=(Wilfrid TODO in trans) Taxes Alcool (Octroi de mer, taxe1, taxe2)

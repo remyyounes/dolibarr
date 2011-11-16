@@ -1,0 +1,8 @@
+# Language file - fr_FR - taxe
+CHARSET=UTF-8
+Mont=Montant
+Cdouane=Code Douane
+Taxetype=Type de Taxe
+Taxe=Taxes Additionnelles
+Module1331Name=Taxes Additionnelles
+Module1331Desc=(Wilfrid TODO in trans) Description du module Taxes Additionnelles

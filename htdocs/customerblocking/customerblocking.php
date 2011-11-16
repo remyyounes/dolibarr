@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2007 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
+ * Copyright (C) 2011 Remy Younes <ryounes@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,11 @@
  */
 
 /**
- *   	\file       dev/skeletons/skeleton_page.php
- *		\ingroup    mymodule othermodule1 othermodule2
- *		\brief      This file is an example of a php page
- *		\version    $Id: skeleton_page.php,v 1.8 2009/03/09 11:28:12 eldy Exp $
- *		\author		Put author name here
- *		\remarks	Put here some comments
+ *   	\file       customerblocking/customerblocking.php
+ *		\ingroup    customerblocking
+ *		\brief      This file is the tab page for the customerblocking module
+ *		\version    $Id: customerblocking.php,v 1.0 2011/11/14 11:28:12 remyyounes Exp $
+ *		\author		Remy Younes
  */
 
 require("../main.inc.php");
@@ -31,13 +30,13 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/functions.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/user/class/user.class.php");
 
-// Load traductions files required by by page
+$module = 'customerblocking';
 $langs->load("companies");
-$langs->load("customerblocking@customerblocking");
+$langs->load($module.'@'.$module);
 $action		= (GETPOST('action') ? GETPOST('action') : 'view');
 $confirm	= GETPOST('confirm');
 $socid		= GETPOST("socid");
-$currentmodule = "societe";
+$parentmodule = "societe";
 $customfields_table = "customerblocking";
 
 if ($user->societe_id) $socid=$user->societe_id;
@@ -47,23 +46,8 @@ foreach ($_POST as $key=>$value) { // Generic way to fill all the fields to the 
     $object->$key = $value;
 }
 
-// Get object canvas (By default, this is not defined, so standard usage of dolibarr)
-$object->getCanvas($socid);
-$canvas = $object->canvas?$object->canvas:GETPOST("canvas");
-if (! empty($canvas))
-{
-    require_once(DOL_DOCUMENT_ROOT."/core/class/canvas.class.php");
-    $objcanvas = new Canvas($db, $action);
-    $objcanvas->getCanvas('thirdparty', 'card', $canvas);
-}
-
 // Security check
-$result = restrictedArea($user, 'societe', $socid, '', '', '', '', $objcanvas);
-
-// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-//include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
-//$hookmanager=new HookManager($db);
-//$hookmanager->callHooks(array('thirdpartyblocking'));
+$result = restrictedArea($user, 'societe', $socid);
 
 /*******************************************************************
  * ACTIONS
@@ -74,8 +58,8 @@ if ($_POST["action"] == 'update' && ! $_POST["cancel"] )
     $object->fetch($socid);
     //update
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
-    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
-    $upd = $customfields->create($object);
+    $customfields = new CustomFields($db, $parentmodule, $customfields_table);
+    $upd = $customfields->create($object,0,1);
      
     //display status message from update/create
     if ($upd > 0){
@@ -102,9 +86,6 @@ if ($socid > 0)
 {
     $object->fetch($socid);
 
-    /*
-     * Affichage onglets
-     */
     if ($conf->notification->enabled) $langs->load("mails");
 
     $head = societe_prepare_head($object);
@@ -112,25 +93,26 @@ if ($socid > 0)
 
     if ($action == 'edit')
     {
-        print '<form action="customerblocking.php?socid='.$socid.'" method="post">';
+        print '<form action="'.$module.'.php?socid='.$socid.'" method="post">';
         print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
         print '<input type="hidden" name="action" value="update">';
         print '<input type="hidden" name="id" value="'.$socid.'">';
 
     }
+
     // En mode visu
     print '<table class="border" width="100%">';
     
-    //name
+    // Name
     print '<tr><td>'.$langs->trans('Name').'</td>';
     print '<td colspan="3">';
     print $form->showrefnav($object,'socid','',1,'rowid','nom');
     print '</td></tr>';
 
-    //prefix
+    // Prefix
     print '<tr><td>'.$langs->trans('Prefix').'</td><td colspan="3">'.$object->prefix_comm.'</td></tr>';
 
-    //tier code
+    // Tier code
     if ($object->client)
     {
         print '<tr><td>';
@@ -152,24 +134,23 @@ if ($socid > 0)
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
 
-    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
+    $customfields = new CustomFields($db, $parentmodule, $customfields_table);
     $rights = 1;
     $idvar = "id";
-    
-    $fields_data = customfields_load_main_form($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
-    printCustomForm($fields_data);
+
+    $fields_data = customfields_load_main_form($parentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
+    include('canvas/tpl/datasheet.tpl.php');
     
     if ($action == 'edit')
     {
         print '<tr><td colspan="4" align="center"><input type="submit" class="button" value="'.$langs->trans("Save").'">';
         print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'"></td></tr>';
     }
-    
+
     print "</table>";
     if ($action == 'edit'){
         print "</form>";
     }
-
 }
 
 print '</div>';
@@ -187,7 +168,7 @@ if (empty($action) || $action != 'edit')
 
     if ($user->rights->societe->creer)
     {
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/customerblocking/customerblocking.php?action=edit&amp;socid='.$socid.'">'.$langs->trans("Editer les parametres de blocage").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/'.$module.'/'.$module.'.php?action=edit&amp;socid='.$socid.'">'.$langs->trans("Editer les parametre de blocage").'</a>';
     }
 
     print "\n</div>\n";
@@ -208,25 +189,15 @@ if ($socid > 0)
     print "</br>";
     include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
     include_once(DOL_DOCUMENT_ROOT.'/customfields/lib/customfields.lib.php');
-    $customfields = new CustomFields($db, $currentmodule, $customfields_table);
+    $customfields = new CustomFields($db, $parentmodule, $customfields_table);
     $rights = 1;
     $idvar = "socid";
-    customfields_print_log($currentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
+    customfields_print_log($parentmodule, $object, $action, $user, $idvar, $rights, $customfields_table);
     
 }
 
 // End of page
 $db->close();
 llxFooter();
-//TODO: CANVAS or TEMPLATE
-function printCustomForm($fields_data){
-    print '<tr>';
-    print '<td width="15%">'.$fields_data['libelle_blockingcode']['label'].'</td>'.'<td>'.$fields_data['libelle_blockingcode']['data'].'</td>';
-    print '</tr><tr>';
-    print '<td width="15%">'.$fields_data['plafond']['label'].'</td>'.'<td>'.$fields_data['plafond']['data'].'</td>';
-    print '</tr><tr>';
-    print '<td>'.$fields_data['depassement']['label'].'</td>'.'<td>'.$fields_data['depassement']['data'].'</td>';
-    print'</tr>';
-}
 
 ?>

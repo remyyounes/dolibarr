@@ -18,10 +18,10 @@
  */
 
 /**
- *   	\file       productunits/productunits.php
- *		\ingroup    productunits
- *		\brief      This file is the tab page for the productunits module
- *		\version    $Id: productunits.php,v 1.0 2011/11/14 11:28:12 remyyounes Exp $
+ *   	\file       taxesalcool/taxesalcool.php
+ *		\ingroup    taxesalcool
+ *		\brief      This file is the tab page for the taxesalcool module
+ *		\version    $Id: taxesalcool.php,v 1.0 2011/11/14 11:28:12 remyyounes Exp $
  *		\author		Remy Younes
  */
 
@@ -33,7 +33,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/class/extrafields.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/product.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
-$module = 'productunits';
+$module = 'taxesalcool';
 $langs->load("products");
 $langs->load($module.'@'.$module);
 $langs->load("other");
@@ -47,7 +47,7 @@ $confirm=GETPOST('confirm');
 $socid=GETPOST("socid");
 if ($user->societe_id) $socid=$user->societe_id;
 $parentmodule = "product";
-$customfields_table = "units";
+$customfields_table = "taxesalcool";
     
 $object = new Product($db);
 $extrafields = new ExtraFields($db);
