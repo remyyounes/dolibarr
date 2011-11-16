@@ -242,7 +242,7 @@ if ($resql)
 		print '<td nowrap>';
 		$facturestatic->id=$obj->facid;
 		$facturestatic->ref=$obj->ref;
-		$facturestatic->ref_ext=$obj->ref_ext;
+		$facturestatic->ref_ext=$obj->ref_ext?$obj->ref_ext:"(PROV".$obj->ref.")";
 		$facturestatic->ref_supplier=$obj->facnumber;
 		print $facturestatic->getNomUrl(1);
 		print "</td>\n";

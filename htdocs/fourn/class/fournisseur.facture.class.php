@@ -305,7 +305,7 @@ class FactureFournisseur extends Facture
 
                 $this->id    = $obj->rowid;
                 $this->ref   = $obj->rowid;
-                $this->ref_ext = $obj->ref_ext?$obj->ref_ext:$this->ref;
+                $this->ref_ext = $obj->ref_ext?$obj->ref_ext:"(PROV".$this->ref.")";
                 
                 $this->ref_supplier = $obj->facnumber;
                 $this->facnumber = $obj->facnumber;
