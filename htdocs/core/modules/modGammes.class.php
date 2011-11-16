@@ -19,42 +19,42 @@
  */
 
 /**
- * 		\defgroup   taxe     Module taxe
- *      \brief      Module used to define extra taxes needed by 3rd party tax modules
- *      \file       htdocs/includes/modules/modTaxe.class.php
- *      \ingroup    taxe
- *      \brief      Description and activation file for Taxe module 
+ * 		\defgroup   gammes    Module gammes
+ *      \brief      Module used to edit range
+ *      \file       htdocs/includes/modules/modGammes.class.php
+ *      \ingroup    gammes
+ *      \brief      Description and activation file for Gamme module 
  */
 include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
 
 
 /**
- * 		\class      modTaxe
- *      \brief      Description and activation class for module Taxe
+ * 		\class      modGammes
+ *      \brief      Description and activation class for module Gammes
  */
-class modTaxe extends DolibarrModules
+class modGammes extends DolibarrModules
 {
 	/**
 	 *   Constructor. Define names, constants, directories, boxes, permissions
 	 *
 	 *   @param      DoliDB		$DB      Database handler
 	 */
-	function modTaxe($DB)
+	function modGammes($DB)
 	{
         global $langs,$conf;
 
         $this->db = $DB;
 
-		$this->numero = 1331;
+		$this->numero = 1355;
 		$this->family = "products";
 		$this->name = preg_replace('/^mod/i','',get_class($this));
-		$this->description = "Description of module Taxe";
+		$this->description = "Description of module Gammes";
 		$this->version = "1.1";//'dolibarr';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->special = 0;
 		
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
-		$this->picto='bill';
+		$this->picto = $this->picto='picto@gammes';
 
 		// Defined if the directory /mymodule/includes/triggers/ contains triggers or not
 		$this->triggers = 1;
@@ -69,12 +69,11 @@ class modTaxe extends DolibarrModules
 		//$this->config_page_url = array("mymodulesetuppage.php");
 
 		// Dependencies
-		//TODO: fill depends array with proper values ("makinalib, etc...)
-		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
-		$this->requiredby = array('modTaxesParafiscales','modTaxesAlcool');	// List of modules id to disable if this one is disabled
+		$this->depends = array('modCustomFields');		// List of modules id that must be enabled if this module is enabled
+		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("taxe@taxe");
+		$this->langfiles = array("gammes@gammes");
 
 		// Constants
 		// List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -82,23 +81,23 @@ class modTaxe extends DolibarrModules
 		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0)
 		//                             2=>array('MAIN_MODULE_MYMODULE_HOOKS','chaine','hookcontext1:hookcontext2','To say: This module manage hooks in hookcontext1 and hookcontext2',1,'current',1)
 		// );
-		$this->const = array(0=>array('MAIN_MODULE_TAXE_HOOKS','chaine','admin','This module manage hooks in the dictionary management page',1,'current',1));
+		$this->const = array(0=>array('MAIN_MODULE_GAMMES_HOOKS','chaine','produitdao','This module manage hooks in productdao',1,'current',1));
 		
-		// Ta
-        $this->tabs = array();
+		// Tabs
+        $this->tabs = array('product:+gammes:Gammes:@gammes:$user->rights->gammes->read:/gammes/gammes.php?id=__ID__');
 
         // Dictionnaries
         $this->dictionnaries=array(
-            'langs'=>'taxe@taxe',
-            'tabname'=>array(MAIN_DB_PREFIX."c_taxe"),
-            'tablib'=>array("Taxe"),
-            'tabsql'=>array("SELECT t.rowid as rowid, p.libelle as pays, p.code as pays_code, t.code, t.libelle, t.taxetype, t.active,t.mont, t.cdouane FROM ".MAIN_DB_PREFIX."c_taxe as t,  llx_c_pays as p WHERE t.fk_pays=p.rowid"),
-            'tabsqlsort'=>array("code ASC"),
-            'tabfield'=>array("code,libelle,pays_id,pays,taxetype,mont,cdouane"),
-            'tabfieldvalue'=>array("code,libelle,pays,taxetype,mont,cdouane"),
-            'tabfieldinsert'=>array("code,libelle,fk_pays,taxetype,mont,cdouane"),
+            'langs'=>'gammes@gammes',
+            'tabname'=>array(MAIN_DB_PREFIX."c_gamme"),
+            'tablib'=>array("Gammes"),
+            'tabsql'=>array("SELECT t.rowid as rowid, p.libelle as pays, p.code as pays_code, t.cgam, t.libelle, t.active FROM ".MAIN_DB_PREFIX."c_gamme as t,  llx_c_pays as p WHERE t.fk_pays=p.rowid"),
+            'tabsqlsort'=>array("cgam ASC"),
+            'tabfield'=>array("cgam,libelle,pays_id,pays"),
+            'tabfieldvalue'=>array("cgam,libelle,pays"),
+            'tabfieldinsert'=>array("cgam,libelle,fk_pays"),
             'tabrowid'=>array("rowid"),
-            'tabcond'=>array($conf->taxe->enabled)
+            'tabcond'=>array($conf->gammes->enabled)
         );
 
         // Boxes
@@ -106,19 +105,19 @@ class modTaxe extends DolibarrModules
 
 		// Permissions
 		// Key text used to identify module (for permissions, menus, etc...)
-		$this->rights_class = 'taxe';
+		$this->rights_class = 'gammes';
 		$this->rights = array();		// Permission array used by this module
 		
 		$r=0;
-		$this->rights[$r][0] = 99021;
-		$this->rights[$r][1] = 'Lire le dictionnaire des taxes externes';
+		$this->rights[$r][0] = 99083;
+		$this->rights[$r][1] = 'Lire les informations liees aux gammes';
 		$this->rights[$r][2] = 'r';
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'read';
 		
 		$r++;
-		$this->rights[$r][0] = 99022;
-		$this->rights[$r][1] = 'Modifier le dictionnaire des taxes externes';
+		$this->rights[$r][0] = 99084;
+		$this->rights[$r][1] = 'Modifier les gammes';
 		$this->rights[$r][2] = 'w';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'write';
@@ -142,7 +141,7 @@ class modTaxe extends DolibarrModules
 		$sql = array();
 
 		$result=$this->load_tables();
-
+		$this->initCustomFields();
 		return $this->_init($sql);
 	}
 
@@ -156,21 +155,44 @@ class modTaxe extends DolibarrModules
 	 */
 	function remove($options='')
 	{
-		$sql = array();
-
-		return $this->_remove($sql);
+		$sql = array("DROP TABLE ".MAIN_DB_PREFIX."product_gamme");
+        return $this->_remove($sql);
 	}
 
 
 	/**
-	 *		Create tables, keys and data required by taxe module
+	 *		Create tables, keys and data required by gammes module
 	 *		This function is called by this->init
 	 *
 	 * 		@return		int		<=0 if KO, >0 if OK
 	 */
 	function load_tables()
 	{
-		return $this->_load_tables('/taxe/sql/');
+		return $this->_load_tables('/gammes/sql/');
+	}
+	
+	function initCustomFields(){
+	    require_once(DOL_DOCUMENT_ROOT."/customfields/lib/customfields.lib.php");
+	    require_once(DOL_DOCUMENT_ROOT."/customfields/class/customfields.class.php");
+	    $customfields = new CustomFields($this->db, "product", "gamme");
+	    $customfields->initCustomFields();
+	    
+	    $type = "other";
+	    $size = "";
+	    $nulloption = "";
+	    $defaultvalue = null;
+	    $constraint = MAIN_DB_PREFIX."c_gamme";
+	    $customtype = null;
+	    $customdef = null;
+	    $customsql = null;
+	    $fieldid = null;
+	    $notrigger = 0;
+	    
+	    $fieldname ="libelle_gamme1";
+	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
+	
+	    $fieldname ="libelle_gamme2";
+	    $customfields->addCustomField($fieldname, $type, $size, $nulloption, $defaultvalue, $constraint, $customtype, $customdef, $customsql, $fieldid, $notrigger);
 	}
 }
 
