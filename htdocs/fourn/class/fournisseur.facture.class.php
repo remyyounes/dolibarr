@@ -769,8 +769,10 @@ class FactureFournisseur extends Facture
         if ($force_number)
         {
             $num = $force_number;
+        }else if(!empty($conf->supplierinvoicenumbering) && $conf->supplierinvoicenumbering->enabled){
+            $num = $this->getNextNumRef($this->client);
         }
-        else if (preg_match('/^[\(]?PROV/i', $this->ref) || 1)
+        else if (preg_match('/^[\(]?PROV/i', $this->ref))
         {
             $num = $this->getNextNumRef($this->client);
         }
@@ -1370,19 +1372,53 @@ class FactureFournisseur extends Facture
     }
     
     /**
-    *  Renvoie la reference de facture_fourn suivante non utilisee en fonction du modele
-    *                  de numerotation actif defini dans FOURN_SUPPLIER_ADDON
+    *  Renvoie la reference de Facture suivante non utilisee en fonction du modele
+    *                  de numerotation actif defini dans FACTURE_SUPPLIER_ADDON
     *  @param	    soc  		            objet societe
     *  @return     string                  reference libre pour la facture
     */
     function getNextNumRef($soc)
     {
         global $db, $langs, $conf;
-        require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
-        $langs->load("orders");
-        $mask = "FF{yy}{mm}-{0000}";
-        $numFinal=get_next_value($db,$mask,'facture_fourn','ref_ext','',$soc->code_fournisseur,$this->datec);
-        return $numFinal;
+    
+        $dir = DOL_DOCUMENT_ROOT .'/core/modules/supplier_invoice/';
+        if (! empty($conf->global->FACTURE_SUPPLIER_ADDON))
+        {
+            $file = $conf->global->FACTURE_SUPPLIER_ADDON.'.php';
+    
+            if (is_readable($dir.'/'.$file))
+            {
+                // Definition du nom de modele de numerotation de facture fournisseur
+                $modName=$conf->global->FACTURE_SUPPLIER_ADDON;
+                require_once($dir.'/'.$file);
+    
+                // Recuperation de la nouvelle reference
+                $objMod = new $modName($this->db);
+    
+                $numref = "";
+                $numref = $objMod->facture_get_num($soc,$this);
+    
+                if ( $numref != "")
+                {
+                    return $numref;
+                }
+                else
+                {
+                    dol_print_error($db,"FactureFournisseur::getNextNumRef ".$obj->error);
+                    return -1;
+                }
+            }
+            else
+            {
+                print $langs->trans("Error")." ".$langs->trans("Error_FailedToLoad_FACTURE_SUPPLIER_ADDON_File",$conf->global->FACTURE_SUPPLIER_ADDON);
+                return -2;
+            }
+        }
+        else
+        {
+            print $langs->trans("Error")." ".$langs->trans("Error_FACTURE_SUPPLIER_ADDON_NotDefined");
+            return -3;
+        }
     }
     
 
