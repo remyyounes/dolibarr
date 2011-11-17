@@ -1372,6 +1372,7 @@ class FactureFournisseur extends Facture
     }
     
     /**
+     * Only Works if SupplierInvoiceNumbering is enabled
     *  Renvoie la reference de Facture suivante non utilisee en fonction du modele
     *                  de numerotation actif defini dans FACTURE_SUPPLIER_ADDON
     *  @param	    soc  		            objet societe
@@ -1380,7 +1381,10 @@ class FactureFournisseur extends Facture
     function getNextNumRef($soc)
     {
         global $db, $langs, $conf;
-    
+
+        if(empty($conf->supplierinvoicenumbering) || !$conf->supplierinvoicenumbering->enabled){
+            return $this->ref;
+        }
         $dir = DOL_DOCUMENT_ROOT .'/core/modules/supplier_invoice/';
         if (! empty($conf->global->FACTURE_SUPPLIER_ADDON))
         {
