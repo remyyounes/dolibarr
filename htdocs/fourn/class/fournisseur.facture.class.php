@@ -1380,7 +1380,7 @@ class FactureFournisseur extends Facture
         global $db, $langs, $conf;
         require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
         $langs->load("orders");
-        $mask = "FF{dd}{mm}{yy}{0000}";
+        $mask = "FF{yy}{mm}-{0000}";
         $numFinal=get_next_value($db,$mask,'facture_fourn','ref_ext','',$soc->code_fournisseur,$this->datec);
         return $numFinal;
     }
