@@ -310,7 +310,7 @@ if ($object->fetch($id))
 	if ($user->rights->fournisseur->facture->lire)
 	{
 		// TODO move to DAO class
-		$sql = 'SELECT f.rowid,f.libelle,f.facnumber,f.fk_statut,f.datef as df,f.total_ttc as amount,f.paye,';
+		$sql = 'SELECT f.rowid,f.ref_ext,f.libelle,f.facnumber,f.fk_statut,f.datef as df,f.total_ttc as amount,f.paye,';
 		$sql.= ' SUM(pf.amount) as am';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'facture_fourn as f';
 		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiementfourn_facturefourn as pf ON f.rowid=pf.fk_facturefourn';
@@ -337,10 +337,11 @@ if ($object->fetch($id))
 			{
 				$obj = $db->fetch_object($resql);
 				$var=!$var;
+				$line_ref = $obj->ref_ext ? $obj->ref_ext : "(PROV".$obj->rowid.")";
 				print '<tr '.$bc[$var].'>';
 				print '<td>';
 				print '<a href="facture/fiche.php?facid='.$obj->rowid.'">';
-				print img_object($langs->trans('ShowBill'),'bill').' '.$obj->facnumber.'</a> '.dol_trunc($obj->libelle,14).'</td>';
+				print img_object($langs->trans('ShowBill'),'bill').' '.$line_ref.'</a> '.dol_trunc($obj->libelle,14).'</td>';
 				print '<td align="center" nowrap="nowrap">'.dol_print_date($db->jdate($obj->df),'day').'</td>';
 				print '<td align="right" nowrap="nowrap">'.price($obj->amount).'</td>';
 				print '<td align="right" nowrap="nowrap">';
