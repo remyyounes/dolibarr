@@ -4,3 +4,4 @@ SupplierInvoiceNumberingSetup=Configuration de la numerotation des factures (Fou
 InvoiceNumberingModules=Modèles de numérotation des factures
 Module1771Name=Numerotation Facture Fournisseur
 Module1771Desc=(Wilfrid TODO in trans) Configuration de la numérotation des factures (fournisseur)
+SuppliersInvoiceModelCoco=Modèle de factures fournisseur complet (logo...) - Necessaire pour afficher un numero de facture correct
