@@ -1135,6 +1135,7 @@ function print_left_eldy_menu($db,$menu_array_before,$menu_array_after)
                 if ($leftmenu=="sendings") $newmenu->add("/expedition/stats/index.php?leftmenu=sendings", $langs->trans("Statistics"), 1, $user->rights->expedition->lire);
             }
 
+            include_once(DOL_DOCUMENT_ROOT ."/stockoperation/includes/menu_left.php");
         }
 
 

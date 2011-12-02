@@ -1,0 +1,7 @@
+# Language file - fr_FR - stockoperation
+CHARSET=UTF-8
+Module1772Name=Operation Stock
+Module1772Desc=(Wilfrid TODO in trans) Operation Stock
+NewStockEntryRecord=Nouvelle Entrée Stock
+MiscOperations=Operations Diverses
+Inventory=Inventaire
