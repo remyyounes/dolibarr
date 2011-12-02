@@ -208,7 +208,7 @@ function customfields_print_main_form($currentmodule, $object, $action, $user, $
  *      @param      customfields_table        	Replace the '_customfields' postfix
  *      @return     void        returns nothing because this is a procedure : it just does what we want
  */
-function customfields_load_main_form($currentmodule, $object, $action, $user, $idvar = 'id', $rights = null, $customfields_table = '') {
+function customfields_load_main_form($currentmodule, $object, $action, $user, $idvar = 'id', $rights = null, $customfields_table = '', $rowid = 0) {
     global $db, $langs, $conf;
 
     // Init and main vars
@@ -220,9 +220,16 @@ function customfields_load_main_form($currentmodule, $object, $action, $user, $i
     if ($customfields->probeCustomFields()) { // ... and if the table for this module exists, we show the custom fields
 
         // == Fetching customfields
-        $fields = $customfields->fetchAllCustomFields(); // fetching the customfields list
-        $datas = $customfields->fetch($object->id); // fetching the record - the values of the customfields for this id (if it exists)
-        $datas->id = $object->id; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
+        $fields = $customfields->fetchAllCustomFields(1); // fetching the customfields list
+        $dataid = $rowid ? $rowid : $object->id;
+        if($rowid){
+            $dataid = $rowid;
+            $datas = $customfields->fetchByRowid($dataid); // fetching the record - the values of the customfields for this id (if it exists)
+        }else{
+            $dataid = $object->id;
+            $datas = $customfields->fetch($dataid); // fetching the record - the values of the customfields for this id (if it exists)
+        }
+        $datas->id = $dataid; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
 
         foreach ($fields as $field) { // for each customfields, we will print/save the edits
 

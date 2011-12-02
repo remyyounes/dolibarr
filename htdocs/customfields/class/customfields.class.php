@@ -99,6 +99,72 @@ class CustomFields // extends CommonObject
 
 	//--------------- Main Functions ---------------------
 
+	function fetchByRowid($rowid, $trigger=0)
+	{
+	    // Get all the columns (custom fields), primary field included (that's why there's the true)
+	    //if log is enabled then we want to fetch autofields as well
+	    $fields = $this->fetchAllCustomFields(true,0, $log);
+	    
+	    // Forging the SQL statement - we set all the column_name to fetch (because Dolibarr wants to avoid SELECT *, so we must name the columns we fetch)
+	    foreach ($fields as $field) {
+	        $keys[] = $field->column_name;
+	    }
+	    $sqlfields = implode(',',$keys);
+	    
+	    $sql = "SELECT ".$sqlfields." FROM ".$this->moduletable . " WHERE rowid = " . $rowid;
+	    
+	    
+	    // Trigger or not?
+	    if ($notrigger) {
+	        $trigger = null;
+	    } else {
+	        $trigger = strtoupper($this->module).'_CUSTOMFIELD_FETCHRECORDBYROWID';
+	    }
+	    
+	    // Executing the SQL statement
+	    $resql = $this->executeSQL($sql, 'fetchRecord_CustomFields',$trigger);
+	    
+	    // Filling the record object
+	    if ($resql < 0) {
+	        // if there's an error
+	        return $resql; // we return the error code
+	    } else { // else we fill the record
+	        $num = $this->db->num_rows($resql); // number of results returned (number of records)
+	        // Several records returned = array() of objects
+	        if ($num > 1) {
+	            // Find the primary field (so that we can set the record's id)
+	            $prifield = $this->fetchPrimaryField($this->moduletable);
+	            $rowid = $prifield->column_name;
+	    
+	            $record = array();
+	            for ($i=0;$i < $num;$i++) {
+	                $obj = $this->db->fetch_object($resql);
+	                $obj->id = $obj->$prifield; // set the record's id
+	                $record[$obj->id] = $obj; // add the record to our records' array
+	            }
+	            $this->records = $record; // and we as well store the records as a property of the CustomFields class
+	            // Only one record returned = one object
+	        } elseif ($num == 1) {
+	            $record = $this->db->fetch_object($resql);
+	    
+	            // If we get only 1 result and $id is not set, this means that we are not looking for a particular record, we are fetching all records but we find only one. In this case, we must find the id by ourselves.
+	            if (!isset($id)) {
+	                $prifield = $this->fetchPrimaryField($this->moduletable); // find the primary field of the table
+	                $id = $record->$prifield; // set the id
+	            }
+	    
+	            $record->id = $id; // set the record's id
+	            $this->id = $id;
+	            // No record returned = null
+	        } else {
+	            $record = null;
+	        }
+	        $this->db->free($resql);
+	    
+	        // Return the field(s) or null
+	        return $record;
+	    }
+	}
 	/**
 	 *      Fetch a record (or all records) from the database (meaning an instance of the custom fields, the values if you prefer)
 	 *      @param	   id				id of the record to find (NOT rowid but fk_moduleid) - can be left empty if you want to fetch all the records
@@ -1160,7 +1226,7 @@ class CustomFields // extends CommonObject
 			if ($type == 'varchar') {
 				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			} elseif ($type == 'text') {
-				require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
+				require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 				$doleditor=new DolEditor($this->varprefix.$key,$currentvalue,'',200,'dolibarr_notes','In',false,false,$conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE,5,100);
 				$out.=$doleditor->Create(1);
 			} elseif ($type == 'date') {
