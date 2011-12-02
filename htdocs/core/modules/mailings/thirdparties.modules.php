@@ -40,7 +40,7 @@ class mailing_thirdparties extends MailingTargets
 	/**
 	 *	Constructor
 	 *
-	 *  @param		DoliDB		$DB      Database handler
+	 *  @param		DoliDB		$db      Database handler
 	 */
 	function mailing_thirdparties($db)
 	{
@@ -49,10 +49,11 @@ class mailing_thirdparties extends MailingTargets
 
 
 	/**
-	 *    \brief      This is the main function that returns the array of emails
-	 *    \param      mailing_id    Id of mailing. No need to use it.
-	 *    \param      filterarray   If you used the formFilter function. Empty otherwise.
-	 *    \return     int           <0 if error, number of emails added if ok
+	 *    This is the main function that returns the array of emails
+	 *
+	 *    @param	int		$mailing_id    	Id of mailing. No need to use it.
+	 *    @param	array	$filterarray   	If you used the formFilter function. Empty otherwise.
+	 *    @return   int 					<0 if error, number of emails added if ok
 	 */
 	function add_to_target($mailing_id,$filtersarray=array())
 	{
@@ -60,20 +61,35 @@ class mailing_thirdparties extends MailingTargets
 
 		$cibles = array();
 
-		// CHANGE THIS
 		// Select the third parties from category
-		$sql = "SELECT s.rowid as id, s.email as email, s.nom as name, null as fk_contact, null as firstname,";
-		if ($_POST['filter']) $sql.= " llx_categorie.label as label";
-		else $sql.=" null as label";
-		$sql.= " FROM llx_societe as s";
-		if ($_POST['filter']) $sql.= " LEFT JOIN llx_categorie_societe ON llx_categorie_societe.fk_societe=s.rowid";
-		if ($_POST['filter']) $sql.= " LEFT JOIN llx_categorie ON llx_categorie.rowid = llx_categorie_societe.fk_categorie";
-		$sql.= " WHERE s.email != ''";
-		$sql.= " AND s.entity = ".$conf->entity;
-		if ($_POST['filter']) $sql.= " AND llx_categorie.rowid='".$_POST['filter']."'";
-		$sql.= " ORDER BY s.email";
+		if (empty($_POST['filter']))
+		{
+		    $sql = "SELECT s.rowid as id, s.email as email, s.nom as name, null as fk_contact, null as firstname, null as label";
+		    $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
+		    $sql.= " WHERE s.email != ''";
+		    $sql.= " AND s.entity = ".$conf->entity;
+		}
+		else
+		{
+		    $sql = "SELECT s.rowid as id, s.email as email, s.nom as name, null as fk_contact, null as firstname, c.label as label";
+		    $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."categorie_societe as cs, ".MAIN_DB_PREFIX."categorie as c";
+		    $sql.= " WHERE s.email != ''";
+		    $sql.= " AND s.entity = ".$conf->entity;
+		    $sql.= " AND cs.fk_societe = s.rowid";
+		    $sql.= " AND c.rowid = cs.fk_categorie";
+		    $sql.= " AND c.rowid='".$this->db->escape($_POST['filter'])."'";
+		    $sql.= " UNION ";
+		    $sql.= "SELECT s.rowid as id, s.email as email, s.nom as name, null as fk_contact, null as firstname, c.label as label";
+		    $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."categorie_fournisseur as cs, ".MAIN_DB_PREFIX."categorie as c";
+		    $sql.= " WHERE s.email != ''";
+		    $sql.= " AND s.entity = ".$conf->entity;
+		    $sql.= " AND cs.fk_societe = s.rowid";
+		    $sql.= " AND c.rowid = cs.fk_categorie";
+		    $sql.= " AND c.rowid='".$this->db->escape($_POST['filter'])."'";
+		}
+		$sql.= " ORDER BY email";
 
-		// Stocke destinataires dans cibles
+		// Stock recipients emails into targets table
 		$result=$this->db->query($sql);
 		if ($result)
 		{

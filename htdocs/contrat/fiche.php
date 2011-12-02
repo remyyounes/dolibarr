@@ -290,7 +290,7 @@ if ($action == 'addline' && $user->rights->contrat->creer)
 
         if($price_min && (price2num($pu_ht)*(1-price2num($_POST['remise_percent'])/100) < price2num($price_min)))
         {
-            $object->error = $langs->trans("CantBeLessThanMinPrice",price2num($price_min,'MU').' '.$langs->trans("Currency".$conf->monnaie));
+            $object->error = $langs->trans("CantBeLessThanMinPrice",price2num($price_min,'MU').' '.$langs->trans("Currency".$conf->currency));
             $result = -1 ;
         }
         else
@@ -326,7 +326,11 @@ if ($action == 'addline' && $user->rights->contrat->creer)
              $outputlangs = new Translate("",$conf);
              $outputlangs->setDefaultLang($newlang);
              }
-             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) contrat_pdf_create($db, $object->id, $object->modelpdf, $outputlangs);
+             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+             {
+	            $ret=$object->fetch($id);    // Reload to get new records
+             	contrat_pdf_create($db, $object->id, $object->modelpdf, $outputlangs);
+             }
              */
         }
         else
@@ -510,7 +514,7 @@ if ($action == 'create')
     else print $langs->trans("CompanyHasNoRelativeDiscount");
     $absolute_discount=$soc->getAvailableDiscounts();
     print '. ';
-    if ($absolute_discount) print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->trans("Currency".$conf->monnaie));
+    if ($absolute_discount) print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->trans("Currency".$conf->currency));
     else print $langs->trans("CompanyHasNoAbsoluteDiscount");
     print '.';
     print '</td></tr>';
@@ -657,7 +661,7 @@ else
         else print $langs->trans("CompanyHasNoRelativeDiscount");
         $absolute_discount=$object->societe->getAvailableDiscounts();
         print '. ';
-        if ($absolute_discount) print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->trans("Currency".$conf->monnaie));
+        if ($absolute_discount) print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->trans("Currency".$conf->currency));
         else print $langs->trans("CompanyHasNoAbsoluteDiscount");
         print '.';
         print '</td></tr>';

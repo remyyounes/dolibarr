@@ -63,10 +63,10 @@ class CMailFile
 	var $bodyCSS;
 
 	// Image
-	var $form;
+	var $html;
 	var $image_boundary;
 	var $atleastoneimage=0;
-	var $form_images=array();
+	var $html_images=array();
 	var $images_encoded=array();
 	var $image_types = array('gif'  => 'image/gif',
                            'jpg'  => 'image/jpeg',
@@ -137,6 +137,7 @@ class CMailFile
 		{
 			$this->html = $msg;
 			$findimg = $this->findHtmlImages($conf->fckeditor->dir_output);
+
 			// Define if there is at least one file
 			if ($findimg)
 			{
@@ -465,12 +466,12 @@ class CMailFile
 	/**
 	 * Read a file on disk and return encoded content for emails (mode = 'mail')
 	 *
-	 * @param      sourcefile
-	 * @return     <0 if KO, encoded string if OK
+	 * @param	string	$sourcefile		Path to file to encode
+	 * @return 	int					    <0 if KO, encoded string if OK
 	 */
 	function _encode_file($sourcefile)
 	{
-		$newsourcefile=utf8_check($sourcefile)?utf8_decode($sourcefile):$sourcefile;	// is_readable and file_get_contents need ISO filename
+		$newsourcefile=dol_osencode($sourcefile);
 
 		if (is_readable($newsourcefile))
 		{
@@ -480,7 +481,7 @@ class CMailFile
 		}
 		else
 		{
-			$this->error="Error: Can't read file '$sourcefile'";
+			$this->error="Error: Can't read file '".$sourcefile."' into _encode_file";
 			dol_syslog("CMailFile::encode_file: ".$this->error, LOG_ERR);
 			return -1;
 		}
@@ -490,6 +491,8 @@ class CMailFile
 	/**
 	 *  Write content of a SMTP request into a dump file (mode = all)
 	 *  Used for debugging.
+	 *
+	 *  @return	void
 	 */
 	function dump_mail()
 	{
@@ -856,6 +859,7 @@ class CMailFile
 	{
 		// Build the list of image extensions
 		$extensions = array_keys($this->image_types);
+
 
 		preg_match_all('/(?:"|\')([^"\']+\.('.implode('|', $extensions).'))(?:"|\')/Ui', $this->html, $matches);
 

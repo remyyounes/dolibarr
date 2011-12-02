@@ -49,20 +49,23 @@ $langs->load('main');
 
 if (GETPOST('mesg','int',1) && isset($_SESSION['message'])) $mesg=$_SESSION['message'];
 
-$sall=isset($_GET['sall'])?trim($_GET['sall']):trim($_POST['sall']);
-$projectid=isset($_GET['projectid'])?$_GET['projectid']:0;
+$sall=trim(GETPOST('sall'));
+$projectid=(GETPOST('projectid')?GETPOST('projectid','int'):0);
 
-$id=(GETPOST('id')?GETPOST("id"):GETPOST("facid"));  // For backward compatibility
-$ref=GETPOST('ref');
-$socid=GETPOST('socid');
-$action=GETPOST('action');
-$confirm=GETPOST('confirm');
-$lineid=GETPOST('lineid');
-$userid=GETPOST('userid');
-$search_ref=GETPOST('sf_ref')?GETPOST('sf_ref'):GETPOST('search_ref');
+$id=(GETPOST('id')?GETPOST('id','int'):GETPOST('facid','int'));  // For backward compatibility
+$ref=GETPOST('ref','alpha');
+$socid=GETPOST('socid','int');
+$action=GETPOST('action','alpha');
+$confirm=GETPOST('confirm','alpha');
+$lineid=GETPOST('lineid','int');
+$userid=GETPOST('userid','int');
+$search_ref=GETPOST('sf_ref')?GETPOST('sf_ref','alpha'):GETPOST('search_ref','alpha');
+$search_societe=GETPOST('search_societe','alpha');
+$search_montant_ht=GETPOST('search_montant_ht','alpha');
+$search_montant_ttc=GETPOST('search_montant_ttc','alpha');
 
 // Security check
-$fieldid = isset($_GET["ref"])?'facnumber':'rowid';
+$fieldid = (! empty($ref)?'facnumber':'rowid');
 if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'facture', $id,'','','fk_soc',$fieldid);
 
@@ -169,7 +172,11 @@ if ($action == 'confirm_deleteline' && $confirm == 'yes')
                 $outputlangs = new Translate("",$conf);
                 $outputlangs->setDefaultLang($newlang);
             }
-            if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) $result=facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+            if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+            {
+                $ret=$object->fetch($id);    // Reload to get new records
+                $result=facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+            }
             if ($result >= 0)
             {
                 Header('Location: '.$_SERVER["PHP_SELF"].'?facid='.$id);
@@ -346,7 +353,11 @@ if ($action == 'confirm_valid' && $confirm == 'yes' && $user->rights->facture->v
                 $outputlangs = new Translate("",$conf);
                 $outputlangs->setDefaultLang($newlang);
             }
-            if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+            if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+            {
+                $ret=$object->fetch($id);    // Reload to get new records
+                facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+            }
         }
         else
         {
@@ -419,7 +430,11 @@ if ($action == 'confirm_modif' && ((empty($conf->global->MAIN_USE_ADVANCED_PERMS
 	            $outputlangs = new Translate("",$conf);
 	            $outputlangs->setDefaultLang($newlang);
 	        }
-	        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+	        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+	        {
+                $ret=$object->fetch($id);    // Reload to get new records
+	            facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+	        }
 	    }
     }
 }
@@ -894,6 +909,12 @@ if (($action == 'addline' || $action == 'addline_predef') && $user->rights->fact
 {
     $result=0;
 
+    if ($_POST['np_price'] < 0 && $_POST["qty"] < 0)
+    {
+    	$langs->load("errors");
+    	$mesg='<div class="error">'.$langs->trans("ErrorBothFieldCantBeNegative",$langs->transnoentitiesnoconv("UnitPriceHT"),$langs->transnoentitiesnoconv("Qty")).'</div>';
+    	$result = -1 ;
+    }
     if (empty($_POST['idprod']) && $_POST["type"] < 0)
     {
         $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Type")).'</div>';
@@ -1005,12 +1026,12 @@ if (($action == 'addline' || $action == 'addline_predef') && $user->rights->fact
         {
             if($price_min && (price2num($pu_ht)*(1-price2num($_POST['remise_percent'])/100) < price2num($price_min)))
             {
-                $object->error = $langs->trans("CantBeLessThanMinPrice",price2num($price_min,'MU').' '.$langs->trans("Currency".$conf->monnaie));
+                $object->error = $langs->trans("CantBeLessThanMinPrice",price2num($price_min,'MU').' '.$langs->trans("Currency".$conf->currency));
                 $result = -1 ;
             }
             else
             {
-                // Insert line
+            	// Insert line
                 $result = $object->addline(
                     $id,
                     $desc,
@@ -1051,8 +1072,11 @@ if (($action == 'addline' || $action == 'addline_predef') && $user->rights->fact
             $outputlangs = new Translate("",$conf);
             $outputlangs->setDefaultLang($newlang);
         }
-        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
-
+        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+        {
+            $ret=$object->fetch($id);    // Reload to get new records
+            facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+        }
         unset($_POST['qty']);
         unset($_POST['type']);
         unset($_POST['idprod']);
@@ -1112,7 +1136,7 @@ if ($action == 'updateligne' && $user->rights->facture->creer && $_POST['save'] 
     if ($object->type!=2 && $price_min && GETPOST('productid') && (price2num($up_ht)*(1-price2num(GETPOST('remise_percent'))/100) < price2num($price_min)))
     {
         //print "CantBeLessThanMinPrice ".$up_ht." - ".GETPOST('remise_percent')." - ".$product->price_min;
-        $mesg = '<div class="error">'.$langs->trans("CantBeLessThanMinPrice",price2num($price_min,'MU').' '.$langs->trans("Currency".$conf->monnaie)).'</div>';
+        $mesg = '<div class="error">'.$langs->trans("CantBeLessThanMinPrice",price2num($price_min,'MU').' '.$langs->trans("Currency".$conf->currency)).'</div>';
         $result=-1;
     }
 
@@ -1150,7 +1174,11 @@ if ($action == 'updateligne' && $user->rights->facture->creer && $_POST['save'] 
             $outputlangs = new Translate("",$conf);
             $outputlangs->setDefaultLang($newlang);
         }
-        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+        if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE))
+        {
+            $ret=$object->fetch($id);    // Reload to get new records
+            facture_pdf_create($db, $object, '', $object->modelpdf, $outputlangs, GETPOST('hidedetails'), GETPOST('hidedesc'), GETPOST('hideref'), $hookmanager);
+        }
     }
 }
 
@@ -1720,7 +1748,7 @@ if ($action == 'create')
     print ' <a href="'.DOL_URL_ROOT.'/comm/remise.php?id='.$soc->id.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?socid='.$soc->id.'&action='.$action.'&origin='.GETPOST('origin').'&originid='.GETPOST('originid')).'">('.$langs->trans("EditRelativeDiscount").')</a>';
     print '. ';
     print '<br>';
-    if ($absolute_discount) print $langs->trans("CompanyHasAbsoluteDiscount",'<a href="'.DOL_URL_ROOT.'/comm/remx.php?id='.$soc->id.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?socid='.$soc->id.'&action='.$action.'&origin='.GETPOST('origin').'&originid='.GETPOST('originid')).'">'.price($absolute_discount).'</a>',$langs->trans("Currency".$conf->monnaie));
+    if ($absolute_discount) print $langs->trans("CompanyHasAbsoluteDiscount",'<a href="'.DOL_URL_ROOT.'/comm/remx.php?id='.$soc->id.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?socid='.$soc->id.'&action='.$action.'&origin='.GETPOST('origin').'&originid='.GETPOST('originid')).'">'.price($absolute_discount).'</a>',$langs->trans("Currency".$conf->currency));
     else print $langs->trans("CompanyHasNoAbsoluteDiscount");
     print ' <a href="'.DOL_URL_ROOT.'/comm/remx.php?id='.$soc->id.'&backtopage='.urlencode($_SERVER["PHP_SELF"].'?socid='.$soc->id.'&action='.$action.'&origin='.GETPOST('origin').'&originid='.GETPOST('originid')).'">('.$langs->trans("EditGlobalDiscounts").')</a>';
     print '.';
@@ -1892,6 +1920,8 @@ if ($action == 'create')
     // Show origin lines
     if (is_object($objectsrc))
     {
+        print '<br>';
+
         $title=$langs->trans('ProductsAndServices');
         print_titre($title);
 
@@ -2058,8 +2088,8 @@ else
                 $close[$i]['label']=$langs->trans("ConfirmClassifyPaidPartiallyReasonBadCustomerDesc");$i++;
                 // Texte
                 $i=0;
-                $close[$i]['reason']=$form->textwithpicto($langs->transnoentities("ConfirmClassifyPaidPartiallyReasonDiscountVat",$resteapayer,$langs->trans("Currency".$conf->monnaie)),$close[$i]['label'],1);$i++;
-                $close[$i]['reason']=$form->textwithpicto($langs->transnoentities("ConfirmClassifyPaidPartiallyReasonBadCustomer",$resteapayer,$langs->trans("Currency".$conf->monnaie)),$close[$i]['label'],1);$i++;
+                $close[$i]['reason']=$form->textwithpicto($langs->transnoentities("ConfirmClassifyPaidPartiallyReasonDiscountVat",$resteapayer,$langs->trans("Currency".$conf->currency)),$close[$i]['label'],1);$i++;
+                $close[$i]['reason']=$form->textwithpicto($langs->transnoentities("ConfirmClassifyPaidPartiallyReasonBadCustomer",$resteapayer,$langs->trans("Currency".$conf->currency)),$close[$i]['label'],1);$i++;
                 // arrayreasons[code]=reason
                 foreach($close as $key => $val)
                 {
@@ -2243,19 +2273,19 @@ else
                 {
                     if ($object->statut == 0)
                     {
-                        print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->monnaie));
+                        print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->currency));
                         print '. ';
                     }
                     else
                     {
                         if ($object->statut < 1 || $object->type == 2 || $object->type == 3)
                         {
-                            $text=$langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->monnaie));
+                            $text=$langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->currency));
                             print '<br>'.$text.'.<br>';
                         }
                         else
                         {
-                            $text=$langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->monnaie));
+                            $text=$langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->currency));
                             $text2=$langs->trans("AbsoluteDiscountUse");
                             print $form->textwithpicto($text,$text2);
                         }
@@ -2284,12 +2314,12 @@ else
                 {
                     if ($object->statut == 0 && $object->type != 3)
                     {
-                        $text=$langs->trans("CompanyHasCreditNote",price($absolute_creditnote),$langs->transnoentities("Currency".$conf->monnaie));
+                        $text=$langs->trans("CompanyHasCreditNote",price($absolute_creditnote),$langs->transnoentities("Currency".$conf->currency));
                         print $form->textwithpicto($text,$langs->trans("CreditNoteDepositUse"));
                     }
                     else
                     {
-                        print $langs->trans("CompanyHasCreditNote",price($absolute_creditnote),$langs->transnoentities("Currency".$conf->monnaie)).'.';
+                        print $langs->trans("CompanyHasCreditNote",price($absolute_creditnote),$langs->transnoentities("Currency".$conf->currency)).'.';
                     }
                 }
                 else
@@ -2421,7 +2451,7 @@ else
                 $creditnoteamount=0;
                 $depositamount=0;
                 $sql = "SELECT re.rowid, re.amount_ht, re.amount_tva, re.amount_ttc,";
-                $sql.= " re.description, re.fk_facture_source, re.fk_facture_source";
+                $sql.= " re.description, re.fk_facture_source";
                 $sql.= " FROM ".MAIN_DB_PREFIX ."societe_remise_except as re";
                 $sql.= " WHERE fk_facture = ".$object->id;
                 $resql=$db->query($sql);
@@ -2582,9 +2612,9 @@ else
             // Amount
             print '<tr><td>'.$langs->trans('AmountHT').'</td>';
             print '<td align="right" colspan="2" nowrap>'.price($object->total_ht).'</td>';
-            print '<td>'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+            print '<td>'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
             print '<tr><td>'.$langs->trans('AmountVAT').'</td><td align="right" colspan="2" nowrap>'.price($object->total_tva).'</td>';
-            print '<td>'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+            print '<td>'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
 
             // Amount Local Taxes
             if ($mysoc->pays_code=='ES')
@@ -2593,18 +2623,18 @@ else
                 {
                     print '<tr><td>'.$langs->transcountry("AmountLT1",$mysoc->pays_code).'</td>';
                     print '<td align="right" colspan="2" nowrap>'.price($object->total_localtax1).'</td>';
-                    print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+                    print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
                 }
                 if ($mysoc->localtax2_assuj=="1") //Localtax2 IRPF
                 {
                     print '<tr><td>'.$langs->transcountry("AmountLT2",$mysoc->pays_code).'</td>';
                     print '<td align="right" colspan="2" nowrap>'.price($object->total_localtax2).'</td>';
-                    print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+                    print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
                 }
             }
 
             print '<tr><td>'.$langs->trans('AmountTTC').'</td><td align="right" colspan="2" nowrap>'.price($object->total_ttc).'</td>';
-            print '<td>'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+            print '<td>'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
 
             // Statut
             print '<tr><td>'.$langs->trans('Status').'</td>';
@@ -2924,6 +2954,13 @@ else
                  */
                 $somethingshown=$object->showLinkedObjectBlock();
 
+                // Link for paypal payment
+                if ($conf->paypal->enabled)
+                {
+                    include_once(DOL_DOCUMENT_ROOT.'/paypal/lib/paypal.lib.php');
+                    print showPaypalPaymentUrl('invoice',$object->ref);
+                }
+
                 print '</td><td valign="top" width="50%">';
 
                 print '<br>';
@@ -3047,25 +3084,26 @@ else
         $pageprev = $page - 1;
         $pagenext = $page + 1;
 
-        $month    =GETPOST('month','int');
-        $year     =GETPOST('year','int');
+        $month	= GETPOST('month','int');
+        $year	= GETPOST('year','int');
 
         $facturestatic=new Facture($db);
 
-        $sql = 'SELECT ';
+        if (! $sall) $sql = 'SELECT';
+        else $sql = 'SELECT DISTINCT';
         $sql.= ' f.rowid as facid, f.facnumber, f.type, f.increment, f.total, f.total_ttc,';
         $sql.= ' f.datef as df, f.date_lim_reglement as datelimite,';
         $sql.= ' f.paye as paye, f.fk_statut,';
         $sql.= ' s.nom, s.rowid as socid';
-        if (! $sall) $sql.= ' ,SUM(pf.amount) as am';   // To be able to sort on status
+        if (! $sall) $sql.= ', SUM(pf.amount) as am';   // To be able to sort on status
         $sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s';
-        if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+        if (! $user->rights->societe->client->voir && ! $socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= ', '.MAIN_DB_PREFIX.'facture as f';
-        if ($sall) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as fd ON fd.fk_facture = f.rowid';
         if (! $sall) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
+        else $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as fd ON fd.fk_facture = f.rowid';
         $sql.= ' WHERE f.fk_soc = s.rowid';
         $sql.= " AND f.entity = ".$conf->entity;
-        if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+        if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid) $sql.= ' AND s.rowid = '.$socid;
         if ($userid)
         {
@@ -3081,21 +3119,21 @@ else
                 $sql .= ' AND ' . trim($filt[0]) . ' = ' . trim($filt[1]);
             }
         }
-        if ($_GET['search_ref'])
+        if ($search_ref)
         {
-            $sql.= ' AND f.facnumber LIKE \'%'.$db->escape(trim($_GET['search_ref'])).'%\'';
+            $sql.= ' AND f.facnumber LIKE \'%'.$db->escape(trim($search_ref)).'%\'';
         }
-        if ($_GET['search_societe'])
+        if ($search_societe)
         {
-            $sql.= ' AND s.nom LIKE \'%'.$db->escape(trim($_GET['search_societe'])).'%\'';
+            $sql.= ' AND s.nom LIKE \'%'.$db->escape(trim($search_societe)).'%\'';
         }
-        if ($_GET['search_montant_ht'])
+        if ($search_montant_ht)
         {
-            $sql.= ' AND f.total = \''.$db->escape(trim($_GET['search_montant_ht'])).'\'';
+            $sql.= ' AND f.total = \''.$db->escape(trim($search_montant_ht)).'\'';
         }
-        if ($_GET['search_montant_ttc'])
+        if ($search_montant_ttc)
         {
-            $sql.= ' AND f.total_ttc = \''.$db->escape(trim($_GET['search_montant_ttc'])).'\'';
+            $sql.= ' AND f.total_ttc = \''.$db->escape(trim($search_montant_ttc)).'\'';
         }
         if ($month > 0)
         {
@@ -3108,20 +3146,16 @@ else
         {
             $sql.= " AND f.datef BETWEEN '".$db->idate(dol_get_first_day($year,1,false))."' AND '".$db->idate(dol_get_last_day($year,12,false))."'";
         }
-        if (trim($search_ref) != '')
-        {
-            $sql.= ' AND f.facnumber LIKE \'%'.$db->escape(trim($search_ref)) . '%\'';
-        }
-        if ($sall)
-        {
-            $sql.= ' AND (s.nom LIKE \'%'.$db->escape($sall).'%\' OR f.facnumber LIKE \'%'.$db->escape($sall).'%\' OR f.note LIKE \'%'.$db->escape($sall).'%\' OR fd.description LIKE \'%'.$db->escape($sall).'%\')';
-        }
         if (! $sall)
         {
             $sql.= ' GROUP BY f.rowid, f.facnumber, f.type, f.increment, f.total, f.total_ttc,';
             $sql.= ' f.datef, f.date_lim_reglement,';
             $sql.= ' f.paye, f.fk_statut,';
             $sql.= ' s.nom, s.rowid';
+        }
+        else
+        {
+        	$sql.= ' AND (s.nom LIKE \'%'.$db->escape($sall).'%\' OR f.facnumber LIKE \'%'.$db->escape($sall).'%\' OR f.note LIKE \'%'.$db->escape($sall).'%\' OR fd.description LIKE \'%'.$db->escape($sall).'%\')';
         }
         $sql.= ' ORDER BY ';
         $listfield=explode(',',$sortfield);
@@ -3176,11 +3210,11 @@ else
             print '</td>';
             print '<td class="liste_titre" align="left">&nbsp;</td>';
             print '<td class="liste_titre" align="left">';
-            print '<input class="flat" type="text" name="search_societe" value="'.$_GET['search_societe'].'">';
+            print '<input class="flat" type="text" name="search_societe" value="'.$search_societe.'">';
             print '</td><td class="liste_titre" align="right">';
-            print '<input class="flat" type="text" size="10" name="search_montant_ht" value="'.$_GET['search_montant_ht'].'">';
+            print '<input class="flat" type="text" size="10" name="search_montant_ht" value="'.$search_montant_ht.'">';
             print '</td><td class="liste_titre" align="right">';
-            print '<input class="flat" type="text" size="10" name="search_montant_ttc" value="'.$_GET['search_montant_ttc'].'">';
+            print '<input class="flat" type="text" size="10" name="search_montant_ttc" value="'.$search_montant_ttc.'">';
             print '</td>';
             print '<td class="liste_titre" align="right">';
             print '&nbsp;';

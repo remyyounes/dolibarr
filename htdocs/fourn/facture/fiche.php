@@ -279,7 +279,7 @@ if ($action == 'add' && $user->rights->fournisseur->facture->creer)
                 $element = 'fourn'; $subelement = 'fournisseur.commande';
             }
 
-            $object->origin 	= $_POST['origin'];
+            $object->origin    = $_POST['origin'];
             $object->origin_id = $_POST['originid'];
 
             $id = $object->create($user);
@@ -314,20 +314,20 @@ if ($action == 'add' && $user->rights->fournisseur->facture->creer)
                         if ($lines[$i]->date_end) $date_end=$lines[$i]->date_end;
 
                         $result = $object->addline(
-                        $desc,
-                        $lines[$i]->subprice,
-                        $lines[$i]->tva_tx,
-                        $lines[$i]->localtax1_tx,
-                        $lines[$i]->localtax2_tx,
-                        $lines[$i]->qty,
-                        $lines[$i]->fk_product,
-                        $lines[$i]->remise_percent,
-                        $date_start,
-                        $date_end,
-                        0,
-                        $lines[$i]->info_bits,
+                            $desc,
+                            $lines[$i]->subprice,
+                            $lines[$i]->tva_tx,
+                            $lines[$i]->localtax1_tx,
+                            $lines[$i]->localtax2_tx,
+                            $lines[$i]->qty,
+                            $lines[$i]->fk_product,
+                            $lines[$i]->remise_percent,
+                            $date_start,
+                            $date_end,
+                            0,
+                            $lines[$i]->info_bits,
         					'HT',
-                        $product_type
+                            $product_type
                         );
 
                         if ($result < 0)
@@ -434,7 +434,7 @@ if ($action == 'update_line')
         {
             $prod = new Product($db);
             $prod->fetch($_POST['idprod']);
-            $label = $prod->libelle;
+            $label = $prod->description;
             if (trim($_POST['label']) != trim($label)) $label=$_POST['label'];
 
             $type = $prod->type;
@@ -488,7 +488,7 @@ if ($action == 'addline')
 
             // cas special pour lequel on a les meme reference que le fournisseur
             // $label = '['.$product->ref.'] - '. $product->libelle;
-            $label = $product->libelle;
+            $label = $product->description;
 
             $tvatx=get_default_tva($societe,$mysoc,$product->id);
 
@@ -1149,6 +1149,22 @@ if ($action == 'create')
     print '<br><center><input type="submit" class="button" name="bouton" value="'.$langs->trans('CreateDraft').'"></center>';
 
     print "</form>\n";
+
+
+    // Show origin lines
+    if (is_object($objectsrc))
+    {
+        print '<br>';
+
+        $title=$langs->trans('ProductsAndServices');
+        print_titre($title);
+
+        print '<table class="noborder" width="100%">';
+
+        $objectsrc->printOriginLinesList($hookmanager);
+
+        print '</table>';
+    }
 }
 else
 {
@@ -1396,8 +1412,8 @@ else
         $alreadypaid=$object->getSommePaiement();
         print '<tr><td>'.$langs->trans('Status').'</td><td colspan="3">'.$object->getLibStatut(4,$alreadypaid).'</td></tr>';
 
-        print '<tr><td>'.$langs->trans('AmountHT').'</td><td align="right">'.price($object->total_ht).'</td><td colspan="2" align="left">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
-        print '<tr><td>'.$langs->trans('AmountVAT').'</td><td align="right">'.price($object->total_tva).'</td><td colspan="2" align="left">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<tr><td>'.$langs->trans('AmountHT').'</td><td align="right">'.price($object->total_ht).'</td><td colspan="2" align="left">'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
+        print '<tr><td>'.$langs->trans('AmountVAT').'</td><td align="right">'.price($object->total_tva).'</td><td colspan="2" align="left">'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
 
         // Amount Local Taxes
         if ($mysoc->pays_code=='ES')
@@ -1406,16 +1422,16 @@ else
             {
                 print '<tr><td>'.$langs->transcountry("AmountLT1",$mysoc->pays_code).'</td>';
                 print '<td align="right">'.price($object->total_localtax1).'</td>';
-                print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+                print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
             }
             if ($mysoc->localtax2_assuj=="1") //Localtax2 IRPF
             {
                 print '<tr><td>'.$langs->transcountry("AmountLT2",$mysoc->pays_code).'</td>';
                 print '<td align="right">'.price($object->total_localtax2).'</td>';
-                print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+                print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
             }
         }
-        print '<tr><td>'.$langs->trans('AmountTTC').'</td><td align="right">'.price($object->total_ttc).'</td><td colspan="2" align="left">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<tr><td>'.$langs->trans('AmountTTC').'</td><td align="right">'.price($object->total_ttc).'</td><td colspan="2" align="left">'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
 
         // Project
         if ($conf->projet->enabled)
@@ -1806,7 +1822,7 @@ else
 
                 /*
                  * Linked object block
-                 */
+                */
                 $somethingshown=$object->showLinkedObjectBlock();
 
                 print '</td><td valign="top" width="50%">';
