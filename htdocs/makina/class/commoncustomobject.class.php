@@ -62,7 +62,7 @@ class CommonCustomObject
      *  @param      int		$notrigger   0=launch triggers after, 1=disable triggers
      *  @return     string      		 HTML Form
      */
-    function printCreateForm($action='add', $hidden_fields)
+    function printCreateForm($action='add', $hidden_fields = null)
     {
     	global $conf, $langs;
 		$error=0;
@@ -94,15 +94,18 @@ class CommonCustomObject
     *  @param      int		$notrigger   0=launch triggers after, 1=disable triggers
     *  @return     string      		 HTML Form
     */
-    function printEditForm( )
+    function printEditForm($action='update',$hidden_fields = null)
     {
         global $conf, $langs;
         $error=0;
     
         print "<form action=\"fiche.php\" method=\"post\">\n";
         print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-        print '<input type="hidden" name="action" value="update">'."\n";
+        print '<input type="hidden" name="action" value="'.$action.'">'."\n";
         print '<input type="hidden" name="id" value="'.$this->id.'">';
+        foreach($hidden_fields as $hf){
+            print '<input type="hidden" name="'.$hf[0].'" value="'.$hf[1].'">';
+        }
         print '<table class="border" width="100%">';
         
         $action = 'edit';
@@ -212,10 +215,25 @@ class CommonCustomObject
         $column_name = $field->column_name;
         if(!empty($this->customTypes[$column_name])){
             $type = $this->customTypes[$column_name];
-            if ($type == 'fournisseur'){
+        if ($type == 'fournisseur'){
                 $soc = new Societe($this->db);
                 $soc->fetch($value);
                 $out .= $soc->nom;
+            }elseif ($type == 'stockentry'){
+                $stockEntry = new Stockentry($this->db);
+                $stockEntry->fetch($value);
+                $out .= $stockEntry->numerodossier;
+            }elseif ($type == 'facture_fourn' && $value){
+                include_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.facture.class.php");
+                $ff = new FactureFournisseur($this->db);
+                $ff->fetch($value);
+                $ref = $ff->ref_ext?$ff->ref_ext:"(PROV".$ff->rowid.")";
+                $out .= $ref;
+            }elseif ($type == 'entrepot'){
+                include_once(DOL_DOCUMENT_ROOT."/product/stock/class/entrepot.class.php");
+                $entrepot = new Entrepot($this->db);
+                $entrepot->fetch($value);
+                $out .= $entrepot->lieu;
             }
         }else{
             $type = $field->data_type;
@@ -233,6 +251,7 @@ class CommonCustomObject
     }
     
     function printList($customsql =''){
+        global $langs;
         $list =  $this->getList($customsql);
         include($this->templates->list);
     }
@@ -290,7 +309,7 @@ class CommonCustomObject
             
             
             
-            if( !$this->$column_name && $field->is_nullable == 'NO'){
+            if( !$this->$column_name && $this->$column_name !== '0' && $field->is_nullable == 'NO'){
                 $this->$column_name = $field->column_default;
                 if($field->data_type == 'date'){
                     $this->$column_name = dol_now();

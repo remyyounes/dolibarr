@@ -390,7 +390,7 @@ class Stockentry_line extends CommonCustomObject
 		$sql.= " total_ttc_facture=".(isset($this->total_ttc_facture)?$this->total_ttc_facture:"null").",";
 		$sql.= " coeff_ht=".(isset($this->coeff_ht)?$this->coeff_ht:"null").",";
 		$sql.= " coeff_ttc=".(isset($this->coeff_ttc)?$this->coeff_ttc:"null").",";
-		$sql.= " daom=".(isset($this->daom)?$this->daom:"null").",";
+		$sql.= " daom=".(isset($this->daom)?"'".$this->daom."'":"'0'").",";
 		$sql.= " numeroconteneur=".(isset($this->numeroconteneur)?"'".$this->db->escape($this->numeroconteneur)."'":"null").",";
 		$sql.= " code_list_control=".(isset($this->code_list_control)?"'".$this->db->escape($this->code_list_control)."'":"null").",";
 		$sql.= " code_selection=".(isset($this->code_selection)?"'".$this->db->escape($this->code_selection)."'":"null").",";
@@ -399,9 +399,9 @@ class Stockentry_line extends CommonCustomObject
 		$sql.= " weight=".(isset($this->weight)?$this->weight:"null").",";
 		$sql.= " weight_unit=".(isset($this->weight_unit)?$this->weight_unit:"null").",";
 		$sql.= " volume_unit=".(isset($this->volume_unit)?$this->volume_unit:"null").",";
-		$sql.= " type_facture=".(isset($this->type_facture)?$this->type_facture:"null").",";
-		$sql.= " mode_calcul=".(isset($this->mode_calcul)?$this->mode_calcul:"null").",";
-		$sql.= " accounting=".(isset($this->accounting)?$this->accounting:"null").",";
+		$sql.= " type_facture=".(isset($this->type_facture)?"'".$this->type_facture."'":"null").",";
+		$sql.= " mode_calcul=".(isset($this->mode_calcul)?"'".$this->mode_calcul."'":"null").",";
+		$sql.= " accounting=".(isset($this->accounting)?"'".$this->accounting."'":"null").",";
 		$sql.= " note=".(isset($this->note)?"'".$this->db->escape($this->note)."'":"null")."";
 
         
@@ -411,6 +411,7 @@ class Stockentry_line extends CommonCustomObject
 
 		dol_syslog(get_class($this)."::update sql=".$sql, LOG_DEBUG);
         $resql = $this->db->query($sql);
+        //echo $this->db->lasterror(); echo $sql;
     	if (! $resql) { $error++; $this->errors[]="Error ".$this->db->lasterror(); }
 
 		if (! $error)

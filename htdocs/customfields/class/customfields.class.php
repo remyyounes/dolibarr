@@ -1366,11 +1366,12 @@ class CustomFields // extends CommonObject
 					}
 				// every other type
 				} elseif (preg_match('/^(.*)(weight|size|volume|surface)_unit.*$/i', $field->column_name, $matches)) {
+				    $langs->load('other');
 			        $unit_type = $matches[2];
                     require_once(DOL_DOCUMENT_ROOT."/product/class/html.formproduct.class.php");
                     include_once(DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php');
         			$formproduct = new FormProduct($this->db);
-        			if(empty($value)){
+        			if(empty($value) && $value !== '0'){
         			    $value = 0;
         			    if($unit_type == 'weight'){
         			        $value = -3;

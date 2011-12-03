@@ -27,6 +27,7 @@
     	<td class="liste_titre">total_ttc_facture</td>
     	<td class="liste_titre">date_facture_fourn</td>
     	<td class="liste_titre">date_echeance_facture_fourn</td>
+    	<td class="liste_titre"><?php print $langs->trans('Delete');?></td>
     </tr>
     <tr class="liste_titre">
     <td class="liste_titre" colspan="9">filter info</td>
@@ -43,7 +44,7 @@
         <td><?php print $this->printField($this->fields->total_ttc_facture, $item->total_ttc_facture);?></td>
         <td><?php print $this->printField($this->fields->date_facture_fourn, $item->date_facture_fourn);?></td>
         <td><?php print $this->printField($this->fields->date_echeance_facture_fourn, $item->date_echeance_facture_fourn);?></td>
-        
+        <td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?action=deletefacture&id='.$this->fk_stockentry.'&facid='.$item->rowid;?>">X</a></td>
     </tr>
     <?php
             $var = !$var; 

@@ -61,9 +61,13 @@ $mesg = '';
 include_once(DOL_DOCUMENT_ROOT.'/customfields/class/customfields.class.php');
 $customfields = new CustomFields($db, $parentmodule, $customfields_table);
 $stockEntry = new Stockentry($db);
+$stockEntryLine = new Stockentry_line($db);
 $stockEntry->id = $id;
 if($id){
     $stockEntry->fetch($id);
+}
+if($facid){
+    $stockEntryLine->fetch($facid);
 }
 
 
@@ -82,7 +86,6 @@ if ($action == 'add' && $user->rights->stock->creer)
 }
 
 if($action == 'addinvoice'){
-    $stockEntryLine = new Stockentry_line($db);
     $stockEntryLine->getPostValues();
     $stockEntryLine->validateFields();
     $stockEntryLine->fk_stockentry = $id;
@@ -105,6 +108,16 @@ if ($action == 'delete' && $user->rights->stockoperation->supprimer)
 	}
 }
 
+if ($action == 'deletefacture' && $user->rights->stockoperation->supprimer)
+{
+    $result=$stockEntryLine->delete($user);
+    if ($result <= 0)
+    {
+        $mesg='<div class="error">'.$object->error.'</div>';
+        $action='';
+    }
+}
+
 
  
 if ($action == 'update' && $_POST["cancel"] <> $langs->trans("Cancel"))
@@ -120,6 +133,21 @@ if ($action == 'update' && $_POST["cancel"] <> $langs->trans("Cancel"))
 	}else{
 	    $mesg = '<div class="error">'.$object->error.'</div>';
 	}
+}
+
+if ($action == 'updatefacture' && $_POST["cancel"] <> $langs->trans("Cancel"))
+{
+    //update
+    $stockEntryLine->getPostValues();
+    $val = $stockEntryLine->validateFields();
+    $upd = $stockEntryLine->update();
+
+    //display status message from update/create
+    if ($upd > 0){
+        $mesg = '<div class="ok">'.$langs->trans("RecordSaved").'</div>';
+    }else{
+        $mesg = '<div class="error">'.$object->error.'</div>';
+    }
 }
 
 
@@ -211,7 +239,6 @@ else
 		if ($action == 'createinvoice')
 		{
 		    print_fiche_titre($langs->trans("NewStockEntryInvoice"));
-		    $stockEntryLine = new Stockentry_line($db);
 		    $stockEntryLine->fk_societe = $stockEntry->fk_societe;
 		    $stockEntryLine->mode_calcul = $stockEntry->mode_calcul;
 		    $stockEntryLine->numeroconteneur = $stockEntry->numeroconteneur;
@@ -225,7 +252,6 @@ else
 		/*                                                                            */
 		/* ************************************************************************** */
 		
-		$stockEntryLine = new Stockentry_line($db);
 		$stockEntryLine->fk_stockentry = $id;
 		$stockEntryLine->printList(" WHERE l.fk_stockentry='".$id."' ");
 		
@@ -237,18 +263,44 @@ else
 		
 		print '<br>';
 		print_fiche_titre($langs->trans("StockEntryFacture"));
-		if ($action == 'showfacture'){
-		    $stockEntryLine = new Stockentry_line($db);
+	if ($action == 'showfacture'){
 		    $stockEntryLine->fetch($facid);
 		    $stockEntryLine->printDataSheet();
+		    
+		    /* ************************************************************************** */
+		    /*                                                                            */
+		    /* Barre d'action                                                             */
+		    /*                                                                            */
+		    /* ************************************************************************** */
+		    
+		    print "<div class=\"tabsAction\">\n";
+		    
+		    if ($action <> 'edit')
+		    {
+		        if ($user->rights->stock->creer)
+		        print "<a class=\"butAction\" href=\"fiche.php?action=editfacture&id=".$id."&facid=".$facid."\">".$langs->trans("Modify")."</a>";
+		        else
+		        print "<a class=\"butActionRefused\" href=\"#\">".$langs->trans("Modify")."</a>";
+		    
+		        if ($user->rights->stock->supprimer)
+		        print "<a class=\"butActionDelete\" href=\"fiche.php?action=deletefacture&id=".$id."&facid=".$facid."\">".$langs->trans("Delete")."</a>";
+		        else
+		        print "<a class=\"butActionRefused\" href=\"#\">".$langs->trans("Delete")."</a>";
+		        	
+		    }
+		}
+		
+		
+		if ($action == 'editfacture'){
+		    $stockEntryLine->fetch($facid);
+		    $hidden_fields = array(array('id',$id),array('facid',$facid));
+		    $stockEntryLine->printEditForm('updatefacture',$hidden_fields);
 		}
 		
 		
 		print '<br>';
 	}
 }
-
-
 
 
 $db->close();
