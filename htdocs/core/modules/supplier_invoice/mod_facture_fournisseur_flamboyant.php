@@ -100,9 +100,9 @@ class mod_facture_fournisseur_flamboyant extends ModeleNumRefSuppliersInvoices
 
         // D'abord on recupere la valeur max
         $posindice=8;
-        $sql = "SELECT MAX(SUBSTRING(ref FROM ".$posindice.")) as max";
+        $sql = "SELECT MAX(SUBSTRING(ref_ext FROM ".$posindice.")) as max";
         $sql.= " FROM ".MAIN_DB_PREFIX."facture_fourn";
-		$sql.= " WHERE ref like '".$this->prefix."____-%'";
+		$sql.= " WHERE ref_ext like '".$this->prefix."____-%'";
         $sql.= " AND entity = ".$conf->entity;
 
         $resql=$db->query($sql);
