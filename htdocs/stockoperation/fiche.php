@@ -212,6 +212,8 @@ else
 		    print_fiche_titre($langs->trans("NewStockEntryInvoice"));
 		    $stockEntryLine = new Stockentry_line($db);
 		    $stockEntryLine->fk_societe = $stockEntry->fk_societe;
+		    $stockEntryLine->mode_calcul = $stockEntry->mode_calcul;
+		    $stockEntryLine->numeroconteneur = $stockEntry->numeroconteneur;
 		    $hidden_fields = array(array('id',$id));
 		    $stockEntryLine->printCreateForm('addinvoice',$hidden_fields);
 
@@ -223,7 +225,7 @@ else
 		/* ************************************************************************** */
 		
 		$stockEntryLine = new Stockentry_line($db);
-		$stockEntryLine->printList(" WHERE fk_stockentry='".$id."' ");
+		$stockEntryLine->printList(" WHERE l.fk_stockentry='".$id."' ");
 		
 		print '<br>';
 	}

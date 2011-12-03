@@ -193,6 +193,10 @@ class CommonCustomObject
                 require_once(DOL_DOCUMENT_ROOT."/makina/class/html.form2.class.php");
                 $form2=new Form2($this->db);
                 $out .= $form2->select_factures_fournisseurs($this->fk_societe,$value, $htmlname);
+            }elseif ($type == 'entrepot'){
+                require_once(DOL_DOCUMENT_ROOT."/makina/class/html.form2.class.php");
+                $form2=new Form2($this->db);
+                $out .= $form2->select_entrepots($this->fk_stock,$value, $htmlname);
             }
         }else{
             $out .= $this->customfields->ShowInputField($field, $value);

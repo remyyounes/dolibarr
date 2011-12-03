@@ -48,6 +48,7 @@ class Stockentry_line extends CommonCustomObject
 	var $fk_stockentry;
 	var $fk_entrepot;
 	var $fk_societe;
+	var $fk_facture_fourn;
 	var $numerofacture_externe;
 	var $date_facture_fourn='';
 	var $date_echeance_facture_fourn='';
@@ -115,6 +116,7 @@ class Stockentry_line extends CommonCustomObject
 		if (isset($this->fk_stockentry)) $this->fk_stockentry=trim($this->fk_stockentry);
 		if (isset($this->fk_entrepot)) $this->fk_entrepot=trim($this->fk_entrepot);
 		if (isset($this->fk_societe)) $this->fk_societe=trim($this->fk_societe);
+		if (isset($this->fk_facture_fourn)) $this->fk_facture_fourn=trim($this->fk_facture_fourn);
 		if (isset($this->numerofacture_externe)) $this->numerofacture_externe=trim($this->numerofacture_externe);
 		if (isset($this->total_ht_facture)) $this->total_ht_facture=trim($this->total_ht_facture);
 		if (isset($this->total_ttc_facture)) $this->total_ttc_facture=trim($this->total_ttc_facture);
@@ -145,6 +147,7 @@ class Stockentry_line extends CommonCustomObject
 		$sql.= "fk_stockentry,";
 		$sql.= "fk_entrepot,";
 		$sql.= "fk_societe,";
+		$sql.= "fk_facture_fourn,";
 		$sql.= "numerofacture_externe,";
 		$sql.= "date_facture_fourn,";
 		$sql.= "date_echeance_facture_fourn,";
@@ -172,6 +175,7 @@ class Stockentry_line extends CommonCustomObject
 		$sql.= " ".(! isset($this->fk_stockentry)?'NULL':"'".$this->fk_stockentry."'").",";
 		$sql.= " ".(! isset($this->fk_entrepot)?'NULL':"'".$this->fk_entrepot."'").",";
 		$sql.= " ".(! isset($this->fk_societe)?'NULL':"'".$this->fk_societe."'").",";
+		$sql.= " ".(! isset($this->fk_facture_fourn)?'NULL':"'".$this->fk_facture_fourn."'").",";
 		$sql.= " ".(! isset($this->numerofacture_externe)?'NULL':"'".$this->db->escape($this->numerofacture_externe)."'").",";
 		$sql.= " ".(! isset($this->date_facture_fourn) || dol_strlen($this->date_facture_fourn)==0?'NULL':$this->db->idate($this->date_facture_fourn)).",";
 		$sql.= " ".(! isset($this->date_echeance_facture_fourn) || dol_strlen($this->date_echeance_facture_fourn)==0?'NULL':$this->db->idate($this->date_echeance_facture_fourn)).",";
@@ -254,6 +258,7 @@ class Stockentry_line extends CommonCustomObject
 		$sql.= " t.fk_stockentry,";
 		$sql.= " t.fk_entrepot,";
 		$sql.= " t.fk_societe,";
+		$sql.= " t.fk_facture_fourn,";
 		$sql.= " t.numerofacture_externe,";
 		$sql.= " t.date_facture_fourn,";
 		$sql.= " t.date_echeance_facture_fourn,";
@@ -292,6 +297,7 @@ class Stockentry_line extends CommonCustomObject
 				$this->fk_stockentry = $obj->fk_stockentry;
 				$this->fk_entrepot = $obj->fk_entrepot;
 				$this->fk_societe = $obj->fk_societe;
+				$this->fk_facture_fourn = $obj->fk_facture_fourn;
 				$this->numerofacture_externe = $obj->numerofacture_externe;
 				$this->date_facture_fourn = $this->db->jdate($obj->date_facture_fourn);
 				$this->date_echeance_facture_fourn = $this->db->jdate($obj->date_echeance_facture_fourn);
@@ -345,6 +351,7 @@ class Stockentry_line extends CommonCustomObject
 		if (isset($this->fk_stockentry)) $this->fk_stockentry=trim($this->fk_stockentry);
 		if (isset($this->fk_entrepot)) $this->fk_entrepot=trim($this->fk_entrepot);
 		if (isset($this->fk_societe)) $this->fk_societe=trim($this->fk_societe);
+		if (isset($this->fk_facture_fourn)) $this->fk_facture_fourn=trim($this->fk_facture_fourn);
 		if (isset($this->numerofacture_externe)) $this->numerofacture_externe=trim($this->numerofacture_externe);
 		if (isset($this->total_ht_facture)) $this->total_ht_facture=trim($this->total_ht_facture);
 		if (isset($this->total_ttc_facture)) $this->total_ttc_facture=trim($this->total_ttc_facture);
@@ -375,6 +382,7 @@ class Stockentry_line extends CommonCustomObject
 		$sql.= " fk_stockentry=".(isset($this->fk_stockentry)?$this->fk_stockentry:"null").",";
 		$sql.= " fk_entrepot=".(isset($this->fk_entrepot)?$this->fk_entrepot:"null").",";
 		$sql.= " fk_societe=".(isset($this->fk_societe)?$this->fk_societe:"null").",";
+		$sql.= " fk_facture_fourn=".(isset($this->fk_facture_fourn)?$this->fk_facture_fourn:"null").",";
 		$sql.= " numerofacture_externe=".(isset($this->numerofacture_externe)?"'".$this->db->escape($this->numerofacture_externe)."'":"null").",";
 		$sql.= " date_facture_fourn=".(dol_strlen($this->date_facture_fourn)!=0 ? "'".$this->db->idate($this->date_facture_fourn)."'" : 'null').",";
 		$sql.= " date_echeance_facture_fourn=".(dol_strlen($this->date_echeance_facture_fourn)!=0 ? "'".$this->db->idate($this->date_echeance_facture_fourn)."'" : 'null').",";
@@ -565,6 +573,7 @@ class Stockentry_line extends CommonCustomObject
 		$this->fk_stockentry='';
 		$this->fk_entrepot='';
 		$this->fk_societe='';
+		$this->fk_facture_fourn='';
 		$this->numerofacture_externe='';
 		$this->date_facture_fourn='';
 		$this->date_echeance_facture_fourn='';
@@ -587,6 +596,28 @@ class Stockentry_line extends CommonCustomObject
 		$this->note='';
 
 		
+	}
+	function getList($customsql =''){
+	    $fields = $this->customfields->fetchAllCustomFields(1);
+	    $this->setFields($fields);
+	    $elements = array();
+	    $sql = "SELECT l.rowid , l.total_ttc_facture, l.date_facture_fourn, l.date_echeance_facture_fourn, f.ref_ext as referenced_facture, f.rowid as facid ";
+	    $sql.= " FROM " . MAIN_DB_PREFIX . $this->table_element . " AS l LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn AS f ON l.fk_facture_fourn = f.rowid ". $customsql;
+	    $resql = $this->customfields->executeSQL($sql, "getList for ".$this->table_element);
+	    if ($this->db->num_rows($resql) > 0) {
+	        $num = $this->db->num_rows($resql);
+	        for ($i=0;$i < $num;$i++) {
+	            $obj = $this->db->fetch_object($resql);
+	            if(!$obj->referenced_facture ){
+	                if($obj->facid){
+	                    $obj->referenced_facture = "(PROV".$obj->facid.")";
+	                }
+	            }
+	            $elements[] = $obj;
+	        }
+	    }
+	    $this->db->free($resql);
+	    return $elements;
 	}
 
 }
