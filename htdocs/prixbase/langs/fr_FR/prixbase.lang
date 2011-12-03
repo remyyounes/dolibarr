@@ -13,3 +13,6 @@ pb_coeff_mp=Coefficient de revient moyen pondéré
 marge=Marge
 margePct= Marge %%
 coeff_vente=Coeff. de Vente
+
+Module1972Name=Prix Base
+Module1972Desc=(Wilfrid TODO in trans) Prix Base

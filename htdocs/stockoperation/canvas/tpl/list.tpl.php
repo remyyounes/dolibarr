@@ -21,9 +21,10 @@
 <table class="liste" width="100%">
 	
     <tr class="liste_titre">
-    	<td class="liste_titre">ref</td>
-    	<td class="liste_titre">fk_societe</td>
-    	<td class="liste_titre">date_entree</td>
+    	<td class="liste_titre"><?php print $langs->trans('Ref');?></td>
+    	<td class="liste_titre"><?php print $langs->trans('fk_stockentry');?></td>
+    	<td class="liste_titre"><?php print $langs->trans('fk_societe');?></td>
+    	<td class="liste_titre"><?php print $langs->trans('date_entree');?></td>
     </tr>
     <tr class="liste_titre">
     <td class="liste_titre" colspan="9">filter info</td>
@@ -35,6 +36,7 @@
     ?>
     <tr <?php print $bc[$var];?>>
     	<td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?id='.$item->rowid;?>"><?php print $this->printField($this->fields->rowid,$item->rowid);?></a></td>
+        <td><?php print $item->numerodossier?$item->numerodossier:"(PROV".$item->rowid.")";?></td>
         <td><?php print $item->fournisseur_name;?></td>
         <td><?php print $this->printField($this->fields->date_entree, $item->date_entree);?></td>
     </tr>
