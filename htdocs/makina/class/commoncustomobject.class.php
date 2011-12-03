@@ -144,17 +144,20 @@ class CommonCustomObject
             // == Fetching customfields
             $fields = $this->customfields->fetchAllCustomFields(1); // fetching the customfields list
             $this->setFields($fields);
-            $datas = $this->customfields->fetchByRowid($this->id); // fetching the record - the values of the customfields for this id (if it exists)
-            $datas->id = $this->id; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
-    
+            //$datas = $this->customfields->fetchByRowid($this->id); // fetching the record - the values of the customfields for this id (if it exists)
+            if($action != 'create'){
+                $this->fetch($this->id);
+            }
+            //$datas->id = $this->id; // in case the record does not yet exist for this id, we at least set the id property of the datas object (useful for the update later on)
+
             foreach ($fields as $field) {
                 // for each customfields, we will print/save the edits
     
                 // == Default values from database record
                 $name = $field->column_name; // the name of the customfield (which is the property of the record)
                 $value = ''; // by default the value of this property is empty
-                if (isset($datas->$name)) {
-                    $value = $datas->$name;
+                if (isset($this->$name)) {
+                    $value = $this->$name;
                 } // if the property exists (the record is not empty), then we fill in this value
     
                 $currentfield_data = array();
@@ -217,7 +220,11 @@ class CommonCustomObject
         }else{
             $type = $field->data_type;
             if($type == 'date'){
-                $out .= date("d/m/y", strtotime($value));
+                if($value){
+                    //check if datestring is already converted to dateint
+                    if(!is_numeric($value)) $value = strtotime($value);
+                    $out .= date("d/m/y", $value);
+                }
             }else{
                 $out .= $this->customfields->printField($field, $value);
             }
