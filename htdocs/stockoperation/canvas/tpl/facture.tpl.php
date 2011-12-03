@@ -73,7 +73,7 @@
 	<td><?php print $fields_data['volume']['label'];?></td>
     <td><?php print $fields_data['volume']['data'].$fields_data['volume_unit']['data'];?></td>
 	<td><?php print $fields_data['weight']['label'];?></td>
-    <td><?php print $fields_data['weight']['data'].$fields_data['weight_unit'];?></td>
+    <td><?php print $fields_data['weight']['data'].$fields_data['weight_unit']['data'];?></td>
 </tr>
 <tr>
 	<td><?php print $fields_data['type_facture']['label'];?></td>
