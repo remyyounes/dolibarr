@@ -28,9 +28,12 @@
 require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/product.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
-
+if( $conf->prixbase->enabled ){
+	require_once(DOL_DOCUMENT_ROOT."/prixbase/class/product_pricebase.class.php");
+}
 $langs->load("products");
 $langs->load("bills");
+$langs->load("prixbase@prixbase");
 
 // Security check
 if (isset($_GET["id"]) || isset($_GET["ref"]))
@@ -45,6 +48,17 @@ $result=restrictedArea($user,'produit|service',$id,'product','','',$fieldid);
 /*
  * Actions
  */
+
+//=====================================
+//============= PRIX BASE =============
+//=====================================
+if($user->rights->prixbase->creer  && $conf->prixbase->enabled ){
+	require_once(DOL_DOCUMENT_ROOT."/prixbase/update.php");
+}
+//========================================
+//============ END PRIX BASE =============
+//========================================
+
 
 if ($_POST["action"] == 'update_price' && ! $_POST["cancel"] && ($user->rights->produit->creer || $user->rights->service->creer))
 {
@@ -146,6 +160,20 @@ if ($isphoto)
 }
 
 print '</tr>';
+print '</table>';
+
+
+//=====================================
+//============= PRIX BASE =============
+//=====================================
+if( $conf->prixbase->enabled ){
+	require_once(DOL_DOCUMENT_ROOT."/prixbase/view.php");
+}
+print "<br>";
+print '<table class="border" width="100%">';
+//========================================
+//============ END PRIX BASE =============
+//========================================
 
 // MultiPrix
 if ($conf->global->PRODUIT_MULTIPRICES)
@@ -285,18 +313,30 @@ if ($mesg) print $mesg;
 /*                                                                            */
 /* ************************************************************************** */
 
-if (empty($_GET["action"]) || $_GET["action"]=='delete')
+if (empty($_GET["action"]) || $_GET["action"]=='delete' ||  $_GET["action"]=='update_unites')
 {
 	print "\n<div class=\"tabsAction\">\n";
 
 	if ($user->rights->produit->creer || $user->rights->service->creer)
 	{
 		print '<a class="butAction" href="'.DOL_URL_ROOT.'/product/price.php?action=edit_price&amp;id='.$product->id.'">'.$langs->trans("UpdatePrice").'</a>';
+		if($user->rights->prixbase->creer ){
+			print '<a class="butAction" href="'.DOL_URL_ROOT.'/product/price.php?action=edit_baseprice&amp;id='.$product->id.'">'.$langs->trans("Changer le Prix Base").'</a>';
+		}
 	}
 
 	print "\n</div>\n";
 }
 
+//=====================================
+//============= PRIX BASE =============
+//=====================================
+if($user->rights->prixbase->creer  && $conf->prixbase->enabled ){
+	require_once(DOL_DOCUMENT_ROOT."/prixbase/edit.php");
+}
+//========================================
+//============ END PRIX BASE =============
+//========================================
 
 
 /*
