@@ -37,3 +37,4 @@ type_facture=Type de Facture
 accounting=Comptabilité
 repartition=Repartition (?)
 referenced_facture=Reference Fact (interne)
+stockentries=Dossiers Stocks

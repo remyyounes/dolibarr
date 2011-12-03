@@ -171,6 +171,7 @@ llxHeader("",$langs->trans("WarehouseCard"),$help_url);
 
 
 if($action == 'liste'){
+    print_fiche_titre($langs->trans("stockentries"));
     $stockEntry->printList();
     //LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON p.rowid = pfp.fk_product
 }
