@@ -601,7 +601,7 @@ class Stockentry_line extends CommonCustomObject
 	    $fields = $this->customfields->fetchAllCustomFields(1);
 	    $this->setFields($fields);
 	    $elements = array();
-	    $sql = "SELECT l.rowid , l.total_ttc_facture, l.date_facture_fourn, l.date_echeance_facture_fourn, f.ref_ext as referenced_facture, f.rowid as facid ";
+	    $sql = "SELECT l.rowid , l.total_ttc_facture, l.date_facture_fourn, l.date_echeance_facture_fourn, l.type_facture, f.ref_ext as referenced_facture, f.rowid as facid ";
 	    $sql.= " FROM " . MAIN_DB_PREFIX . $this->table_element . " AS l LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn AS f ON l.fk_facture_fourn = f.rowid ". $customsql;
 	    $resql = $this->customfields->executeSQL($sql, "getList for ".$this->table_element);
 	    if ($this->db->num_rows($resql) > 0) {

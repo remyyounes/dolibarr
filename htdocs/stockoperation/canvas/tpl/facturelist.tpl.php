@@ -37,7 +37,7 @@
         foreach($list as $item){
     ?>
     <tr <?php print $bc[$var];?>>
-    	<td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?facid='.$item->rowid.'&actions=showfacture';?>"><?php print $this->printField($this->fields->rowid,$item->rowid);?></a></td>
+    	<td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?action=showfacture&id='.$this->fk_stockentry.'&facid='.$item->rowid;?>"><?php print $this->printField($this->fields->rowid,$item->rowid);?></a></td>
         <td><?php print $this->printField($this->fields->type_facture, $item->type_facture);?></td>
         <td><a href="<?php print DOL_URL_ROOT.'/fourn/facture/fiche.php?facid='.$item->facid;?>"><?php print $item->referenced_facture.'</a>';?></td>
         <td><?php print $this->printField($this->fields->total_ttc_facture, $item->total_ttc_facture);?></td>

@@ -45,6 +45,7 @@ $object = new Societe($db);
 $sortfield = GETPOST("sortfield");
 $sortorder = GETPOST("sortorder");
 $id = GETPOST('id');
+$facid = GETPOST('facid');
 if (! $sortfield) $sortfield="p.ref";
 if (! $sortorder) $sortorder="DESC";
 $parentmodule = "societe";
@@ -220,12 +221,28 @@ else
 		}
 		/* ************************************************************************** */
 		/*                                                                            */
-		/* Affichage de la liste des produits de l'entrepot                           */
+		/* Affichage de la liste des factures du dossier	                          */
 		/*                                                                            */
 		/* ************************************************************************** */
 		
 		$stockEntryLine = new Stockentry_line($db);
+		$stockEntryLine->fk_stockentry = $id;
 		$stockEntryLine->printList(" WHERE l.fk_stockentry='".$id."' ");
+		
+		/* ************************************************************************** */
+		/*                                                                            */
+		/* Affichage unique des factures du dossier	            		              */
+		/*                                                                            */
+		/* ************************************************************************** */
+		
+		print '<br>';
+		print_fiche_titre($langs->trans("StockEntryFacture"));
+		if ($action == 'showfacture'){
+		    $stockEntryLine = new Stockentry_line($db);
+		    $stockEntryLine->fetch($facid);
+		    $stockEntryLine->printDataSheet();
+		}
+		
 		
 		print '<br>';
 	}
