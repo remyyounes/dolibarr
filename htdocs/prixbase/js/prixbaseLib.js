@@ -1,90 +1,128 @@
-function calculateCoeff(obj){
+$(document).ready(function() {
+	initPrixBase();
+});
+
+function initPrixBase() {
+	var pa = $('#cf_pa');
+	var pamp = $('#cf_pamp');
+	var prht = $('#cf_prht');
+	var prmpht = $('#cf_prmpht');
+	var coeff = $('#cf_coeff');
+	var coeff_mp = $('#cf_coeff_mp');
 	
+
+	coeff.bind('blur', function() {
+		calculatePR($(this));
+		calculateTTC();
+	});
+	coeff_mp.bind('blur', function() {
+		calculatePR($(this));
+		calculateTTC();
+	});
+
+	pa.bind('blur', function() {
+		calculateCoeff($(this));
+	});
+	pamp.bind('blur', function() {
+		calculateCoeff($(this));
+	});
+	prht.bind('blur', function() {
+		calculateCoeff($(this));
+		calculateTTC();
+	});
+	prmpht.bind('blur', function() {
+		calculateCoeff($(this));
+		calculateTTC();
+	});
+
+}
+
+function calculateCoeff(obj) {
+
 	formatFields();
-	var pa = $F('pb_pa');
-	var prht = $F('pb_prht');
-	var coeff = parseFloat(prht) / parseFloat(pa);
-	$('pb_coeff').value = coeff;
 	
-	var pamp = $F('pb_pamp');
-	var prmpht = $F('pb_prmpht');
-	var coeff_mp = parseFloat(prmpht) / parseFloat(pamp);
-	$('pb_coeff_mp').value = coeff_mp;
-	
-	formatFields();
-	
-	if(obj.id == 'pb_prht' || obj.id == 'pb_prmpht'){
-		calculateTTC(obj);
+	var pa = getFieldFloatValue($('#cf_pa'));
+	var prht = getFieldFloatValue($('#cf_prht'));
+	var pamp = getFieldFloatValue($('#cf_pamp'));
+	var prmpht = getFieldFloatValue($('#cf_prmpht'));
+
+	if (pa && prht) {
+		$('#cf_coeff').val(parseFloat(prht) / parseFloat(pa));
 	}
-}
-
-function formatFields(){
-	valueFormat($("pb_coeff"),3);
-	valueFormat($("pb_pa"),2);
-	valueFormat($("pb_prht"),2);
-	valueFormat($("pb_coeff_mp"),3);
-	valueFormat($("pb_pamp"),2);
-	valueFormat($("pb_prmpht"),2);
-}
-
-
-function calculatePR(obj){
-	
+	if (pamp && prmpht) {
+		$('#cf_coeff_mp').val(parseFloat(prmpht) / parseFloat(pamp));
+	}
 	formatFields();
-	var pa = parseFloat($F('pb_pa'));
-	var coeff = parseFloat($F('pb_coeff'));
+
+}
+
+function formatFields() {
+
+	valueFormat($("#cf_coeff"), 3);
+	valueFormat($("#cf_pa"), 2);
+	valueFormat($("#cf_prht"), 2);
+	valueFormat($("#cf_coeff_mp"), 3);
+	valueFormat($("#cf_pamp"), 2);
+	valueFormat($("#cf_prmpht"), 2);
+}
+
+function calculatePR(obj) {
+
+	formatFields();
+	var pa = parseFloat($('#cf_pa').val());
+	var coeff = parseFloat($('#cf_coeff').val());
 	var prht = coeff * pa;
-	$('pb_prht').value = prht;
-	
-	var pamp = parseFloat($F('pb_pamp'));
-	var coeff_mp = parseFloat($F('pb_coeff_mp'));
+	$('#cf_prht').val(prht);
+
+	var pamp = parseFloat($('#cf_pamp').val());
+	var coeff_mp = parseFloat($('#cf_coeff_mp').val());
 	var prmpht = coeff_mp * pamp;
-	$('pb_prmpht').value = prmpht;
-	
+	$('#cf_prmpht').val(prmpht);
+
 	formatFields();
-	
-	if(obj.id == 'pb_prht' || obj.id == 'pb_prmpht'){
-		calculateTTC(obj);
-	}
 }
 
-
-
-function adjustPriceByCoeff(obj,pr,level){
+function adjustPriceByCoeff(obj, pr, level) {
 	valueFormat(obj, 3);
-	var coeff = obj.value.replace(",",".").replace(" ","");
+	var coeff = obj.val().replace(",", ".").replace(" ", "");
 	var newPrice = coeff * pr;
-	var price = $('price_'+level);
-	price.value = newPrice;
+	var price = $('#price_' + level);
+	price.val(newPrice);
 	valueFormat(price, 2);
 }
-function adjustCoeffByPrice(obj,pr,level){
-	valueFormat(obj,2);
-	var price = obj.value.replace(",",".").replace(" ","");
-	if(pr > 0){
+
+function adjustCoeffByPrice(obj, pr, level) {
+	valueFormat(obj, 2);
+	var price = obj.val().replace(",", ".").replace(" ", "");
+	if (pr > 0) {
 		var newcoeff = price / pr;
-	}else{
+	} else {
 		var newcoeff = 0;
 	}
-	var coeff = $('coeff_vente'+level);
-	coeff.value = newcoeff;
-	valueFormat(coeff,3);
+	var coeff = $('#coeff_vente' + level);
+	coeff.val(newcoeff);
+	valueFormat(coeff, 3);
 }
 
-function calculateTTC(obj){
-	var ttcField = "";
-	var ht = obj.value.replace(",",".").replace(" ","");
-	if(obj.id == 'pb_prht'){
-		ttcField = 'pb_prttc';
-	}else{
-		ttcField = 'pb_prmpttc';
+function calculateTTC() {
+	
+	// get price HT
+	var ht = getFieldFloatValue($('#cf_prht'));
+	var ht_mp = getFieldFloatValue($('#cf_prmpht'));
+	
+	// get TVA and NPR
+	if (typeof productNPR == 'undefined') {
+		productNPR = 0;
 	}
-	ttcElm = $(ttcField);
-	if(productNPR || productTVA <= 0){
-		ttcElm.value = ht;
-	}else{
-		ttcElm.value = parseFloat(ht) + parseFloat(ht * productTVA / 100);
+	if (typeof productTVA == 'undefined' || productNPR) {
+		productTVA = 0;
 	}
-	valueFormat(ttcElm,2);
-		
+	
+	//multiply and set
+	$('#cf_prttc').val(   ht    + ht    * productTVA / 100);
+	$('#cf_prmpttc').val( ht_mp + ht_mp * productTVA / 100);
+	
+	//format
+	valueFormat($('#cf_prttc'), 2);
+	valueFormat($('#cf_prmpttc'), 2);
 }

@@ -1224,19 +1224,23 @@ class CustomFields // extends CommonObject
 		// Normal non-constrained fields
 		} else {
 			if ($type == 'varchar') {
-				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
+				$out.='<input type="text" name="'.$this->varprefix.$key.'" id="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			} elseif ($type == 'text') {
 				require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 				$doleditor=new DolEditor($this->varprefix.$key,$currentvalue,'',200,'dolibarr_notes','In',false,false,$conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE,5,100);
 				$out.=$doleditor->Create(1);
 			} elseif ($type == 'date') {
 				//$out.=' (YYYY-MM-DD)';
+			    
+			    if (empty($currentvalue)) {
+			    $currentvalue = date("%d/%m/%y",dol_now());
+			    }
 				$html=new Form($db);
 				$out.=$html->select_date($currentvalue,$this->varprefix.$key,0,0,1,$this->varprefix.$key,1,1,1);
 			} elseif ($type == 'datetime') {
 				//$out.=' (YYYY-MM-DD HH:MM:SS)';
 				if (empty($currentvalue)) { $currentvalue = 'YYYY-MM-DD HH:MM:SS'; }
-				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
+				$out.='<input type="text" name="'.$this->varprefix.$key.'" id="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			} elseif ($type == 'enum') {
 				$out.='<select name="'.$this->varprefix.$key.'">';
 				// cleaning out the enum values and exploding them into an array
@@ -1275,7 +1279,7 @@ class CustomFields // extends CommonObject
     			}
     			$out .= $formproduct->load_measuring_units($this->varprefix.$key, $unit_type, $currentvalue);
             }else { // for all other types (custom types and other undefined), we use a basic text input
-				$out.='<input type="text" name="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
+				$out.='<input type="text" name="'.$this->varprefix.$key.'" id="'.$this->varprefix.$key.'" size="'.$showsize.'" maxlength="'.$size.'" value="'.$currentvalue.'"'.($moreparam?$moreparam:'').'>';
 			}
 		}
 

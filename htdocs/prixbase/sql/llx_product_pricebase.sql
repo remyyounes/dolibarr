@@ -7,8 +7,8 @@ CREATE TABLE  IF NOT EXISTS llx_product_pricebase (
 `prmpht` DOUBLE,
 `prttc` DOUBLE,
 `prmpttc` DOUBLE,
-`valorisation` VARCHAR( 1 ),
+`valorisation` enum('pxmp','derpx','lot''lifo','fifo') NOT NULL,
 `peremption` INT( 6 ),
+`fk_user` INT( 11 ),
 PRIMARY KEY (  `rowid` )
 )TYPE=InnoDB AUTO_INCREMENT=1;
-

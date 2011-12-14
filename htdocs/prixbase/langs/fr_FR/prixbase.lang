@@ -1,15 +1,15 @@
 # Language file - fr_FR - prixbase
 CHARSET=UTF-8
-pb_pa=Prix d'achat
-pb_pamp=Prix d'achat moyen pondéré 
-pb_prht=Prix de revient HT
-pb_prmpht=Prix de revient moyen pondéré HT
-pb_prttc=Prix de revient TTC
-pb_prmpttc=Prix de revient moyen pondéré TTC
-pb_valorisation=Valorisation
-pb_peremption=Peremption
-pb_coeff=Coefficient de revient
-pb_coeff_mp=Coefficient de revient moyen pondéré
+pa=Prix d'achat
+pamp=Px. achat moy. pondéré 
+prht=Px. revient HT
+prmpht=Px. revient moy. pondéré HT
+prttc=Px. revient TTC
+prmpttc=Px. revient moy. pondéré TTC
+valorisation=Valorisation
+peremption=Peremption
+coeff=Coefficient de revient
+coeff_mp=Coeff. revient moy. pondéré
 marge=Marge
 margePct= Marge %%
 coeff_vente=Coeff. de Vente
