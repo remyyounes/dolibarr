@@ -484,7 +484,7 @@ if ($_GET["action"] == 'edit_price' && ($user->rights->produit->creer || $user->
         }
         print '		prht = ';
         print 		$productPriceBase->valorisation == "pxmp" && $productPriceBase->prmpht > 0? $productPriceBase->prmpht : $productPriceBase->prht .';';
-        print '		prttc = ';
+        print '		;prttc = ';
         print 		$productPriceBase->valorisation == "pxmp" && $productPriceBase->prmpttc > 0? $productPriceBase->prmpttc : $productPriceBase->prttc .';';
         print '</script>';
         print '<script src="'.DOL_URL_ROOT.'/prixbase/js/multiprices.js"></script>';

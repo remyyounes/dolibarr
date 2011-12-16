@@ -4,7 +4,7 @@ $(document).ready(function() {
 function initPrices() {
 	var px = new Array();
 	var priceInput = $('#price');
-	for ( var i = 1; i < numPrices || i<2; i++) {
+	for ( var i = 1; i <= numPrices ; i++) {
 
 		var coeffTr = document.createElement('tr');
 		var coeffTdLabel = document.createElement('td');
@@ -48,13 +48,17 @@ function initPrices() {
 					function(e) {
 						adjustCoeffByPrice($('#'
 								+ e.target.previousElementSibling.id));
-					})
+					});
+			var priceMin= $('#price_' + i).parent().parent().next().children(1).children(0);
 		} else {
 			var priceBaseCombo = $('select[name="price_base_type"]');
 			priceBaseCombo.bind('change', function(e) {
 				adjustCoeffByPrice($('#price'));
 			});
+			var priceMin= $('#price').parent().parent().next().children(1).children(0);
 		}
+		priceMin.val(prht);
+		valueFormat(priceMin,2);
 	}
 }
 

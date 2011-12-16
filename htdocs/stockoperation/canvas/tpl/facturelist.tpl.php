@@ -27,8 +27,8 @@
     	<td class="liste_titre"><?php print $langs->trans('total_ttc_facture');?></td>
     	<td class="liste_titre"><?php print $langs->trans('date_facture_fourn');?></td>
     	<td class="liste_titre"><?php print $langs->trans('date_echeance_facture_fourn');?></td>
-    	<td class="liste_titre"><?php print $langs->trans('Edit');?></td>
-    	<td class="liste_titre"><?php print $langs->trans('Delete');?></td>
+    	<td class="liste_titre"></td>
+    	<td class="liste_titre"></td>
     </tr>
     <tr class="liste_titre">
     <td class="liste_titre" colspan="9">filter info</td>
@@ -45,8 +45,8 @@
         <td><?php print $this->printField($this->fields->total_ttc_facture, $item->total_ttc_facture);?></td>
         <td><?php print $this->printField($this->fields->date_facture_fourn, $item->date_facture_fourn);?></td>
         <td><?php print $this->printField($this->fields->date_echeance_facture_fourn, $item->date_echeance_facture_fourn);?></td>
-        <td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?action=editfacture&id='.$this->fk_stockentry.'&facid='.$item->rowid;?>"><?php print $langs->trans('Edit');?></a></td>
-        <td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?action=deletefacture&id='.$this->fk_stockentry.'&facid='.$item->rowid;?>"><?php print $langs->trans('Delete');?></a></td>
+        <td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?action=editfacture&id='.$this->fk_stockentry.'&facid='.$item->rowid;?>"><?php print img_edit();?></a></td>
+        <td><a href="<?php print DOL_URL_ROOT.'/stockoperation/fiche.php?action=deletefacture&id='.$this->fk_stockentry.'&facid='.$item->rowid;?>"><?php print img_delete();?></a></td>
     </tr>
     <?php
             $var = !$var; 
