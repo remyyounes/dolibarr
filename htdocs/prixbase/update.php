@@ -13,12 +13,15 @@ if ($_POST["action"] == 'update_baseprice' && ! $_POST["cancel"] && ($user->righ
     $productPriceBase->validateFields();
 
     //create or update
+    $upd = $productPriceBase->updateCreate($user);
+    /*
     if($productPriceBase->id > 0){
         $upd = $productPriceBase->update($user);
     }else{
         $upd = $productPriceBase->create($user);
     }
-
+	*/
+    
     //display status message from update/create
     if ($upd > 0){
         $mesg = '<div class="ok">'.$langs->trans("RecordSaved").'</div>';

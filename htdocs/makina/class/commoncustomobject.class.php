@@ -56,76 +56,65 @@ class CommonCustomObject
     }
 
 
-    function createCustom($object, $notrigger=0, $forceinsert = 0)
+    function updateCreate( $user, $notrigger=0, $forceinsert = 0)
     {
-        // Get all the columns (custom fields)
-        $fields = $this->fetchAllCustomFields(false,0,1);
 
-        if (empty($fields)) return null;
+        $this->validateFields();
+        // Get all the columns (custom fields)
+        //$fields = $this->customfields->fetchAllCustomFields(false,0,1);
+        $fields = $this->customfields->fetchAllCustomFields(1);
+        if (empty($fields)) return -1;
+
+        $this->setFields($fields);
+
 
         // Forging the SQL statement
         $sqlfields = '';
         foreach ($fields as $field) {
-            $key = $this->varprefix.$field->column_name;
-            if (!isset($object->$key)) {
+            //cf_
+            $key = $this->customfields->varprefix.$field->column_name;
+            if (!isset($this->$key)) {
                 $key = $field->column_name;
             }else{
                 //We need to fetch the correct value when we update a date field
                 if($field->data_type == 'date'){
-                    $object->$key = $this->db->idate(dol_mktime(0, 0, 0, $object->{$key.'month'}, $object->{$key.'day'}, $object->{$key.'year'}));
+                    $this->$key = $this->db->idate(dol_mktime(0, 0, 0, $this->{$key.'month'}, $this->{$key.'day'}, $this->{$key.'year'}));
                 }
             }
              
-            if(preg_match('/^(.*)_((auto).*)$/i', $key, $matches)){
+            if(preg_match('/^(fk_)(.*)$/i', $key, $matches)){
                 //constraints
                 if(!empty($field->referenced_table_name)){
                     //users
                     if($field->referenced_table_name == MAIN_DB_PREFIX.'user'){
-                        $object->$key = $GLOBALS['user']->id;
-                    }
-                }else{
-                    //date / datetime / timestamp
-                    if($field->data_type == 'date' || $field->data_type == 'datetime' || $field->data_type == 'timestamp'){
-                        $object->$key = $this->db->idate(dol_now());
+                        $this->$key = $GLOBALS['user']->id;
                     }
                 }
             }
+            if(preg_match('/^(.*)_(log)$/i', $key, $matches)){
+                //date / datetime / timestamp
+                if($field->data_type == 'date' || $field->data_type == 'datetime' || $field->data_type == 'timestamp'){
+                    $this->$key = $this->db->idate(dol_now());
+                }
+            }
 
-            if ($object->$key) {
+            if ($this->$key) {
                 // Only insert/update this field if it was submitted
                 if ($sqlfields != '') {
                     $sqlfields.=',';
                 }
-                $sqlfields.=$field->column_name."='".$this->escape($object->$key)."'";
+                $this->$key."='".$this->customfields->escape($this->$key)."'";
             }
         }
-        if ($sqlfields != '') {
-            $sqlfields.=',';
-        } // in the case that all fields are empty, this one can be the only one submitted, so we have to put the comma only if it's not alone (or else sql syntax error)
-        $sqlfields.="fk_".$this->module."=".$object->id; // we add the object id (filtered by fetchAllCustomFields)
 
-        $result = $this->fetch($object->id);
 
-        if (!empty($result) and count($result) > 0 and !$forceinsert) {
-            // if the record already exists for this facture id, we update it
-            $sql = "UPDATE ".$this->moduletable." SET ".$sqlfields." WHERE fk_".$this->module."=".$object->id;
+        if($this->id > 0 && !$forceinsert){
+            $this->update($user);
         } else { // else we insert a new record
-            $sql = "INSERT INTO ".$this->moduletable." SET ".$sqlfields;
+            $this->id = $this->create($user);
         }
 
-        // Trigger or not?
-        if ($notrigger) {
-            $trigger = null;
-        } else {
-            $trigger = strtoupper($this->module).'_CUSTOMFIELD_CREATEUPDATERECORD';
-        }
-
-        // Executing the SQL statement
-        $rtncode = $this->executeSQL($sql, 'createOrUpdateRecord_CustomFields',$trigger);
-
-        $this->id = $this->db->last_insert_id($this->moduletable);
-
-        return $rtncode;
+        return $this->id;
     }
 
 
@@ -373,19 +362,8 @@ class CommonCustomObject
         $fields = $this->customfields->fetchAllCustomFields(1);
         $this->setFields($fields);
 
-        /*
-         $is_nullable;
-        $data_type;
-        $column_type;
-        $column_default;
-        */
-         
         foreach($fields as $field){
-
             $column_name = $field->column_name;
-
-
-
             if( !$this->$column_name && $this->$column_name !== '0' && $field->is_nullable == 'NO'){
                 $this->$column_name = $field->column_default;
                 if($field->data_type == 'date'){

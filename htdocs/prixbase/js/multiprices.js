@@ -6,7 +6,7 @@ function initPrices() {
 	var priceInput = $('#price');
 	for ( var i = 1; i < numPrices || i<2; i++) {
 
-		var coeffTr = document.createElement('tr')
+		var coeffTr = document.createElement('tr');
 		var coeffTdLabel = document.createElement('td');
 		var coeffTdInput = document.createElement('td');
 		var coeffInput = document.createElement('input');

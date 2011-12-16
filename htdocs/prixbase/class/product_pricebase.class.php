@@ -56,6 +56,7 @@ class Product_pricebase extends CommonCustomObject
 	var $prmpttc;
 	var $valorisation;
 	var $peremption;
+	var $fk_user;
 
     
 
@@ -120,6 +121,7 @@ class Product_pricebase extends CommonCustomObject
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."product_pricebase(";
 		
 		$sql.= "fk_user,";
+		$sql.= "date_log,";
 		$sql.= "fk_product,";
 		$sql.= "pa,";
 		$sql.= "pamp,";
@@ -132,6 +134,7 @@ class Product_pricebase extends CommonCustomObject
 		
         $sql.= ") VALUES (";
         
+        $sql.= " ".(! isset($user->date_log)?'NULL':"'".$this->date_log."'").",";
         $sql.= " ".(! isset($user->id)?'NULL':"'".$user->id."'").",";        
 		$sql.= " ".(! isset($this->fk_product)?'NULL':"'".$this->fk_product."'").",";
 		$sql.= " ".(! isset($this->pa)?'NULL':"'".$this->pa."'").",";
@@ -209,7 +212,9 @@ class Product_pricebase extends CommonCustomObject
 		$sql.= " t.prttc,";
 		$sql.= " t.prmpttc,";
 		$sql.= " t.valorisation,";
-		$sql.= " t.peremption";
+		$sql.= " t.peremption,";
+		$sql.= " t.fk_user,";
+		$sql.= " t.date_log";
 
 		
         $sql.= " FROM ".MAIN_DB_PREFIX."product_pricebase as t";
@@ -239,7 +244,8 @@ class Product_pricebase extends CommonCustomObject
 				$this->prmpttc = $obj->prmpttc;
 				$this->valorisation = $obj->valorisation;
 				$this->peremption = $obj->peremption;
-
+				$this->fk_user = $obj->fk_user;
+				$this->date_log = $obj->date_log;
                 
             }
             $this->db->free($resql);
@@ -296,6 +302,7 @@ class Product_pricebase extends CommonCustomObject
 		$sql.= " prmpttc=".(($this->prmpttc)?$this->prmpttc:"0").",";
 		$sql.= " valorisation=".(isset($this->valorisation)?"'".$this->valorisation."'":"null").",";
 		$sql.= " peremption=".(($this->peremption)?$this->peremption:"0").",";
+		$sql.= " date_log=".(($this->date_log)?$this->date_log:"").",";
 		$sql.= " fk_user='".$user->id."' ";
 		
         
@@ -472,6 +479,8 @@ class Product_pricebase extends CommonCustomObject
 		$this->prmpttc='';
 		$this->valorisation='';
 		$this->peremption='';
+		$this->fk_user='';
+		$this->date_log='';
 
 		
 	}
