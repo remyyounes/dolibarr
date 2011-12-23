@@ -6,7 +6,7 @@ NewStockEntryRecord=Nouvelle Entrée Stock
 MiscOperations=Operations Diverses
 Inventory=Inventaire
 
-fk_societe=Fournisseur
+fk_societe=Transitaire
 mode_calcul=Mode de Calcul
 transport=Identification Transport
 numeroplomb=Numéro Plomb

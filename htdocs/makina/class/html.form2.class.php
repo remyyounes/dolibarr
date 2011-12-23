@@ -75,7 +75,7 @@ function select_factures_fournisseurs($socid, $selected='', $htmlname='factureid
         {
             $out = '';
             $out .= ajax_autocompleter($selected, $htmlname, DOL_URL_ROOT.'/makina/includes/ajax_facture_fourn.php', ($socid > 0?'socid='.$socid.'&':'').'htmlname='.$htmlname.'&outjson=1', $conf->global->PRODUIT_USE_SEARCH_TO_SELECT);
-            $out .= '<input type="text" size="32" name="search_'.$htmlname.'" id="search_'.$htmlname.'">';
+            $out .= '<input type="text" size="32" name="search_'.$htmlname.'" id="search_'.$htmlname.'">' .'<span class="autocomplete_searchbtn">'. img_picto("Search", "search")."</span>";
             $out .= '<br>';
         }
         else
@@ -177,7 +177,7 @@ function select_factures_fournisseurs($socid, $selected='', $htmlname='factureid
         {
             $out = '';
             $out .= ajax_autocompleter($selected, $htmlname, DOL_URL_ROOT.'/makina/includes/ajax_entrepot.php', 'htmlname='.$htmlname.'&outjson=1', $conf->global->PRODUIT_USE_SEARCH_TO_SELECT);
-            $out .= '<input type="text" size="32" name="search_'.$htmlname.'" id="search_'.$htmlname.'">';
+            $out .= '<input type="text" size="32" name="search_'.$htmlname.'" id="search_'.$htmlname.'">' .'<span class="autocomplete_searchbtn">'. img_picto("Search", "search")."</span>";
             $out .= '<br>';
         }
         else
@@ -213,7 +213,7 @@ function select_factures_fournisseurs($socid, $selected='', $htmlname='factureid
         // Add criteria on ref/label
         if ($filterkey && $filterkey != '' && $filterkey != ' ')
         {
-            $sql.=" AND (s.lieu LIKE '%".$filterkey."%' OR s.rowid LIKE '%".$filterkey."%' )";
+            $sql.=" WHERE (s.lieu LIKE '%".$filterkey."%' OR s.rowid LIKE '%".$filterkey."%' )";
         }
         $sql.= " ORDER BY s.rowid DESC";
     
@@ -264,7 +264,7 @@ function select_factures_fournisseurs($socid, $selected='', $htmlname='factureid
         }
         else
         {
-            dol_print_error($db);
+            dol_print_error($this->db);
         }
     }
 

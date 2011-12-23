@@ -302,7 +302,7 @@ else
 		print '<br>';
 	}
 }
-
+print '<script src="'.DOL_URL_ROOT.'/makina/js/ajax_searchbutton.js"></script>';
 
 $db->close();
 
