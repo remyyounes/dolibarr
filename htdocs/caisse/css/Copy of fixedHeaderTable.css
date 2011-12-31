@@ -1,0 +1,238 @@
+body {
+	background-color: #eeeef0;
+	font-family: Arial, Helvetica, 'Helvetica Neue', Verdana, sans-serif;
+}
+
+header {
+	padding: 0px;
+	margin: 0px;
+}
+
+/* define height and width of scrollable area. Add 16px to width for scrollbar          */
+
+.info.column {
+	width:100px;
+}
+
+/* Reset overflow value to hidden for all non-IE browsers. */
+html>body section.ticket.column {
+	height: auto;
+	overflow: hidden;
+	width: auto;
+	margin-right: 5px;
+	margin-left: 5px;
+	-webkit-box-shadow: 3px 0px 5px rgba(120, 120, 150, 0.7), -3px 0px 5px
+		rgba(120, 120, 150, 0.7);
+	-webkit-border-radius: 0px;
+}
+
+html>body section.ticket.column header {
+	background-color: #2C3B4F;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(0, 0,
+		0, 0) ), color-stop(.55, rgba(0, 0, 0, .1) ),
+		color-stop(1, rgba(20, 20, 20, .5) ) );
+}
+
+html>body section.ticket.column header h1 {
+	color: white;
+	display: block;
+	background-color: transparent;
+	-webkit-box-shadow: 0px -0px 0px rgba(150, 150, 250, 1);
+	padding: 0px 6px 0px 6px;
+	margin: 0px;
+	position: relative;
+	top: 0px;
+	left: 0px;
+	text-shadow: 0px -1px 2px rgba(150, 150, 250, 1);
+	font-size: 20pt;
+}
+
+html>body section.ticket.column header h3 {
+	padding: 0px 6px 0px 6px;
+	margin: 0px;
+	display: inline;
+	text-shadow: 0px -1px 2px rgba(150, 150, 250, 1);
+	font-size: 12pt;
+	color: white;
+}
+
+header .total {
+	float: right;
+}
+
+.column  h2 {
+	font-size: 16pt;
+	display: inline;
+	color: white;
+	width: auto;
+	margin: 0px;
+	background-color: #C0D0E6;
+	-webkit-border-radius: 3px;
+	padding: 1px 15px 0px 15px;
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.45);
+	-webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+	border-top: 1px solid #fff;
+	border-left: 1px solid #fff;
+	border-bottom: 1px solid #778;
+	border-right: 1px solid #778;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(222,
+		222, 222, .10) ), color-stop(.45, rgba(0, 0, 0, .01) ),
+		color-stop(1, rgba(20, 20, 20, .11) ) );
+}
+
+html>body .column {
+	padding: 0px;
+	margin: 0px;
+	height: 300px;
+	width: 200px;
+	background-color: #ffffff;
+	-webkit-border-radius: 5px;
+}
+
+html>body .column.right {
+	margin-left: 0px;
+}
+
+html>body section.centerize {
+	width: auto;
+	min-width: 900px;
+	max-width: 1200px;
+	margin: 0px auto;
+	margin-top: 0px;
+	margin-right: auto;
+	margin-bottom: 0px;
+	margin-left: auto;
+	padding: 0px;
+	-webkit-border-radius: 5px;
+	-webkit-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.3), 0px -1px 3px
+		rgba(0, 0, 0, 0.3);
+	background-color: white;
+}
+
+html>body div.clear {
+	clear: both;
+}
+
+table.fixedHeader {
+	width: 100%;
+	position: relative;
+	top: -2px;
+	left: -2px;
+}
+
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+
+.scrollContent tr {
+	height: 30px;
+}
+
+th {
+	font-size: 9pt;
+	color: white;
+	padding: 0px 5px 0px 5px;
+	margin: 0px;
+	background-color: #1F2732;
+	-webkit-border-bottom-right-radius: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	font-weight: normal;
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.45);
+	-webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+	border: 1px solid #FFF;
+	border-top: 0px;
+	border-left: 0px;
+}
+
+/* define the table content to be scrollable                                              */
+/* set TBODY element to have block level attributes. All other non-IE browsers            */
+/* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+/* induced side effect is that child TDs no longer accept width: auto                     */
+html>body tbody.scrollContent {
+	height: 262px;
+	overflow: auto;
+	width: 100%
+}
+
+/* make TD elements pretty. Provide alternating classes for striping the table */
+/* http://www.alistapart.com/articles/zebratables/                             */
+tbody.scrollContent td,tbody.scrollContent tr.normalRow td {
+	background: #FFF;
+	padding: 2px 3px 3px 4px;
+}
+
+tbody.scrollContent tr.alternateRow td {
+	background: #EEE;
+	padding: 2px 3px 3px 4px
+}
+
+/* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+/* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+/* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+html>body table.fixedHeader thead th {
+	width: 33%;
+}
+
+html>body table.fixedHeader thead th+th {
+	width: 11%;
+	text-align: right;
+	padding-right: 5px;
+}
+
+/* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
+/* All other non-IE browsers.                                            */
+/* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+html>body tbody.scrollContent td {
+	width: 33%;
+	font-size: 9pt;
+}
+
+
+
+html>body tbody.scrollContent td+td {
+	width: 11%;
+	border-left: 1px solid #CCC;
+}
+
+.controls.column {
+	
+}
+
+.controls a {
+	min-height: 25px;
+	width: 175px;;
+	display: block;
+}
+
+.pad{
+	display:none;
+	padding:5px;
+	position:absolute;
+	bottom: 10px;
+	left:10px;
+	width:268px;;
+	height:auto;
+	background:white;
+	-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5),-2px -2px 3px rgba(0, 0, 0, 0.5);
+	z-index:999;
+	-webkit-border-radius:5px;
+}
+
+.pad input{
+	-webkit-border-radius:5px;
+	border:0px solid black;
+	-webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+	border: 1px solid #aaa;
+	width:185px;
+	font-size:22px;
+}
+
+.centerize.productsearch {
+	margin-top:10px;
+	background-color: #2C3B4F;
+	color: white;
+}

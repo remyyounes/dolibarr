@@ -1,0 +1,492 @@
+body {
+	background-color: #eeeef0;
+	font-family: Arial, Helvetica, 'Helvetica Neue', Verdana, sans-serif;
+}
+
+table {
+	border: 0px;
+	border-spacing: 0px;
+	width: 100%;
+}
+
+input {
+	-webkit-border-radius: 5px;
+}
+
+.info.column {
+	width: 100px;
+	text-align: center;
+	margin-left: -100%;
+}
+
+.controls.column {
+	width: 200px;
+	margin-left: -200px;
+}
+
+.ticket.column {
+	
+	/* overflow: hidden; */
+	margin: 0 205px 0 100px;	
+	-webkit-box-shadow: 3px 0px 5px rgba(120, 120, 150, 0.7), -3px 0px 5px
+		rgba(120, 120, 150, 0.7);
+}
+
+header {
+	border-left: 1px solid white;
+	background-color: #2C3B4F;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(0, 0,
+		0, 0) ), color-stop(.55, rgba(0, 0, 0, .1) ),
+		color-stop(1, rgba(20, 20, 20, .5) ) );
+	background-color: #2C3B4F;
+}
+
+header h1 {
+	color: white;
+	margin: 0px;
+	padding: 0px 6px 0px 6px;
+	background-color: transparent;
+	text-shadow: 0px -1px 2px rgba(150, 150, 250, 1);
+	font-size: 24px;
+}
+
+header h3 {
+	color: white;
+	padding: 0px 6px 0px 6px;
+	margin: 0px;
+	display: inline;
+	text-shadow: 0px -1px 1px rgba(150, 150, 250, 1);
+	font-size: 12pt;
+}
+
+header .total {
+	float: right;
+}
+
+header .total {
+	padding-left: 5px;
+}
+
+.column {
+	height: auto;
+	padding: 0px;
+	margin: 0px;
+	background-color: #ffffff;
+}
+
+.column.right {
+}
+
+section.centerize {
+	background-color: white;
+	width: auto;
+	padding: 0px;
+	min-width: 900px;
+	margin-top: 0px;
+	margin-right: auto;
+	margin-bottom: 0px;
+	margin-left: auto;
+	-webkit-border-radius: 5px;
+	-webkit-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.3), 0px -1px 3px
+		rgba(0, 0, 0, 0.3);
+}
+
+table.fixedHeader {
+	width: 100%;
+	position: relative;
+	top: -2px;
+}
+
+th {
+	font-size: 9pt;
+	color: white;
+	padding: 0px 5px 0px 5px;
+	margin: 0px;
+	background-color: #1F2732;
+	-webkit-border-bottom-right-radius: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	font-weight: normal;
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.45);
+	-webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+	border: 1px solid #FFF;
+	border-top: 0px;
+	border-right: 0px;
+}
+
+/* define the table content to be scrollable                                              */
+/* set TBODY element to have block level attributes. All other non-IE browsers            */
+/* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+/* induced side effect is that child TDs no longer accept width: auto                     */
+.scrollContent {
+	height: 300px;
+	overflow: auto;
+	width: 100%
+}
+
+.scrollContent tr {
+	height: 30px;
+}
+
+tr:nth-child(odd) {
+	background: #EEE;
+}
+
+tr:nth-child(even) {
+	background: #FFF;
+}
+
+.scrollContent tr td:first-child {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.scrollContent tr:hover td:first-child {
+	overflow: visible;
+	white-space: normal;
+}
+
+/*  ===================================
+	End - Extra Colum Styling (colum#2)
+	===================================
+*/
+.scrollContent td div {
+	text-align: left;
+	float: left;
+}
+
+.scrollContent td div label {
+	position: relative;
+	z-index: 1;
+	display: block;
+	font-weight: bold;
+	/* opacity: 0.75; */
+	-webkit-transition: opacity 0.3s linear;
+	margin-bottom: -16px;
+	top: 6px;
+	left: 4px;
+	opacity: 1;
+}
+
+.scrollContent td div label.hide {
+	opacity: 0;
+}
+
+.scrollContent td div input {
+	position: relative;
+	z-index: 2;
+	top: 2px;
+	background-color: rgba(255, 255, 255, .8);
+	margin-bottom: 3px;
+}
+
+#ticket_input_info tr {
+	background-color: #CACACA;
+	font-size: 9pt;
+}
+
+#ticket_input_info td:nth-child(odd) {
+	width: 13%;
+	text-align: right;
+	padding-right: 5px;
+}
+
+#ticket_input_info td:nth-child(even) {
+	width: 20%;
+	text-align: left;
+	padding-left: 5px;
+}
+
+/*  ============================
+	Being - Extra Colum Styling 
+	============================
+*/
+table.fixedHeader thead th {
+	width: 200px;
+	max-width: 200px;
+	text-align: center;
+	padding: 0px 5px 0px 5px;
+}
+
+table.fixedHeader thead th+th {
+	width: auto;
+}
+
+table.fixedHeader thead th+th+th+th {
+	width: 60px;
+}
+
+table.fixedHeader thead th+th+th {
+	width: 60px;
+}
+
+table.fixedHeader thead th+th+th+th+th {
+	width: 50px;
+}
+
+table.fixedHeader thead th+th+th+th+th+th {
+	width: 80px;
+}
+
+table.fixedHeader thead th+th+th+th+th+th+th {
+	width: 80px;
+}
+
+tbody.scrollContent td {
+	width: 200px;
+	max-width: 200px;
+	padding: 0px 5px 0px 5px;
+	font-size: 9pt;
+}
+
+/* extraInfo */
+tbody.scrollContent td+td {
+	border-left: 1px solid #CCC;
+	width: auto;
+}
+
+/* HT */
+tbody.scrollContent td+td+td {
+	text-align: right;
+	width: 60px;
+}
+
+/* qte */
+tbody.scrollContent td+td+td+td {
+	width: 60px;
+}
+
+/* rem% */
+tbody.scrollContent td+td+td+td+td {
+	width: 50px;
+}
+
+/* total */
+tbody.scrollContent td+td+td+td+td+td {
+	width: 80px;
+}
+
+/* total */
+tbody.scrollContent td+td+td+td+td+td+td {
+	width: 80px;;
+}
+
+#loader {
+	width: auto;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	height: auto;
+	background: white;
+	-webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5), -2px -2px 5px
+		rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	-webkit-border-radius: 5px;
+	padding-top: 5px;
+	top: 40%;
+	left: 40%;
+}
+
+.selection {
+	min-width: 400px;
+	position: fixed;
+	height: auto;
+	background: white;
+	-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5), -2px -2px 3px
+		rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	-webkit-border-bottom-left-radius: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	top: 0px;
+	left: 35%;
+	-webkit-transition: all 500ms ease;
+}
+
+.selection.hideSelection {
+	top:0px;
+	margin-top: -100%;;
+	-webkit-transition: all 500ms ease;
+}
+
+.selection .scrollContent {
+	height: auto;
+	max-height: 300px;
+}
+
+.selection table {
+	background-color: #eee;
+}
+
+.selection table td {
+	padding: 5px 5px 5px 5px;
+	font-size: 9pt;
+	cursor: pointer;
+}
+
+.selection table td+td {
+	border-left: 1px solid #ccc;
+}
+
+.selection table th {
+	padding: 2px 5px 2px 5px;
+}
+
+.selection header {
+	text-align: center;
+}
+
+.pad {
+	display: none;
+	padding: 5px;
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	width: 268px;;
+	height: auto;
+	background: white;
+	-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5), -2px -2px 3px
+		rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	-webkit-border-radius: 5px;
+}
+
+.pad input {
+	border: 0px solid black;
+	-webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+	border: 1px solid #aaa;
+	width: 185px;
+	font-size: 22px;
+}
+
+.centerize.productsearch {
+	margin-top: 10px;
+	background-color: #2C3B4F;
+	color: white;
+}
+
+div.spacer {
+	color: white;
+	max-height: 1px;
+}
+
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+
+div.clear {
+	clear: both;
+}
+
+div.extra {
+	float: left;
+	padding: 0px 5px 0px 5px;
+	margin: 1px;
+	margin-right: 5px; background-color : white;
+	-webkit-border-radius: 3px;
+	-webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .2);
+	background-color: white;
+	position:relative;
+	top:-1px;
+}
+
+div.extra span {
+	-webkit-box-shadow: 2px 0px 0px rgba(100, 100, 100, 0.3);
+	padding: 1px;
+	padding-right: 2px;
+	margin-right: 3px;
+}
+
+table.input input {
+	width: 100%;
+}
+
+table.input div {
+	padding-top: 2px;
+}
+
+#ticket_input tr td:nth-child(2) input {
+	width: 100px;
+}
+
+p.total {
+	padding: 6px;
+	margin: 0px;
+}
+
+.scrollContent tr td.search {
+	text-align: center;
+}
+
+.scrollContent tr td.search input {
+	width: auto;
+}
+
+.scrollContent tr.edit td {
+	opacity: .3;
+	background-color: yellow;
+	-webkit-transition: all 1s ease;
+	overflow: visible;
+	white-space: normal;
+}
+
+.scrollContent tr td {
+	opacity: 1;
+	-webkit-transition: all 1s ease;
+}
+
+#messageBox {
+	text-align: center;
+	background-color: #eee;
+	cursor: pointer;
+}
+
+#messageBox p {
+	max-width: 500px;
+	padding: 3px;
+}
+
+#loginBox {
+	text-align: center;
+	background-color: #eee;
+	width: 200px;
+	min-width: 0px;
+}
+
+#loginBox input {
+	padding: 3px 7px 3px 7px;;
+}
+
+#ticket_input tr td:last-child {
+	padding: 0px;
+	width: 90px;
+}
+
+#ticket_list tr:hover {
+	cursor: pointer;
+}
+
+.hideBlock {
+	display: none;
+}
+#encaissement.selection {
+	left:50%;
+	margin-left:-250px;
+}
+
+#encaissement input {
+	width:100%;
+}
+
+#encaissement td {
+	cursor: default;
+}
+
+td.warning {
+	color:red;
+	font-weight: bold;
+}

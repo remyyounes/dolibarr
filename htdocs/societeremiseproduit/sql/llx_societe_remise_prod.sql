@@ -1,0 +1,20 @@
+CREATE TABLE  IF NOT EXISTS llx_societe_remise_prod (
+`rowid` INT( 11 ) NOT NULL AUTO_INCREMENT,
+`fk_soc` INT( 11 ),
+`fk_categorie_soc` INT( 11 ),
+`fk_categorie` INT( 11 ),
+`fk_product` INT( 11 ),
+`fk_user_author` INT( 11 ),
+`productlevel` INT( 1 ),
+`qte` DOUBLE,
+`txrem` DOUBLE,
+`cfrem` DOUBLE,
+`prem` DOUBLE,
+`prem2` DOUBLE,
+`active` INT( 1 ),
+`tms` TIMESTAMP,
+`datec` DATETIME,
+`dated` DATETIME,
+`datef` DATETIME,
+PRIMARY KEY (  `rowid` )
+)TYPE=InnoDB AUTO_INCREMENT=1;
